@@ -1,0 +1,203 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Отчёты - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .report-card-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+    }
+    .report-card-actions .panel-link {
+        font-size: 0.82rem;
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .report-card-actions .panel-link:hover {
+        text-decoration: underline;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-file-earmark-pdf-fill"></i> Формирование отчёта</h2>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <!-- Соц. работники -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(102,126,234,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-people-fill" style="font-size:2rem; color:#667eea;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Социальные работники</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить список социальных работников с контактами, медосмотром и статусом.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfSocialWorkers">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <a href="{% url 'accounts:social_workers_list' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Получатели -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(118,75,162,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-person-heart" style="font-size:2rem; color:#764ba2;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Получатели услуг</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить список получателей услуг с данными об инвалидности, оплате, кратности посещений и статусе проживания.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfRecipients">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <a href="{% url 'accounts:recipients_list' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Закреплённые лица -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(231,76,94,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-diagram-3-fill" style="font-size:2rem; color:#e74c5e;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Закреплённые лица</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить список закреплённых подопечных за социальными работниками с контактами и адресами.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfAssigned">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <a href="{% url 'accounts:assigned_persons' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Услуги -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(46,204,113,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-briefcase-fill" style="font-size:2rem; color:#27ae60;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Услуги</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить сводную таблицу всех связок «работник — населённый пункт» с количеством подопечных.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfServicesAll">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <a href="{% url 'accounts:services_panel' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подтверждение: только на этой странице -->
+<div class="modal fade" id="confirmPdfSocialWorkers" tabindex="-1" aria-labelledby="confirmPdfSocialWorkersLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfSocialWorkersLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfSocialWorkers'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfRecipients" tabindex="-1" aria-labelledby="confirmPdfRecipientsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfRecipientsLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_pdf' 'recipients' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfRecipients'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfAssigned" tabindex="-1" aria-labelledby="confirmPdfAssignedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfAssignedLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_pdf' 'assigned' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfAssigned'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfServicesAll" tabindex="-1" aria-labelledby="confirmPdfServicesAllLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfServicesAllLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_pdf' 'services_all' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfServicesAll'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

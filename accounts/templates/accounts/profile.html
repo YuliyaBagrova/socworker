@@ -1,0 +1,93 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}О пользователе - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-person-circle"></i> О пользователе</h2>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body p-4 text-center">
+                <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, #667eea, #764ba2); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+                    <i class="bi bi-person-fill" style="font-size:1.8rem; color:#fff;"></i>
+                </div>
+                <h5 class="fw-bold">{{ user.get_full_name|default:user.username }}</h5>
+                {% if user.is_staff %}
+                    <span class="badge bg-success">Администратор</span>
+                {% else %}
+                    <span class="badge bg-primary">Пользователь</span>
+                {% endif %}
+            </div>
+            <div class="card-body border-top pt-3">
+                <div class="mb-2">
+                    <small class="text-muted d-block">Имя пользователя</small>
+                    <span class="fw-medium">{{ user.username }}</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Email</small>
+                    <span class="fw-medium">{{ user.email|default:"Не указан" }}</span>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted d-block">Имя</small>
+                    <span class="fw-medium">{{ user.first_name|default:"Не указано" }}</span>
+                </div>
+                <div class="mb-0">
+                    <small class="text-muted d-block">Фамилия</small>
+                    <span class="fw-medium">{{ user.last_name|default:"Не указана" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield-check me-1 text-primary"></i> Права доступа</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Роль</small>
+                    {% if user.is_staff %}
+                        <span class="badge bg-success">Администратор</span>
+                    {% else %}
+                        <span class="badge bg-primary">Пользователь</span>
+                    {% endif %}
+                </div>
+                <div class="mb-0">
+                    <small class="text-muted d-block mb-1">Аккаунт активен</small>
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Да</span>
+                    {% else %}
+                        <span class="badge bg-danger">Нет</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-check me-1 text-primary"></i> Информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Дата регистрации</small>
+                    <span>{{ user.date_joined|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="mb-0">
+                    <small class="text-muted d-block mb-1">Последний вход</small>
+                    <span>
+                        {% if user.last_login %}
+                            {{ user.last_login|date:"d.m.Y H:i" }}
+                        {% else %}
+                            Первый вход
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

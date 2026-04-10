@@ -1,0 +1,51 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}{{ title }} — SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header flex-wrap">
+    <h2><i class="bi bi-calendar-plus"></i> {{ title }}</h2>
+</div>
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            <div class="alert alert-light border small py-2 mb-3 d-flex align-items-center flex-wrap gap-1">
+                <span class="badge rounded-pill bg-light text-dark border" style="background: rgba(240, 240, 245, 0.95) !important;">Сб / Вс</span>
+                <span class="text-muted">— выходные; в таймлайне и календаре такие колонки подсвечены.</span>
+            </div>
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in form.visible_fields %}
+                {% if field.name == 'social_worker' %}
+                    <h6 class="small fw-semibold text-secondary mb-2 mt-1">Назначить сотрудника</h6>
+                {% elif field.name == 'recipient' %}
+                    <h6 class="small fw-semibold text-secondary mb-2 mt-3">Подопечный</h6>
+                {% elif field.name == 'visit_date' %}
+                    <h6 class="small fw-semibold text-secondary mb-2 mt-3">Дата и время</h6>
+                {% endif %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                {% if planned_visit %}
+                    <button type="submit" name="delete" value="1" class="btn btn-outline-danger"
+                            onclick="return confirm('Удалить этот запланированный визит?');">Удалить</button>
+                {% endif %}
+                {% if next_url %}
+                    <a href="{{ next_url }}" class="btn btn-outline-secondary">Назад</a>
+                {% else %}
+                    <a href="{% url 'accounts:visit_planning' %}" class="btn btn-outline-secondary">К планированию</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

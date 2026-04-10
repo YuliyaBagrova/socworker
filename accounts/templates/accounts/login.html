@@ -1,0 +1,48 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Вход - SocWorker{% endblock %}
+
+{% block header_title %}Вход в систему{% endblock %}
+{% block header_subtitle %}Введите свои учетные данные{% endblock %}
+
+{% block content %}
+<form method="post" action="{% url 'accounts:login' %}">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label for="{{ form.username.id_for_label }}" class="form-label">
+            <i class="bi bi-person"></i> {{ form.username.label }}
+        </label>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div class="text-danger small">{{ form.username.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.password.id_for_label }}" class="form-label">
+            <i class="bi bi-lock"></i> {{ form.password.label }}
+        </label>
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div class="text-danger small">{{ form.password.errors }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-box-arrow-in-right"></i> Войти
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block footer %}
+<p class="mb-0">Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрироваться</a></p>
+{% endblock %}

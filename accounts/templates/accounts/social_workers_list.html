@@ -1,0 +1,273 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Социальные работники - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-people-fill"></i> Социальные работники</h2>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-danger" title="Скачать PDF"
+                data-bs-toggle="modal" data-bs-target="#socialWorkersPdfModal">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </button>
+        <a href="{% url 'accounts:assigned_persons' %}" class="btn btn-outline-primary">
+            <i class="bi bi-diagram-3-fill"></i> Закреплённые лица
+        </a>
+        <a href="{% url 'accounts:social_worker_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить работника
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label for="search" class="form-label">Поиск</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0" id="search" name="search"
+                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="status" class="form-label">Статус</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Все статусы</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Найти
+                </button>
+            </div>
+            {% if has_active_filters %}
+            <div class="col-12 mt-2">
+                <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-lg"></i> Показать всех работников
+                </a>
+                <span class="text-muted small ms-2">Сбросить поиск и фильтр по статусу</span>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF">
+                                <input type="checkbox" class="form-check-input" id="socialWorkerSelectAll"
+                                       aria-label="Отметить всех на странице">
+                            </th>
+                            <th>Таб. №</th>
+                            <th>ФИО</th>
+                            <th>Год рожд.</th>
+                            <th>Адрес</th>
+                            <th>Телефон</th>
+                            <th>Мед. осмотр</th>
+                            <th>Последний осмотр</th>
+                            <th>Медосмотр назначен</th>
+                            <th>Статус</th>
+                            <th class="text-center">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for worker in page_obj %}
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input social-worker-select"
+                                           name="worker_pick" value="{{ worker.pk }}"
+                                           aria-label="Выбрать {{ worker.get_full_name }}">
+                                </td>
+                                <td><span class="fw-medium">{{ worker.employee_id }}</span></td>
+                                <td>
+                                    <a href="{% url 'accounts:social_worker_detail' worker.pk %}">
+                                        {{ worker.get_full_name }}
+                                    </a>
+                                </td>
+                                <td>{{ worker.birth_date|date:"Y"|default:"—" }}</td>
+                                <td title="{{ worker.address|default:'' }}">{{ worker.address|default:"—"|truncatewords:4 }}</td>
+                                <td>{{ worker.phone|default:"—" }}</td>
+                                <td>
+                                    {% if worker.medical_checkup == 'passed' %}
+                                        <span class="badge bg-success">Пройден</span>
+                                    {% elif worker.medical_checkup == 'not_passed' %}
+                                        <span class="badge bg-secondary">Не пройден</span>
+                                    {% elif worker.medical_checkup == 'expired' %}
+                                        <span class="badge text-dark bg-warning">Просрочен</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{% if worker.last_medical_checkup_date %}{{ worker.last_medical_checkup_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                                <td class="small">{% if worker.medical_checkup_planned_date %}{{ worker.medical_checkup_planned_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                                <td>
+                                    {% if worker.status == 'active' %}
+                                        <span class="badge bg-success">Активный</span>
+                                    {% elif worker.status == 'inactive' %}
+                                        <span class="badge bg-secondary">Неактивный</span>
+                                    {% elif worker.status == 'vacation' %}
+                                        <span class="badge text-dark bg-warning">В отпуске</span>
+                                    {% elif worker.status == 'sick' %}
+                                        <span class="badge bg-danger">На больничном</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group-actions justify-content-center">
+                                        <a href="{% url 'accounts:social_worker_detail' worker.pk %}" class="btn btn-sm btn-outline-primary" title="Просмотр">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'accounts:social_worker_edit' worker.pk %}" class="btn btn-sm btn-outline-warning" title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'accounts:social_worker_delete' worker.pk %}" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <div class="card-body border-top pt-3 pb-2">
+                    <nav>
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>Социальные работники не найдены</p>
+                <a href="{% url 'accounts:social_worker_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Добавить первого работника
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<form id="socialWorkersPdfForm" method="post" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="socialWorkersPdfScope" value="all">
+    <span id="socialWorkersPdfIdFields"></span>
+</form>
+
+<div class="modal fade" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="socialWorkersPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="swPdfScopeAll">
+                            Весь список социальных работников
+                        </label>
+                        <div class="small text-muted ms-4">Все записи из базы</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="swPdfScopeSelected">
+                            Только отмеченные в таблице
+                        </label>
+                        <div class="small text-muted ms-4">Флажки слева; на другой странице списка отметьте нужных сотрудников отдельно</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="socialWorkersPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('socialWorkerSelectAll');
+    const modalConfirm = document.getElementById('socialWorkersPdfConfirm');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.social-worker-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="sw_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('socialWorkersPdfForm');
+            const scopeInput = document.getElementById('socialWorkersPdfScope');
+            const idContainer = document.getElementById('socialWorkersPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.social-worker-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного работника в таблице или выберите «Весь список социальных работников».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'worker_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,373 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Закреплённые лица - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .assigned-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        font-size: 0.85rem;
+    }
+    .assigned-table th {
+        padding: 0.6rem 0.75rem;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .assigned-table td {
+        padding: 0.55rem 0.75rem;
+        vertical-align: middle;
+    }
+    .assigned-table a { text-decoration: none; }
+    .assigned-table a:hover { text-decoration: underline; }
+
+    /* red (worker) */
+    .assigned-table th.c-red { background: #e74c5e; color: #fff; border-bottom: 2px solid #c0392b; }
+    .assigned-table td.c-red { background: #fdf0f1; border-bottom: 1px solid #f5c6cb; color: #721c24; }
+    .assigned-table td.c-red a { color: #c0392b; font-weight: 600; }
+
+    /* blue (recipient) */
+    .assigned-table th.c-blue { background: #5a7eea; color: #fff; border-bottom: 2px solid #4060c8; }
+    .assigned-table td.c-blue { background: #eef2fd; border-bottom: 1px solid #bdd0fb; color: #1e3a6e; }
+    .assigned-table td.c-blue a { color: #3355aa; font-weight: 500; }
+
+    /* action col */
+    .assigned-table th.col-action { background: #f8f9fb; color: #5f6368; border-bottom: 2px solid #e8eaed; }
+    .assigned-table td.col-action { background: #fff; border-bottom: 1px solid #f0f2f5; text-align: center; }
+
+    .assigned-table td.empty-cell { color: #999; font-style: italic; }
+
+    /* left outer border = first group colour */
+    .assigned-table td.b-left-red, .assigned-table th.b-left-red { border-left: 3px solid #e74c5e; }
+    .assigned-table td.b-left-blue, .assigned-table th.b-left-blue { border-left: 3px solid #5a7eea; }
+
+    /* separator between groups */
+    .assigned-table td.bsep, .assigned-table th.bsep { border-right: 3px solid #ccc; }
+
+    /* right border before action */
+    .assigned-table td.bsep2, .assigned-table th.bsep2 { border-right: 3px solid #ccc; }
+
+    /* sort tabs */
+    .sort-tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .sort-tabs .stab {
+        font-size: 0.82rem; padding: 0.35rem 0.85rem; border-radius: 8px;
+        font-weight: 500; text-decoration: none; border: 1px solid #dde1e6; color: #5f6368;
+        transition: all 0.2s; display: flex; align-items: center; gap: 0.35rem;
+    }
+    .sort-tabs .stab:hover { background: #f0f2f5; color: #333; }
+    .sort-tabs .stab.active-all {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff; border-color: transparent;
+    }
+    .sort-tabs .stab.active-red { background: #e74c5e; color: #fff; border-color: transparent; }
+    .sort-tabs .stab.active-blue { background: #5a7eea; color: #fff; border-color: transparent; }
+
+    .search-box { max-width: 380px; }
+    .btn-unassign { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 6px; }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-diagram-3-fill"></i> Закреплённые лица</h2>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-danger btn-sm" title="Скачать PDF"
+                data-bs-toggle="modal" data-bs-target="#assignedPdfModal">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </button>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignModal">
+            <i class="bi bi-link-45deg"></i> Закрепить подопечного
+        </button>
+        <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Назад к работникам
+        </a>
+    </div>
+</div>
+
+<!-- Sort tabs + search -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted fw-medium" style="font-size:0.85rem;"><i class="bi bi-funnel"></i></span>
+                <div class="sort-tabs">
+                    <a href="?sort=all" class="stab {% if sort == 'all' %}active-all{% endif %}">
+                        <i class="bi bi-list-ul"></i> Весь список
+                    </a>
+                    <a href="?sort=worker" class="stab {% if sort == 'worker' %}active-red{% endif %}">
+                        <i class="bi bi-people-fill"></i> По соц. работникам
+                    </a>
+                    <a href="?sort=recipient" class="stab {% if sort == 'recipient' %}active-blue{% endif %}">
+                        <i class="bi bi-person-heart"></i> По подопечным
+                    </a>
+                </div>
+            </div>
+            {% if sort == 'worker' or sort == 'recipient' %}
+                <form method="get" class="d-flex gap-2 search-box">
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0" name="search" value="{{ search }}"
+                               placeholder="{% if sort == 'worker' %}ФИО или телефон работника{% else %}ФИО, телефон или адрес подопечного{% endif %}">
+                    </div>
+                    <button type="submit" class="btn btn-sm {% if sort == 'worker' %}btn-outline-danger{% else %}btn-outline-primary{% endif %}">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    {% if search %}
+                        <a href="?sort={{ sort }}" class="btn btn-sm btn-outline-secondary" title="Сбросить">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if rows %}
+            <div class="table-responsive">
+                <table class="assigned-table">
+                    <thead>
+                        <tr>
+                            <th class="col-action text-center" style="width:2.5rem;" title="Для выгрузки в PDF">
+                                <input type="checkbox" class="form-check-input" id="assignedSelectAll"
+                                       aria-label="Отметить все строки">
+                            </th>
+                            {% if sort == 'recipient' %}
+                                <th class="c-blue b-left-blue">Ф.И.О. подопечного</th>
+                                <th class="c-blue">Телефон подопечного</th>
+                                <th class="c-blue bsep">Адрес проживания подопечного</th>
+                                <th class="c-red">Ф.И.О. соц. работника</th>
+                                <th class="c-red bsep2">Телефон соц. работника</th>
+                            {% else %}
+                                <th class="c-red b-left-red">Ф.И.О. соц. работника</th>
+                                <th class="c-red bsep">Телефон соц. работника</th>
+                                <th class="c-blue">Ф.И.О. подопечного</th>
+                                <th class="c-blue">Телефон подопечного</th>
+                                <th class="c-blue bsep2">Адрес проживания подопечного</th>
+                            {% endif %}
+                            <th class="col-action">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                <td class="col-action text-center align-middle">
+                                    {% if row.recipient %}
+                                        <input type="checkbox" class="form-check-input assigned-row-select"
+                                               value="r:{{ row.recipient.pk }}"
+                                               aria-label="Выбрать строку">
+                                    {% else %}
+                                        <input type="checkbox" class="form-check-input assigned-row-select"
+                                               value="w:{{ row.worker.pk }}"
+                                               aria-label="Выбрать {{ row.worker.get_full_name }}">
+                                    {% endif %}
+                                </td>
+                                {% if sort == 'recipient' %}
+                                    {# LEFT: recipient (blue) #}
+                                    {% if row.recipient %}
+                                        <td class="c-blue b-left-blue">
+                                            <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
+                                        </td>
+                                        <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
+                                        <td class="c-blue bsep">{{ row.recipient.address|default:"—" }}</td>
+                                    {% else %}
+                                        <td class="c-blue b-left-blue empty-cell" colspan="3">Нет закреплённых подопечных</td>
+                                    {% endif %}
+                                    {# RIGHT: worker (red) #}
+                                    <td class="c-red">
+                                        <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
+                                    </td>
+                                    <td class="c-red bsep2">{{ row.worker.phone|default:"—" }}</td>
+                                {% else %}
+                                    {# LEFT: worker (red) #}
+                                    <td class="c-red b-left-red">
+                                        <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
+                                    </td>
+                                    <td class="c-red bsep">{{ row.worker.phone|default:"—" }}</td>
+                                    {# RIGHT: recipient (blue) #}
+                                    {% if row.recipient %}
+                                        <td class="c-blue">
+                                            <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
+                                        </td>
+                                        <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
+                                        <td class="c-blue bsep2">{{ row.recipient.address|default:"—" }}</td>
+                                    {% else %}
+                                        <td class="c-blue empty-cell" colspan="3">Нет закреплённых подопечных</td>
+                                    {% endif %}
+                                {% endif %}
+                                <td class="col-action">
+                                    {% if row.recipient %}
+                                        <form method="post" action="{% url 'accounts:unassign_recipient' row.recipient.pk %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-unassign" title="Открепить"
+                                                    onclick="return confirm('Открепить {{ row.recipient.get_full_name }} от {{ row.worker.get_full_name }}?')">
+                                                <i class="bi bi-x-circle"></i> Открепить
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-diagram-3"></i>
+                {% if search %}
+                    <p>По запросу «{{ search }}» ничего не найдено</p>
+                    <a href="?sort={{ sort }}" class="btn btn-outline-primary btn-sm">Сбросить поиск</a>
+                {% else %}
+                    <p>Нет данных для отображения</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Assign Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff;">
+                <h5 class="modal-title" id="assignModalLabel">
+                    <i class="bi bi-link-45deg"></i> Закрепить подопечного за работником
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <form method="post" action="{% url 'accounts:assign_recipient' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {% if unassigned_recipients %}
+                        <div class="mb-3">
+                            <label for="worker_id" class="form-label fw-medium">Социальный работник</label>
+                            <select name="worker_id" id="worker_id" class="form-select" required>
+                                <option value="">— Выберите работника —</option>
+                                {% for w in all_workers %}
+                                    <option value="{{ w.pk }}">{{ w.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipient_id" class="form-label fw-medium">Подопечный <small class="text-muted">(ещё не закреплённые)</small></label>
+                            <select name="recipient_id" id="recipient_id" class="form-select" required>
+                                <option value="">— Выберите подопечного —</option>
+                                {% for r in unassigned_recipients %}
+                                    <option value="{{ r.pk }}">{{ r.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
+                            <p class="mt-2 mb-0 text-muted">Все подопечные уже закреплены за работниками.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    {% if unassigned_recipients %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Закрепить
+                        </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form id="assignedPdfForm" method="post" action="{% url 'accounts:report_pdf' 'assigned' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="assignedPdfScope" value="all">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <span id="assignedPdfRowFields"></span>
+</form>
+
+<div class="modal fade" id="assignedPdfModal" tabindex="-1" aria-labelledby="assignedPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="assignedPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт. Порядок колонок соответствует текущей вкладке (весь список / по работникам / по подопечным).</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="assigned_pdf_scope_choice" id="assignedPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="assignedPdfScopeAll">
+                            Весь список закреплений
+                        </label>
+                        <div class="small text-muted ms-4">Все пары «работник — подопечный» из базы</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="assigned_pdf_scope_choice" id="assignedPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="assignedPdfScopeSelected">
+                            Только отмеченные в таблице
+                        </label>
+                        <div class="small text-muted ms-4">Строки с флажком, в том числе работники без подопечных</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="assignedPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('assignedSelectAll');
+    const modalConfirm = document.getElementById('assignedPdfConfirm');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.assigned-row-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="assigned_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('assignedPdfForm');
+            const scopeInput = document.getElementById('assignedPdfScope');
+            const rowContainer = document.getElementById('assignedPdfRowFields');
+            scopeInput.value = scope;
+            rowContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.assigned-row-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одну строку или выберите «Весь список закреплений».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'row_ids';
+                    h.value = cb.value;
+                    rowContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
+{% endblock %}

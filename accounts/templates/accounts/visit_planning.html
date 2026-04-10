@@ -1,0 +1,613 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Планирование визитов - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .visit-stat-card {
+        border-radius: 14px;
+        border: 1px solid #e8eaed;
+        background: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
+        padding: 1rem 1.25rem;
+        height: 100%;
+    }
+    .visit-stat-card .val { font-size: 1.65rem; font-weight: 700; color: var(--primary); }
+    .visit-stat-card .lbl { font-size: 0.82rem; color: #5f6368; }
+
+    .vp-tabs .nav-link {
+        border-radius: 10px;
+        font-size: 0.88rem;
+        color: #5f6368;
+        border: 1px solid transparent;
+    }
+    .vp-tabs .nav-link.active {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .weekend-col, .cal-cell.weekend, .vp-cal-weekhdr.weekend {
+        background: rgba(240, 240, 245, 0.95) !important;
+    }
+    .cal-cell.weekend .cal-day-num { color: #888; }
+
+    .visit-plan-table { font-size: 0.84rem; }
+    .visit-plan-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #f8f9fb 0%, #f3f5f9 100%);
+    }
+    .visit-day-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        min-width: 140px;
+    }
+    .visit-day-cell {
+        height: 22px;
+        border-radius: 6px;
+        background: #eef1f6;
+        border: 1px solid #e2e6ec;
+    }
+    .visit-day-cell.on {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-color: transparent;
+        box-shadow: 0 2px 6px rgba(102, 126, 234, 0.35);
+    }
+    .visits-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        padding: 0.25rem 0.45rem;
+        border-radius: 8px;
+        background: rgba(102, 126, 234, 0.12);
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .schedule-warn-badge {
+        font-size: 0.72rem;
+        cursor: help;
+    }
+
+    .cal-month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        font-size: 0.78rem;
+    }
+    .cal-cell {
+        min-height: 72px;
+        border: 1px solid #e8eaed;
+        border-radius: 8px;
+        padding: 4px 6px;
+        background: #fff;
+    }
+    .cal-cell.muted { opacity: 0.45; }
+    .cal-day-num { font-weight: 700; font-size: 0.85rem; }
+    .cal-count {
+        font-size: 0.72rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .cal-view-switch .btn { font-size: 0.8rem; }
+
+    .tl-cell {
+        min-height: 56px;
+        border-radius: 8px;
+        padding: 4px;
+        font-size: 0.72rem;
+        border: 1px solid #e8eaed;
+        vertical-align: top;
+    }
+    .tl-cell.load-0 { background: #e8f8ef; border-color: #c3e6d0; }
+    .tl-cell.load-low { background: #f5f9ff; }
+    .tl-cell.load-mid { background: #fff6e5; }
+    .tl-cell.load-high { background: #ffe8e8; border-color: #f5c2c2; }
+    .tl-cell .tl-n { font-weight: 700; font-size: 0.85rem; }
+    .tl-legend {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+    }
+    .tl-legend span { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 4px; vertical-align: middle; }
+{% endblock %}
+
+{% block content %}
+<div class="page-header flex-wrap">
+    <h2><i class="bi bi-calendar-week"></i> Планирование визитов</h2>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        <button type="button" class="btn btn-outline-primary position-relative" data-bs-toggle="modal" data-bs-target="#taskReminderModal">
+            <i class="bi bi-bell"></i> Напоминание о задаче
+            {% if task_reminder_count %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ task_reminder_count }}</span>
+            {% endif %}
+        </button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#plannedVisitModal">
+            <i class="bi bi-calendar-plus"></i> Запланировать визит
+        </button>
+    </div>
+</div>
+
+<p class="text-muted small mb-3">
+    Кратность и дни посещений проверяются при сохранении карточки подопечного.
+    Суббота и воскресенье подсвечены как <span class="badge bg-light text-dark border">выходные</span>.
+    В таймлайне светло-зелёные ячейки — «окна» без визитов в этот день у работника.
+</p>
+
+<form method="get" class="card mb-3">
+    <div class="card-body py-3">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        <input type="hidden" name="cal" value="{{ cal_view }}">
+        <input type="hidden" name="ref" value="{{ ref_iso }}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Соц. работник</label>
+                <select name="worker" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for w in all_workers %}
+                        <option value="{{ w.pk }}" {% if filter_worker == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Подопечный</label>
+                <select name="recipient" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for r in recipient_options %}
+                        <option value="{{ r.pk }}" {% if filter_recipient == r.pk|stringformat:"s" %}selected{% endif %}>{{ r.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Проживание</label>
+                <select name="living" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for val, lbl in living_choices %}
+                        <option value="{{ val }}" {% if filter_living == val %}selected{% endif %}>{{ lbl }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Статус работника</label>
+                <select name="wstatus" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for val, lbl in worker_status_choices %}
+                        <option value="{{ val }}" {% if filter_wstatus == val %}selected{% endif %}>{{ lbl }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Применить</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<ul class="nav nav-pills vp-tabs gap-2 flex-wrap mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'table' %}active{% endif %}"
+           href="{% url 'accounts:visit_planning' %}?tab=table&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таблица</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'calendar' %}active{% endif %}"
+           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Календарь</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'list' %}active{% endif %}"
+           href="{% url 'accounts:visit_planning' %}?tab=list&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Сегодня / завтра</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if tab == 'timeline' %}active{% endif %}"
+           href="{% url 'accounts:visit_planning' %}?tab=timeline&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таймлайн</a>
+    </li>
+</ul>
+
+{% if tab == 'table' %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="visit-stat-card">
+            <div class="lbl">Подопечных (по фильтру)</div>
+            <div class="val">{{ total_recipients }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="visit-stat-card">
+            <div class="lbl">Сумма визитов в неделю</div>
+            <div class="val">{{ total_visits_week }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if rows %}
+            <div class="table-responsive">
+            <table class="table table-hover mb-0 visit-plan-table">
+                <thead>
+                    <tr>
+                        <th>Подопечный</th>
+                        <th>Соц. работник</th>
+                        <th>Кратность</th>
+                        <th>Дни посещений</th>
+                        <th class="text-center">Виз./нед.</th>
+                        <th>Согласованность</th>
+                        {% for d in weekday_labels %}
+                            <th class="text-center {% if forloop.counter >= 6 %}weekend-col{% endif %}">{{ d }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td><a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a></td>
+                            <td><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
+                            <td>{{ row.schedule_label }}</td>
+                            <td class="text-break">{{ row.visit_days_text }}</td>
+                            <td class="text-center"><span class="visits-badge">{{ row.visits_per_week }}</span></td>
+                            <td>
+                                {% if row.schedule_ok %}
+                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark schedule-warn-badge" title="{{ row.schedule_warn }}">Несовпадение</span>
+                                {% endif %}
+                            </td>
+                            {% for on in row.day_flags %}
+                                <td class="text-center p-1 {% if forloop.counter >= 6 %}weekend-col{% endif %}">
+                                    <div class="visit-day-cell{% if on %} on{% endif %}"></div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <p>Нет данных по выбранным фильтрам</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if tab == 'calendar' %}
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 cal-view-switch">
+            <div class="btn-group" role="group">
+                <a class="btn btn-outline-secondary {% if cal_view == 'day' %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">День</a>
+                <a class="btn btn-outline-secondary {% if cal_view == 'week' %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=week&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Неделя</a>
+                <a class="btn btn-outline-secondary {% if cal_view == 'month' %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=month&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Месяц</a>
+                <a class="btn btn-outline-secondary {% if cal_view == 'year' %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=year&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Год</a>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ prev_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}"><i class="bi bi-chevron-left"></i></a>
+                <strong class="px-2">{{ cal_title }}</strong>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ next_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}"><i class="bi bi-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if cal_view == 'day' %}
+            <p class="text-muted small mb-2">Визиты в выбранный день ({{ cal_title }}). Выходной: {% if ref_is_weekend %}да{% else %}нет{% endif %}</p>
+            <ul class="list-group list-group-flush">
+                {% for entry in day_entries %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
+                            <span class="text-muted small">— {{ entry.recipient.get_visit_frequency_display }}</span>
+                            {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                            {% if entry.planned_visit and entry.planned_visit.visit_time %}
+                                <span class="text-muted small ms-1">{{ entry.planned_visit.visit_time|time:"H:i" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-end small">
+                            {% if entry.worker %}<a href="{% url 'accounts:social_worker_detail' entry.worker.pk %}">{{ entry.worker.get_full_name }}</a>{% endif %}
+                            {% if entry.planned_visit %}
+                                <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="d-block mt-1">Изменить / удалить</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">Нет визитов на этот день</li>
+                {% endfor %}
+            </ul>
+        {% elif cal_view == 'week' %}
+            <div class="row g-2">
+                {% for wd in week_days %}
+                    <div class="col-md-6 col-lg">
+                        <div class="border rounded p-2 h-100 {% if wd.is_weekend %}weekend-col{% endif %}">
+                            <div class="fw-bold">{{ wd.wd_label }} {{ wd.date|date:"d.m" }}</div>
+                            <ul class="list-unstyled small mb-0 mt-2">
+                                {% for entry in wd.entries %}
+                                    <li class="mb-1">
+                                        <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
+                                        {% if not entry.from_schedule %}<span class="badge bg-info text-dark" style="font-size:0.65rem;">+</span>{% endif %}
+                                        {% if entry.planned_visit %}
+                                            <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted" title="Изменить"><i class="bi bi-pencil-square"></i></a>
+                                        {% endif %}
+                                    </li>
+                                {% empty %}
+                                    <li class="text-muted">—</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif cal_view == 'year' %}
+            <div class="row g-2">
+                {% for ym in year_months %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="border rounded p-2 h-100">
+                            <div class="fw-semibold">{{ ym.label }}</div>
+                            <div class="text-primary small">Визито-дней: {{ ym.total }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="cal-month-grid mb-1">
+                {% for d in weekday_labels %}
+                    <div class="text-center fw-semibold small py-1 vp-cal-weekhdr {% if forloop.counter >= 6 %}weekend{% endif %}">{{ d }}</div>
+                {% endfor %}
+            </div>
+            {% for week in month_weeks %}
+                <div class="cal-month-grid mb-2">
+                    {% for cell in week %}
+                        <div class="cal-cell {% if not cell.in_month %}muted{% endif %} {% if cell.is_weekend %}weekend{% endif %}">
+                            <div class="cal-day-num">{{ cell.date.day }}</div>
+                            {% if cell.count %}
+                                <div class="cal-count">{{ cell.count }} виз.</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if tab == 'list' %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold {% if today_is_weekend %}weekend-col{% endif %}">Сегодня — {{ today_wd }}, {{ today|date:"d.m.Y" }}</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for entry in today_entries %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
+                                    {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-secondary">{{ entry.recipient.get_living_status_display }}</span>
+                                    {% if entry.planned_visit %}
+                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="small d-block mt-1">Изменить</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="small text-muted">{% if entry.worker %}{{ entry.worker.get_full_name }}{% else %}—{% endif %} · {{ entry.recipient.get_visit_frequency_display }} · {{ entry.recipient.visit_days|default:"—" }}</div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет визитов на сегодня</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold {% if tomorrow_is_weekend %}weekend-col{% endif %}">Завтра — {{ tomorrow_wd }}, {{ tomorrow|date:"d.m.Y" }}</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for entry in tomorrow_entries %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
+                                    {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-secondary">{{ entry.recipient.get_living_status_display }}</span>
+                                    {% if entry.planned_visit %}
+                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="small d-block mt-1">Изменить</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="small text-muted">{% if entry.worker %}{{ entry.worker.get_full_name }}{% else %}—{% endif %} · {{ entry.recipient.get_visit_frequency_display }} · {{ entry.recipient.visit_days|default:"—" }}</div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет визитов на завтра</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if tab == 'timeline' %}
+<p class="small text-muted mb-2">
+    Неделя с {{ tl_week_start|date:"d.m.Y" }}.
+    Занятость по числу визитов у работника в день (относительно самого загруженного дня в колонке — тёмнее = плотнее).
+</p>
+<div class="tl-legend small mb-2 text-muted">
+    <span style="background:#e8f8ef;border:1px solid #c3e6d0;"></span> окно (0 визитов)
+    <span style="background:#fff6e5;border:1px solid #eee;"></span> средняя загрузка
+    <span style="background:#ffe8e8;border:1px solid #f5c2c2;"></span> высокая
+</div>
+<div class="card">
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-sm mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Соц. работник</th>
+                    {% for col in timeline_columns %}
+                        <th class="text-center {% if col.is_weekend %}weekend-col{% endif %}">{{ col.label }}<br><span class="fw-normal text-muted small">{{ col.date|date:"d.m" }}</span></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in timeline %}
+                    <tr>
+                        <td class="small"><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
+                        {% for c in row.cells %}
+                            <td class="tl-cell {% if c.is_weekend %}weekend-col {% endif %}{% if c.count == 0 %}load-0{% elif c.load_ratio < 0.34 %}load-low{% elif c.load_ratio < 0.67 %}load-mid{% else %}load-high{% endif %}">
+                                <div class="tl-n">{{ c.count }}</div>
+                                {% for e in c.entries %}
+                                    <div class="text-truncate" style="max-width:140px;">
+                                        <a href="{% url 'accounts:recipient_detail' e.recipient.pk %}">{{ e.recipient.get_full_name }}</a>
+                                        {% if e.planned_visit %}
+                                            <a href="{% url 'accounts:planned_visit_edit' e.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted"><i class="bi bi-pencil-square"></i></a>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8" class="text-muted p-3">Нет данных по фильтру</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="taskReminderModal" tabindex="-1" aria-labelledby="taskReminderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskReminderModalLabel"><i class="bi bi-bell"></i> Напоминания о задачах</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">
+                    Показаны записи, по которым наступило время напомнить работнику: от <strong>двух календарных дней до даты выполнения</strong> до самой этой даты включительно
+                    (в том числе <strong>запланированные визиты</strong> с датой в этом окне и ваши <strong>ручные задачи</strong>).
+                </p>
+                {% if active_task_reminders %}
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Тип</th>
+                                    <th>Дата</th>
+                                    <th>Сотрудник</th>
+                                    <th>Подопечный</th>
+                                    <th>Описание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in active_task_reminders %}
+                                    <tr>
+                                        <td>{% if row.kind == 'planned' %}<span class="badge bg-primary-subtle text-primary border">Визит</span>{% else %}<span class="badge bg-secondary-subtle text-secondary border">Задача</span>{% endif %}</td>
+                                        <td>{{ row.task_date|date:"d.m.Y" }}</td>
+                                        <td class="small"><a href="{% url 'accounts:social_worker_detail' row.social_worker.pk %}">{{ row.social_worker.get_full_name }}</a></td>
+                                        <td class="small">{% if row.recipient %}<a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>{% else %}—{% endif %}</td>
+                                        <td class="small text-break">{{ row.description }}</td>
+                                        <td class="text-nowrap">
+                                            {% if row.planned_visit %}
+                                                <a href="{% url 'accounts:planned_visit_edit' row.planned_visit.pk %}?next={{ planning_next_quoted }}" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                            {% else %}
+                                                <form method="post" action="{% url 'accounts:visit_task_reminder_delete' row.manual.pk %}" class="d-inline" onsubmit="return confirm('Удалить напоминание?');">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="next" value="{{ planning_back_url }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-4">Сейчас нет записей в окне напоминаний (при текущих фильтрах).</p>
+                {% endif %}
+                <hr class="my-3">
+                <h6 class="fw-semibold mb-3">Добавить напоминание</h6>
+                <form method="post" action="{% url 'accounts:visit_task_reminder_create' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ planning_back_url }}">
+                    {% if task_reminder_form.non_field_errors %}
+                        <div class="alert alert-danger">{{ task_reminder_form.non_field_errors }}</div>
+                    {% endif %}
+                    {% for field in task_reminder_form.visible_fields %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Сохранить напоминание</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="plannedVisitModal" tabindex="-1" aria-labelledby="plannedVisitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:planned_visit_create' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ planning_back_url }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="plannedVisitModalLabel">Запланировать визит</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border small py-2 mb-3 d-flex align-items-center flex-wrap gap-1">
+                        <span class="badge rounded-pill bg-light text-dark border weekend-col">Сб / Вс</span>
+                        <span class="text-muted">— выходные; в таймлайне и календаре такие колонки подсвечены.</span>
+                    </div>
+                    {% if planned_visit_form.non_field_errors %}
+                        <div class="alert alert-danger">{{ planned_visit_form.non_field_errors }}</div>
+                    {% endif %}
+                    {% for field in planned_visit_form.visible_fields %}
+                        {% if field.name == 'social_worker' %}
+                            <h6 class="small fw-semibold text-secondary mb-2 mt-1">Назначить сотрудника</h6>
+                        {% elif field.name == 'recipient' %}
+                            <h6 class="small fw-semibold text-secondary mb-2 mt-3">Подопечный</h6>
+                        {% elif field.name == 'visit_date' %}
+                            <h6 class="small fw-semibold text-secondary mb-2 mt-3">Дата и время</h6>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

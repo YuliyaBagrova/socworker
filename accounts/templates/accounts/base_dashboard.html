@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SocWorker{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd6;
+            --accent: #764ba2;
+            --navbar-height: 124px;
+            --bg: #eef1f8;
+            --card-shadow: 0 2px 8px rgba(26, 26, 46, 0.06), 0 1px 2px rgba(26, 26, 46, 0.04);
+            --card-shadow-hover: 0 12px 28px rgba(102, 126, 234, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            color: #1a1a2e;
+            overflow-x: hidden;
+        }
+
+        /* ── Top navbar ── */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            min-height: var(--navbar-height);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.65rem 1rem;
+            padding: 0.5rem 1.25rem 0.5rem 1.25rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.97) 0%, rgba(118, 75, 162, 0.97) 100%);
+            box-shadow: 0 4px 24px rgba(102, 126, 234, 0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .top-navbar .brand {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            letter-spacing: 0.35px;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .top-navbar .brand:hover { color: #fff; opacity: 0.95; }
+        .top-navbar .brand i { font-size: 1.35rem; opacity: 0.95; }
+
+        /* Main panel links — два ряда: основные разделы и дополнительные */
+        .top-nav-columns {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 0;
+            justify-content: center;
+        }
+        .top-nav-main {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            justify-content: center;
+            min-width: 0;
+        }
+        .top-nav-main.top-nav-row-secondary {
+            padding-top: 0.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            width: 100%;
+            max-width: 100%;
+            justify-content: center;
+        }
+        @media (max-width: 992px) {
+            .top-nav-columns {
+                order: 3;
+                flex-basis: 100%;
+                align-items: stretch;
+                padding-top: 0.25rem;
+                border-top: 1px solid rgba(255,255,255,0.12);
+                margin: 0 -0.25rem;
+                padding-left: 0.25rem;
+            }
+            .top-nav-main.top-nav-row-secondary {
+                justify-content: flex-start;
+            }
+        }
+
+        .top-nav-main .nav-pill {
+            color: rgba(255,255,255,0.88);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.08);
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .top-nav-main .nav-pill i {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+        .top-nav-main .nav-pill:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.35);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .top-nav-main .nav-pill.active {
+            background: #fff;
+            color: var(--primary-dark);
+            border-color: #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        }
+        .top-nav-main .nav-pill.active i { color: var(--accent); }
+
+        .top-navbar .user-area {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .top-navbar .user-link {
+            color: rgba(255,255,255,0.92);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            transition: background 0.2s, border-color 0.2s;
+            white-space: nowrap;
+            max-width: 200px;
+        }
+        .top-navbar .user-link:hover {
+            background: rgba(255,255,255,0.22);
+            border-color: rgba(255,255,255,0.35);
+            color: #fff;
+        }
+        @media (max-width: 576px) {
+            .top-navbar .user-link .span-text { display: none; }
+        }
+
+        .top-navbar .btn-logout {
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.28);
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .top-navbar .btn-logout:hover {
+            background: rgba(255,255,255,0.28);
+            color: #fff;
+        }
+
+        /* ── Main content (full width — no sidebar) ── */
+        .main-content {
+            margin-left: 0;
+            margin-top: calc(var(--navbar-height) + 8px);
+            padding: 1.5rem 1.75rem 2.5rem;
+            min-height: calc(100vh - var(--navbar-height) - 8px);
+            max-width: 1440px;
+            margin-inline: auto;
+        }
+        @media (max-width: 992px) {
+            :root {
+                --navbar-height: 148px;
+            }
+        }
+
+        /* ── Cards ── */
+        .card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+            background: #fff;
+            transition: box-shadow 0.25s;
+        }
+        .card:hover { box-shadow: var(--card-shadow-hover); }
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #f0f2f5;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+        .card-header h5 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .card-body { padding: 1.25rem; }
+
+        /* ── Tables ── */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 0 0 14px 14px;
+        }
+        .table {
+            margin-bottom: 0;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+        .table thead th {
+            background: linear-gradient(180deg, #f8f9fb 0%, #f3f5f9 100%);
+            border-bottom: 2px solid #e8eaed;
+            color: #5f6368;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 0.65rem;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .table tbody td {
+            padding: 0.65rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f2f5;
+            color: #3c4043;
+        }
+        .table-hover tbody tr:hover {
+            background: #f5f7ff;
+        }
+        .table tbody tr {
+            transition: background 0.15s;
+        }
+        .table a {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .table a:hover { color: var(--primary-dark); }
+
+        /* ── Badges ── */
+        .badge {
+            font-weight: 500;
+            font-size: 0.75rem;
+            padding: 0.35em 0.7em;
+            border-radius: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── Buttons ── */
+        .btn { border-radius: 8px; font-weight: 500; font-size: 0.875rem; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border: none;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.28);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #6a3f94 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.38);
+            transform: translateY(-1px);
+        }
+        .btn-sm {
+            padding: 0.3rem 0.55rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        .btn-group-actions {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: nowrap;
+        }
+
+        /* ── Forms ── */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #dde1e6;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+        .form-label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #5f6368;
+            margin-bottom: 0.35rem;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .page-header h2 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .page-header h2 i { color: var(--primary); }
+
+        /* ── Pagination ── */
+        .pagination .page-link {
+            border-radius: 8px;
+            margin: 0 0.15rem;
+            font-size: 0.85rem;
+            color: var(--primary);
+            border: 1px solid #e8eaed;
+        }
+        .pagination .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* ── Alerts ── */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #dadce0;
+            margin-bottom: 1rem;
+        }
+        .empty-state p {
+            color: #80868b;
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── Section dividers in forms ── */
+        .section-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #333;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .section-title:first-child { margin-top: 0; }
+        .section-title i { color: var(--primary); font-size: 1rem; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c4c7cc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8abb2; }
+
+        {% block inline_css %}{% endblock %}
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="top-navbar">
+        <a href="{% url 'accounts:dashboard' %}" class="brand">
+            <i class="bi bi-shield-lock-fill"></i> SocWorker
+        </a>
+
+        <div class="top-nav-columns">
+            <div class="top-nav-main">
+                <a class="nav-pill {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   href="{% url 'accounts:dashboard' %}">
+                    <i class="bi bi-house-door-fill"></i> Главная
+                </a>
+                <a class="nav-pill {% if 'social_worker' in request.resolver_match.url_name or 'assigned_persons' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:social_workers_list' %}">
+                    <i class="bi bi-people-fill"></i> Соц. работники
+                </a>
+                <a class="nav-pill {% if 'recipient' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:recipients_list' %}">
+                    <i class="bi bi-person-heart"></i> Получатели услуг
+                </a>
+                <a class="nav-pill {% if 'services' in request.resolver_match.url_name or 'location' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:services_panel' %}">
+                    <i class="bi bi-briefcase-fill"></i> Услуги
+                </a>
+                <a class="nav-pill {% if request.resolver_match.url_name == 'visit_planning' %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}">
+                    <i class="bi bi-calendar-week"></i> Планирование визитов
+                </a>
+            </div>
+            <div class="top-nav-main top-nav-row-secondary">
+                <a class="nav-pill {% if request.resolver_match.url_name == 'medical_checkup_panel' %}active{% endif %}"
+                   href="{% url 'accounts:medical_checkup_panel' %}">
+                    <i class="bi bi-heart-pulse"></i> Прохождение медосмотра
+                </a>
+                <a class="nav-pill {% if 'safety_briefing' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:safety_briefing_panel' %}">
+                    <i class="bi bi-shield-check"></i> Техника безопасности
+                </a>
+            </div>
+        </div>
+
+        <div class="user-area">
+            <a href="{% url 'accounts:report_select' %}" class="user-link" title="Отчёты">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span class="span-text">Отчёт</span>
+            </a>
+            <a href="{% url 'accounts:profile' %}" class="user-link" title="О пользователе">
+                <i class="bi bi-person-circle"></i>
+                <span class="span-text">{{ user.get_full_name|default:user.username }}</span>
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> Выход
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

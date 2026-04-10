@@ -1,0 +1,141 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}{{ worker.get_full_name }} - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-person-badge-fill"></i> {{ worker.get_full_name }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'accounts:social_worker_edit' worker.pk %}" class="btn btn-outline-warning">
+            <i class="bi bi-pencil"></i> Редактировать
+        </a>
+        <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person me-1 text-primary"></i> Персональная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Табельный номер</div>
+                    <div class="col-sm-8 fw-semibold">{{ worker.employee_id }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">ФИО</div>
+                    <div class="col-sm-8">{{ worker.get_full_name }}</div>
+                </div>
+                {% if worker.birth_date %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Дата рождения</div>
+                    <div class="col-sm-8">{{ worker.birth_date|date:"d.m.Y" }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-geo-alt me-1 text-primary"></i> Контактная информация</h5>
+            </div>
+            <div class="card-body">
+                {% if worker.phone %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Телефон</div>
+                    <div class="col-sm-8"><a href="tel:{{ worker.phone }}">{{ worker.phone }}</a></div>
+                </div>
+                {% endif %}
+                {% if worker.address %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Адрес</div>
+                    <div class="col-sm-8">{{ worker.address }}</div>
+                </div>
+                {% endif %}
+                {% if not worker.phone and not worker.address %}
+                <p class="text-muted mb-0">Контактная информация не указана</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if worker.notes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-chat-left-text me-1 text-primary"></i> Примечания</h5>
+            </div>
+            <div class="card-body">{{ worker.notes|linebreaks }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-briefcase me-1 text-primary"></i> Рабочая информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Медицинский осмотр</small>
+                    {% if worker.medical_checkup == 'passed' %}
+                        <span class="badge bg-success">Пройден</span>
+                    {% elif worker.medical_checkup == 'not_passed' %}
+                        <span class="badge bg-secondary">Не пройден</span>
+                    {% elif worker.medical_checkup == 'expired' %}
+                        <span class="badge text-dark bg-warning">Просрочен</span>
+                    {% endif %}
+                    {% if worker.last_medical_checkup_date %}
+                        <div class="small mt-2">Последний осмотр: <strong>{{ worker.last_medical_checkup_date|date:"d.m.Y" }}</strong></div>
+                    {% endif %}
+                    {% if worker.medical_checkup_planned_date %}
+                        <div class="small mt-1">Назначен на: <strong>{{ worker.medical_checkup_planned_date|date:"d.m.Y" }}</strong></div>
+                    {% endif %}
+                    <div class="small mt-2">
+                        <a href="{% url 'accounts:medical_checkup_panel' %}?worker={{ worker.pk }}" class="text-decoration-none">Открыть в панели медосмотра</a>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Статус</small>
+                    {% if worker.status == 'active' %}
+                        <span class="badge bg-success">Активный</span>
+                    {% elif worker.status == 'inactive' %}
+                        <span class="badge bg-secondary">Неактивный</span>
+                    {% elif worker.status == 'vacation' %}
+                        <span class="badge text-dark bg-warning">В отпуске</span>
+                    {% elif worker.status == 'sick' %}
+                        <span class="badge bg-danger">На больничном</span>
+                    {% endif %}
+                </div>
+                {% if worker.hire_date %}
+                <div class="mb-0">
+                    <small class="text-muted d-block mb-1">Дата приема на работу</small>
+                    <span>{{ worker.hire_date|date:"d.m.Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-1 text-primary"></i> Метаданные</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Создано:</small>
+                    <small class="d-block">{{ worker.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Обновлено:</small>
+                    <small class="d-block">{{ worker.updated_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <a href="{% url 'accounts:social_worker_delete' worker.pk %}" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="bi bi-trash"></i> Удалить работника
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

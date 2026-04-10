@@ -1,0 +1,179 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Прохождение медосмотра - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header flex-wrap">
+    <h2><i class="bi bi-heart-pulse"></i> Прохождение медосмотра</h2>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignMedicalModal">
+            <i class="bi bi-calendar2-plus"></i> Назначить медосмотр
+        </button>
+    </div>
+</div>
+
+<p class="text-muted small mb-3">
+    Медосмотр считается <strong>актуальным 365 дней</strong> с даты последнего подтверждённого прохождения.
+    После истечения срока отметьте новое прохождение или назначьте дату визита к врачу.
+</p>
+
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label for="filter_worker" class="form-label">Социальный работник</label>
+                <select class="form-select form-select-sm" id="filter_worker" name="worker">
+                    <option value="">Все</option>
+                    {% for sw in all_workers %}
+                        <option value="{{ sw.pk }}" {% if filter_worker == sw.pk|stringformat:"s" %}selected{% endif %}>{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="status" class="form-label">Статус работника</label>
+                <select class="form-select form-select-sm" id="status" name="status">
+                    <option value="">Все</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Применить</button>
+            </div>
+            {% if has_active_filters %}
+            <div class="col-12 mt-2">
+                <a href="{% url 'accounts:medical_checkup_panel' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-lg"></i> Сбросить фильтры
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Таб. №</th>
+                        <th>ФИО</th>
+                        <th>Поле в системе</th>
+                        <th>Дата последнего осмотра</th>
+                        <th>Годен до</th>
+                        <th class="text-center">Актуально 12 мес.</th>
+                        <th>Назначен на</th>
+                        <th class="text-end" style="min-width: 260px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in page_obj %}
+                    <tr>
+                        <td>{{ w.employee_id }}</td>
+                        <td><a href="{% url 'accounts:social_worker_detail' w.pk %}">{{ w.get_full_name }}</a></td>
+                        <td>{{ w.get_medical_checkup_display }}</td>
+                        <td>{% if w.last_medical_checkup_date %}{{ w.last_medical_checkup_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td>
+                            {% if w.mc_valid_until %}
+                                {{ w.mc_valid_until|date:"d.m.Y" }}
+                                {% if not w.mc_is_current_year_ok %}
+                                    <span class="badge bg-warning text-dark ms-1">просрочено</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if w.mc_is_current_year_ok %}
+                                <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill"></i> Да</span>
+                            {% elif w.last_medical_checkup_date %}
+                                <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill"></i> Нет</span>
+                                {% if w.mc_days_overdue %}<span class="small text-muted d-block">+{{ w.mc_days_overdue }} дн.</span>{% endif %}
+                            {% else %}
+                                <span class="text-muted">Нет данных</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if w.medical_checkup_planned_date %}<span class="badge bg-info text-dark">{{ w.medical_checkup_planned_date|date:"d.m.Y" }}</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td class="text-end">
+                            <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
+                                <form method="post" action="{% url 'accounts:medical_checkup_mark_passed' %}" class="d-flex flex-wrap gap-1 align-items-center">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ medical_panel_back }}">
+                                    <input type="hidden" name="worker_pk" value="{{ w.pk }}">
+                                    <input type="date" name="passed_on" value="{{ today_iso }}" class="form-control form-control-sm" style="width: 9.5rem;" title="Дата прохождения">
+                                    <button type="submit" class="btn btn-sm btn-success">Прошёл</button>
+                                </form>
+                                {% if w.last_medical_checkup_date or w.medical_checkup == 'passed' or w.medical_checkup == 'expired' %}
+                                <form method="post" action="{% url 'accounts:medical_checkup_clear_mark' %}" class="d-inline" onsubmit="return confirm('Снять отметку о прохождении медосмотра? Статус станет «Не пройден», дата последнего осмотра будет очищена.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ medical_panel_back }}">
+                                    <input type="hidden" name="worker_pk" value="{{ w.pk }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Снять отметку о прохождении">Снять</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state p-4"><p class="text-muted mb-0">Нет сотрудников по заданным условиям.</p></div>
+        {% endif %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="card-footer py-2">
+        <nav aria-label="Страницы">
+            <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Назад</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Вперёд</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="assignMedicalModal" tabindex="-1" aria-labelledby="assignMedicalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:medical_checkup_assign' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ medical_panel_back }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignMedicalModalLabel">Назначить медосмотр</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Сотрудник</label>
+                        <select name="worker_pk" class="form-select" required>
+                            <option value="">Выберите…</option>
+                            {% for sw in all_workers %}
+                                <option value="{{ sw.pk }}">{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="planned_date_modal">Дата прохождения (план)</label>
+                        <input type="date" class="form-control" id="planned_date_modal" name="planned_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

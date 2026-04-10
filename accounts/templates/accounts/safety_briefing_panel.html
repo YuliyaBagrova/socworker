@@ -1,0 +1,186 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Техника безопасности - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header flex-wrap">
+    <h2><i class="bi bi-shield-check"></i> Техника безопасности</h2>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#safetyBriefingModal">
+            <i class="bi bi-plus-circle"></i> Добавить инструктаж
+        </button>
+    </div>
+</div>
+
+<p class="text-muted small mb-3">
+    Учёт инструктажей по охране труда и технике безопасности. В колонке <strong>«Прохождение»</strong> видно, отмечен ли инструктаж как пройденный;
+    при снятой галочке при добавлении записи или кнопке «Снять» статус — <strong>не пройден</strong>, подтвердите прохождение кнопкой «Прошёл» (как на панели медосмотра).
+</p>
+
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label for="filter_worker" class="form-label">Социальный работник</label>
+                <select class="form-select form-select-sm" id="filter_worker" name="worker">
+                    <option value="">Все</option>
+                    {% for sw in all_workers %}
+                        <option value="{{ sw.pk }}" {% if filter_worker == sw.pk|stringformat:"s" %}selected{% endif %}>{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="title" class="form-label">Название инструктажа (поиск)</label>
+                <input type="text" class="form-control form-control-sm" id="title" name="title"
+                       value="{{ filter_title }}" placeholder="Часть названия…">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Применить</button>
+            </div>
+            {% if has_active_filters %}
+            <div class="col-12 mt-2">
+                <a href="{% url 'accounts:safety_briefing_panel' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-lg"></i> Сбросить фильтры
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Дата инструктажа</th>
+                        <th>Таб. №</th>
+                        <th>Социальный работник</th>
+                        <th>Название инструктажа</th>
+                        <th>Примечание</th>
+                        <th class="text-center">Прохождение</th>
+                        <th class="text-end" style="min-width: 260px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in page_obj %}
+                    <tr>
+                        <td>{{ rec.briefing_date|date:"d.m.Y" }}</td>
+                        <td>{{ rec.social_worker.employee_id }}</td>
+                        <td><a href="{% url 'accounts:social_worker_detail' rec.social_worker.pk %}">{{ rec.social_worker.get_full_name }}</a></td>
+                        <td class="text-break fw-medium">{{ rec.briefing_title }}</td>
+                        <td class="small text-muted text-break">{{ rec.notes|default:"—" }}</td>
+                        <td class="text-center">
+                            {% if rec.passed %}
+                                <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill"></i> Прошёл</span>
+                            {% else %}
+                                <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill"></i> Не пройден</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
+                                {% if not rec.passed %}
+                                <form method="post" action="{% url 'accounts:safety_briefing_mark_passed' rec.pk %}" class="d-flex flex-wrap gap-1 align-items-center">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ panel_back }}">
+                                    <input type="date" name="briefing_date" value="{{ rec.briefing_date|date:'Y-m-d' }}" class="form-control form-control-sm" style="width: 9.5rem;" title="Дата прохождения">
+                                    <button type="submit" class="btn btn-sm btn-success">Прошёл</button>
+                                </form>
+                                {% endif %}
+                                {% if rec.passed %}
+                                <form method="post" action="{% url 'accounts:safety_briefing_clear_passed' rec.pk %}" class="d-inline"
+                                      onsubmit="return confirm('Снять отметку о прохождении инструктажа?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ panel_back }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Снять отметку">Снять</button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'accounts:safety_briefing_delete' rec.pk %}" class="d-inline"
+                                      onsubmit="return confirm('Удалить эту запись об инструктаже?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ panel_back }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-muted p-4 text-center">Нет записей. Добавьте инструктаж кнопкой выше.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state p-4"><p class="text-muted mb-0">Нет данных для отображения.</p></div>
+        {% endif %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="card-footer py-2">
+        <nav aria-label="Страницы">
+            <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Назад</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Вперёд</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="safetyBriefingModal" tabindex="-1" aria-labelledby="safetyBriefingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:safety_briefing_add' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ panel_back }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="safetyBriefingModalLabel">Новая запись об инструктаже</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    {% if briefing_form.non_field_errors %}
+                        <div class="alert alert-danger">{{ briefing_form.non_field_errors }}</div>
+                    {% endif %}
+                    {% for field in briefing_form.visible_fields %}
+                        {% if field.name == 'passed' %}
+                        <div class="form-check mb-3">
+                            {{ field }}
+                            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if briefing_form.errors %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('safetyBriefingModal');
+    if (el && window.bootstrap) { new bootstrap.Modal(el).show(); }
+});
+</script>
+{% endif %}
+{% endblock %}

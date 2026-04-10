@@ -1,0 +1,228 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Услуги - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .selector-list {
+        max-height: 380px;
+        overflow-y: auto;
+    }
+    .selector-list .list-group-item {
+        cursor: pointer;
+        padding: 0.65rem 1rem;
+        font-size: 0.88rem;
+        border: none;
+        border-bottom: 1px solid #f0f2f5;
+        transition: background 0.15s;
+    }
+    .selector-list .list-group-item:hover {
+        background: #f5f7ff;
+    }
+    .selector-list .list-group-item.active {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: #fff;
+        border-color: transparent;
+    }
+    .selector-list .list-group-item.active .text-muted,
+    .selector-list .list-group-item.active .badge {
+        color: rgba(255,255,255,0.95) !important;
+        background: rgba(255,255,255,0.2) !important;
+    }
+    .service-matrix-card .table {
+        font-size: 0.82rem;
+    }
+    .service-matrix-card .table tbody td {
+        vertical-align: middle;
+    }
+    .go-btn.disabled {
+        pointer-events: none;
+        opacity: 0.55;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-briefcase-fill"></i> Услуги</h2>
+    <a href="{% url 'accounts:location_create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Добавить нас. пункт
+    </a>
+</div>
+
+<p class="text-muted small mb-3">
+    Выберите социального работника и населённый пункт, затем нажмите «Показать таблицу услуг»,
+    либо откройте готовую связку в таблице ниже. Учитываются получатели с выбранным пунктом в карточке
+    <strong>и</strong> записи без пункта, если в адресе указано название этого населённого пункта.
+</p>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-people-fill me-1 text-danger"></i> Социальные работники</h5>
+            </div>
+            <div class="card-body p-0 selector-list">
+                {% if workers %}
+                    <div class="list-group list-group-flush" id="workerList">
+                        {% for w in workers %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center"
+                                 data-worker-id="{{ w.pk }}"
+                                 onclick="selectWorker(this, {{ w.pk }})">
+                                <span><strong>{{ w.get_full_name }}</strong></span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ w.recipients.count }} подоп.</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-people" style="font-size:2rem;"></i>
+                        <p class="mt-2 mb-0">Нет социальных работников</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-1 text-primary"></i> Населённые пункты (города и деревни)</h5>
+            </div>
+            <div class="card-body p-0 selector-list">
+                {% if locations %}
+                    <div class="list-group list-group-flush" id="locationList">
+                        {% for loc in locations %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center"
+                                 data-location-id="{{ loc.pk }}"
+                                 onclick="selectLocation(this, {{ loc.pk }})">
+                                <span>
+                                    <i class="bi bi-geo-alt me-1 text-muted"></i>
+                                    {{ loc.get_location_type_display }} <strong>{{ loc.name }}</strong>
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary" title="Всего закреплено с этим пунктом">{{ loc.recipients.count }}</span>
+                                    <form method="post" action="{% url 'accounts:location_delete' loc.pk %}" style="display:inline;" onclick="event.stopPropagation();">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.7rem;"
+                                                onclick="return confirm('Удалить «{{ loc.name }}»?')" title="Удалить">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-geo-alt" style="font-size:2rem;"></i>
+                        <p class="mt-2 mb-0">Нет населённых пунктов в базе</p>
+                        <a href="{% url 'accounts:location_create' %}" class="btn btn-sm btn-outline-primary mt-2">Добавить первый пункт</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-2 d-flex align-items-stretch">
+        <div class="card w-100 border-0 bg-transparent shadow-none">
+            <div class="card-body d-flex flex-column justify-content-center text-center p-2">
+                <a id="goBtn" href="#" class="btn btn-primary go-btn disabled">
+                    <i class="bi bi-table"></i> Показать таблицу услуг
+                </a>
+                <p id="goHint" class="text-muted small mt-3 mb-0">Выберите работника и населённый пункт</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if service_links %}
+<div class="card service-matrix-card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-grid-3x3-gap me-1 text-primary"></i> Все связки «работник — населённый пункт»</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Социальный работник</th>
+                        <th>Населённый пункт</th>
+                        <th class="text-center">Записей</th>
+                        <th class="text-center">Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in service_links %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
+                            <span class="text-muted small">({{ row.worker.employee_id }})</span>
+                        </td>
+                        <td>{{ row.location.get_location_type_display }} {{ row.location.name }}</td>
+                        <td class="text-center">
+                            {% if row.count %}
+                                <span class="badge bg-primary">{{ row.count }}</span>
+                            {% else %}
+                                <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'accounts:services_detail' row.worker.pk row.location.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Таблица
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const DETAIL_URL_TEMPLATE = "{{ services_detail_url_zero }}";
+    let selectedWorker = null;
+    let selectedLocation = null;
+
+    function buildDetailUrl(workerId, locationId) {
+        return DETAIL_URL_TEMPLATE.replace(/\/services\/\d+\/\d+/, '/services/' + workerId + '/' + locationId);
+    }
+
+    function selectWorker(el, id) {
+        document.querySelectorAll('#workerList .list-group-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        selectedWorker = id;
+        updateGoBtn();
+    }
+
+    function selectLocation(el, id) {
+        document.querySelectorAll('#locationList .list-group-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        selectedLocation = id;
+        updateGoBtn();
+    }
+
+    function updateGoBtn() {
+        const btn = document.getElementById('goBtn');
+        const hint = document.getElementById('goHint');
+        if (selectedWorker && selectedLocation) {
+            btn.href = buildDetailUrl(selectedWorker, selectedLocation);
+            btn.classList.remove('disabled');
+            hint.textContent = 'Можно открыть таблицу';
+        } else {
+            btn.href = '#';
+            btn.classList.add('disabled');
+            if (!selectedWorker && !selectedLocation) {
+                hint.textContent = 'Выберите социального работника и населённый пункт';
+            } else if (!selectedWorker) {
+                hint.textContent = 'Выберите социального работника';
+            } else {
+                hint.textContent = 'Выберите населённый пункт';
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Главная - SocWorker{% endblock %}
+
+{% block content %}
+<div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+    <div class="card-body p-4">
+        <h2 class="text-white fw-bold mb-1">
+            <i class="bi bi-hand-thumbs-up"></i> Добро пожаловать, {{ user.get_full_name|default:user.username }}!
+        </h2>
+        <p class="text-white-50 mb-0">Вы успешно вошли в систему управления социальными работниками.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100" style="transition: transform 0.2s; cursor: default;">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(102,126,234,0.1); display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-people-fill" style="font-size:1.4rem; color:#667eea;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0 ms-3">Социальные работники</h5>
+                </div>
+                <p class="text-muted flex-grow-1">
+                    Управление базой данных социальных работников. Добавляйте, редактируйте и просматривайте информацию.
+                </p>
+                <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-primary mt-auto align-self-start">
+                    <i class="bi bi-arrow-right"></i> Перейти к списку
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100" style="transition: transform 0.2s; cursor: default;">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(118,75,162,0.1); display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-person-heart" style="font-size:1.4rem; color:#764ba2;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0 ms-3">Получатели услуг</h5>
+                </div>
+                <p class="text-muted flex-grow-1">
+                    Управление базой данных получателей услуг. Добавляйте, редактируйте и отслеживайте информацию о подопечных.
+                </p>
+                <a href="{% url 'accounts:recipients_list' %}" class="btn btn-primary mt-auto align-self-start">
+                    <i class="bi bi-arrow-right"></i> Перейти к списку
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

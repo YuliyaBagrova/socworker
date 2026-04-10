@@ -1,0 +1,147 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}{{ recipient.get_full_name }} - SocWorker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-person-heart"></i> {{ recipient.get_full_name }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'accounts:recipient_edit' recipient.pk %}" class="btn btn-outline-warning">
+            <i class="bi bi-pencil"></i> Редактировать
+        </a>
+        <a href="{% url 'accounts:recipients_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person me-1 text-primary"></i> Персональная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Табельный номер</div>
+                    <div class="col-sm-8">{{ recipient.employee_id }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">ФИО</div>
+                    <div class="col-sm-8">{{ recipient.get_full_name }}</div>
+                </div>
+                {% if recipient.birth_date %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Дата рождения</div>
+                    <div class="col-sm-8">{{ recipient.birth_date|date:"d.m.Y" }}</div>
+                </div>
+                {% endif %}
+                {% if recipient.phone %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Телефон</div>
+                    <div class="col-sm-8">{{ recipient.phone }}</div>
+                </div>
+                {% endif %}
+                {% if recipient.address %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Адрес проживания</div>
+                    <div class="col-sm-8">{{ recipient.address }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard2-pulse me-1 text-primary"></i> Информация об обслуживании</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Группа инвалидности</div>
+                    <div class="col-sm-8">{{ recipient.get_disability_group_display }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Сумма оплаты</div>
+                    <div class="col-sm-8">{{ recipient.payment_percent }}%</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Кратность посещения</div>
+                    <div class="col-sm-8">{{ recipient.get_visit_frequency_display }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Статус проживания</div>
+                    <div class="col-sm-8">{{ recipient.get_living_status_display }}</div>
+                </div>
+                {% if recipient.admission_date %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Дата приёма</div>
+                    <div class="col-sm-8">{{ recipient.admission_date|date:"d.m.Y" }}</div>
+                </div>
+                {% endif %}
+                {% if recipient.visit_days %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">Дни посещений</div>
+                    <div class="col-sm-8">{{ recipient.visit_days }}</div>
+                </div>
+                {% endif %}
+                <div class="row mb-2">
+                    <div class="col-sm-4 text-muted fw-medium">АПИ количество</div>
+                    <div class="col-sm-8">{{ recipient.fire_detector_count }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if recipient.notes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-chat-left-text me-1 text-primary"></i> Примечания</h5>
+            </div>
+            <div class="card-body">{{ recipient.notes|linebreaks }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-link-45deg me-1 text-primary"></i> Назначение</h5>
+            </div>
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Социальный работник</small>
+                {% if recipient.social_worker %}
+                    <a href="{% url 'accounts:social_worker_detail' recipient.social_worker.pk %}">
+                        {{ recipient.social_worker.get_full_name }}
+                    </a>
+                {% else %}
+                    <span class="text-muted">Не назначен</span>
+                {% endif %}
+                <small class="text-muted d-block mt-3 mb-1">Населённый пункт (услуги)</small>
+                {% if recipient.location %}
+                    <span>{{ recipient.location.get_location_type_display }} {{ recipient.location.name }}</span>
+                {% else %}
+                    <span class="text-muted">Не указан</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-1 text-primary"></i> Метаданные</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Создано:</small>
+                    <small class="d-block">{{ recipient.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Обновлено:</small>
+                    <small class="d-block">{{ recipient.updated_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <a href="{% url 'accounts:recipient_delete' recipient.pk %}" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="bi bi-trash"></i> Удалить получателя
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

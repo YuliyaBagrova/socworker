@@ -1,0 +1,112 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Услуги — {{ worker.get_full_name }} - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .services-detail-banner {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        border: 1px solid #e8eaed;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .services-detail-banner .line1 {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1a1a2e;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.35rem;
+    }
+    .services-detail-banner .line2 {
+        font-size: 0.95rem;
+        color: #5f6368;
+    }
+    .services-detail-banner .line2 strong {
+        color: #333;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-briefcase-fill"></i> Услуги</h2>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'accounts:report_pdf' 'services' %}?worker_pk={{ worker.pk }}&location_pk={{ location.pk }}"
+           class="btn btn-outline-danger btn-sm" title="Скачать PDF">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </a>
+        <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Назад к услугам
+        </a>
+    </div>
+</div>
+
+<div class="services-detail-banner">
+    <div class="line1">СОЦИАЛЬНЫЙ РАБОТНИК — {{ worker.get_full_name }}</div>
+    <div class="line2">
+        Место оказания услуг: <strong>{{ location.get_location_type_display }} {{ location.name }}</strong>
+        <span class="text-muted">(таб. № работника: {{ worker.employee_id }})</span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if recipients %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Таб. №</th>
+                            <th>Ф.И.О. обслуживаемого гражданина</th>
+                            <th>Год рождения</th>
+                            <th>Адрес проживания</th>
+                            <th>Группа инвалидности</th>
+                            <th>Оплата</th>
+                            <th>Кратность посещения</th>
+                            <th>Статус проживания</th>
+                            <th>Дата приёма</th>
+                            <th>Дни посещений</th>
+                            <th>АПИ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recipients %}
+                            <tr>
+                                <td>{{ r.employee_id }}</td>
+                                <td>
+                                    <a href="{% url 'accounts:recipient_detail' r.pk %}">
+                                        {{ r.get_full_name }}
+                                    </a>
+                                </td>
+                                <td>{{ r.birth_date|date:"Y"|default:"—" }}</td>
+                                <td>{{ r.address|default:"—" }}</td>
+                                <td>{{ r.get_disability_group_display }}</td>
+                                <td>{{ r.payment_percent }}%</td>
+                                <td>{{ r.get_visit_frequency_display }}</td>
+                                <td>{{ r.get_living_status_display }}</td>
+                                <td>{{ r.admission_date|date:"d.m.Y"|default:"—" }}</td>
+                                <td>{{ r.visit_days|default:"—" }}</td>
+                                <td>{{ r.fire_detector_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>Нет обслуживаемых граждан для <strong>{{ worker.get_full_name }}</strong>
+                    в населённом пункте <strong>{{ location.name }}</strong>.</p>
+                <p class="small text-muted mb-0">
+                    Укажите «Населённый пункт» в карточке получателя услуг или добавьте в адрес проживания название этого пункта.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if recipients %}
+<div class="text-muted small mt-3 text-end">
+    Всего записей: {{ recipients|length }}
+</div>
+{% endif %}
+{% endblock %}
