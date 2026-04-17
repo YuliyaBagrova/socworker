@@ -2,38 +2,158 @@
 
 {% block title %}Удаление работника - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-delete-confirm-page"{% endblock %}
+
+{% block inline_css %}
+    body.sw-delete-confirm-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+    .del-confirm-wrap {
+        max-width: 28rem;
+        margin: 0 auto;
+        padding: 0.5rem 0 2rem;
+    }
+    .del-confirm-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.88);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 16px 48px rgba(45, 38, 82, 0.12),
+            0 2px 12px rgba(220, 38, 38, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .del-confirm-card .del-confirm-head {
+        padding: 1.35rem 1.5rem 1.25rem;
+        background: linear-gradient(125deg, #fb7185 0%, #f43f5e 38%, #dc2626 72%, #b91c1c 100%);
+        color: #fff;
+        text-align: center;
+    }
+    .del-confirm-card .del-confirm-head .del-confirm-icon {
+        width: 3.25rem;
+        height: 3.25rem;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.55rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .del-confirm-card .del-confirm-head .del-confirm-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+        color: #fff;
+    }
+    .del-confirm-card .del-confirm-head p {
+        margin: 0;
+        font-size: 0.875rem;
+        opacity: 0.95;
+        line-height: 1.45;
+    }
+    .del-confirm-card .del-confirm-body {
+        padding: 1.35rem 1.5rem 1.5rem;
+    }
+    .del-confirm-card .del-confirm-summary {
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        background: linear-gradient(165deg, rgba(254, 243, 199, 0.55) 0%, rgba(254, 226, 226, 0.45) 100%);
+        border: 1px solid rgba(248, 113, 113, 0.28);
+        margin-bottom: 1rem;
+    }
+    .del-confirm-card .del-confirm-summary strong {
+        font-size: 1.05rem;
+        color: #1f1a36;
+    }
+    .del-confirm-card .del-confirm-summary small {
+        display: block;
+        margin-top: 0.35rem;
+        color: #5f6368;
+        font-size: 0.8125rem;
+    }
+    .del-confirm-card .del-confirm-warning {
+        font-size: 0.8125rem;
+        color: #b91c1c;
+        font-weight: 600;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1.35rem;
+        line-height: 1.45;
+    }
+    .del-confirm-card .del-confirm-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        justify-content: center;
+    }
+    .del-confirm-card .btn-del-cancel {
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 0.55rem 1.25rem;
+        border: 1px solid rgba(102, 126, 234, 0.28);
+        background: rgba(255, 255, 255, 0.95);
+        color: #3d3a56;
+    }
+    .del-confirm-card .btn-del-cancel:hover {
+        background: #fff;
+        border-color: rgba(102, 126, 234, 0.45);
+        color: #1f1a36;
+    }
+    .del-confirm-card .btn-del-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.55rem 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #f87171 0%, #ef4444 45%, #dc2626 100%);
+        box-shadow:
+            0 4px 16px rgba(220, 38, 38, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .del-confirm-card .btn-del-submit:hover {
+        color: #fff;
+        filter: brightness(1.06);
+        box-shadow:
+            0 6px 22px rgba(220, 38, 38, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body p-4 text-center">
-                <div style="width:64px; height:64px; border-radius:50%; background:rgba(220,53,69,0.1); display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
-                    <i class="bi bi-exclamation-triangle-fill" style="font-size:1.8rem; color:#dc3545;"></i>
-                </div>
-                <h5 class="fw-bold mb-2">Подтверждение удаления</h5>
-                <p class="text-muted mb-3">Вы уверены, что хотите удалить социального работника?</p>
-
-                <div class="alert alert-warning text-start mb-3">
-                    <strong>{{ worker.get_full_name }}</strong><br>
-                    <small class="text-muted">Табельный номер: {{ worker.employee_id }}</small>
-                </div>
-
-                <p class="text-danger small mb-4">
-                    <i class="bi bi-exclamation-circle"></i> Это действие нельзя отменить!
-                </p>
-
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="d-flex justify-content-center gap-2">
-                        <a href="{% url 'accounts:social_worker_detail' worker.pk %}" class="btn btn-outline-secondary">
-                            Отмена
-                        </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Да, удалить
-                        </button>
-                    </div>
-                </form>
+<div class="del-confirm-wrap">
+    <div class="card del-confirm-card">
+        <div class="del-confirm-head">
+            <div class="del-confirm-icon" aria-hidden="true">
+                <i class="bi bi-shield-exclamation"></i>
             </div>
+            <h2 class="del-confirm-title">Удаление записи</h2>
+            <p>Вы собираетесь удалить социального работника из базы. Это окно подтверждения — проверьте данные и выберите действие.</p>
+        </div>
+        <div class="del-confirm-body">
+            <div class="del-confirm-summary">
+                <strong>{{ worker.get_full_name }}</strong>
+                <small>Табельный номер: {{ worker.employee_id }}</small>
+            </div>
+            <div class="del-confirm-warning">
+                <i class="bi bi-exclamation-octagon-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
+                <span>Действие необратимо: карточка будет удалена, восстановить данные через этот интерфейс нельзя.</span>
+            </div>
+            <form method="post" class="del-confirm-actions">
+                {% csrf_token %}
+                <a href="{% url 'accounts:social_worker_detail' worker.pk %}" class="btn btn-del-cancel">Отмена</a>
+                <button type="submit" class="btn btn-del-submit">
+                    <i class="bi bi-trash me-1" aria-hidden="true"></i>Да, удалить
+                </button>
+            </form>
         </div>
     </div>
 </div>

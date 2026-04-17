@@ -121,6 +121,12 @@
 <div class="page-header flex-wrap">
     <h2><i class="bi bi-calendar-week"></i> Планирование визитов</h2>
     <div class="d-flex gap-2 flex-wrap align-items-center">
+        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#visitPlanningPdfModal">
+            <i class="bi bi-file-pdf"></i> PDF
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#visitPlanningCsvModal">
+            <i class="bi bi-filetype-csv"></i> CSV
+        </button>
         <button type="button" class="btn btn-outline-primary position-relative" data-bs-toggle="modal" data-bs-target="#taskReminderModal">
             <i class="bi bi-bell"></i> Напоминание о задаче
             {% if task_reminder_count %}
@@ -164,7 +170,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label small">Проживание</label>
+                <label class="form-label small">Категория</label>
                 <select name="living" class="form-select form-select-sm">
                     <option value="">Все</option>
                     {% for val, lbl in living_choices %}
@@ -230,6 +236,11 @@
             <table class="table table-hover mb-0 visit-plan-table">
                 <thead>
                     <tr>
+                        {% if tab == 'table' %}
+                        <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                            <input type="checkbox" class="form-check-input" id="vpSelectAll" aria-label="Отметить всех на странице">
+                        </th>
+                        {% endif %}
                         <th>Подопечный</th>
                         <th>Соц. работник</th>
                         <th>Кратность</th>
@@ -244,6 +255,12 @@
                 <tbody>
                     {% for row in rows %}
                         <tr>
+                            {% if tab == 'table' %}
+                            <td class="text-center align-middle">
+                                <input type="checkbox" class="form-check-input vp-recipient-select" name="recipient_pick" value="{{ row.recipient.pk }}"
+                                       aria-label="Выбрать {{ row.recipient.get_full_name }}">
+                            </td>
+                            {% endif %}
                             <td><a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a></td>
                             <td><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
                             <td>{{ row.schedule_label }}</td>
@@ -610,4 +627,169 @@
         </div>
     </div>
 </div>
+
+<form id="visitPlanningPdfForm" method="post" action="{% url 'accounts:visit_planning_pdf' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="visitPlanningPdfScope" value="all">
+    <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="hidden" name="cal" value="{{ cal_view }}">
+    <input type="hidden" name="ref" value="{{ ref_iso }}">
+    <input type="hidden" name="worker" value="{{ filter_worker }}">
+    <input type="hidden" name="recipient" value="{{ filter_recipient }}">
+    <input type="hidden" name="living" value="{{ filter_living }}">
+    <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <span id="visitPlanningPdfIdFields"></span>
+</form>
+
+<form id="visitPlanningCsvForm" method="post" action="{% url 'accounts:visit_planning_csv' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="visitPlanningCsvScope" value="all">
+    <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="hidden" name="cal" value="{{ cal_view }}">
+    <input type="hidden" name="ref" value="{{ ref_iso }}">
+    <input type="hidden" name="worker" value="{{ filter_worker }}">
+    <input type="hidden" name="recipient" value="{{ filter_recipient }}">
+    <input type="hidden" name="living" value="{{ filter_living }}">
+    <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <span id="visitPlanningCsvIdFields"></span>
+</form>
+
+<div class="modal fade" id="visitPlanningPdfModal" tabindex="-1" aria-labelledby="visitPlanningPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="visitPlanningPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт (подопечные, визиты на сегодня/завтра, напоминания).</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="vp_pdf_scope_choice" id="vpPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="vpPdfScopeAll">Весь список по текущим фильтрам</label>
+                        <div class="small text-muted ms-4">Все подопечные, попавшие в таблицу после «Применить»</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="vp_pdf_scope_choice" id="vpPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="vpPdfScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки на вкладке «Таблица»; на другой вкладке отметьте нужных и вернитесь на «Таблица»</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="visitPlanningPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="visitPlanningCsvModal" tabindex="-1" aria-labelledby="visitPlanningCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="visitPlanningCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="vp_csv_scope_choice" id="vpCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="vpCsvScopeAll">Весь список по текущим фильтрам</label>
+                        <div class="small text-muted ms-4">Все подопечные из таблицы после «Применить»</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="vp_csv_scope_choice" id="vpCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="vpCsvScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки на вкладке «Таблица»</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="visitPlanningCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('vpSelectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.vp-recipient-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    const modalConfirm = document.getElementById('visitPlanningPdfConfirm');
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="vp_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('visitPlanningPdfForm');
+            const scopeInput = document.getElementById('visitPlanningPdfScope');
+            const idContainer = document.getElementById('visitPlanningPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.vp-recipient-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного подопечного на вкладке «Таблица» или выберите «Весь список по текущим фильтрам».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'recipient_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+    const csvConfirm = document.getElementById('visitPlanningCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="vp_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('visitPlanningCsvForm');
+            const scopeInput = document.getElementById('visitPlanningCsvScope');
+            const idContainer = document.getElementById('visitPlanningCsvIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.vp-recipient-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного подопечного на вкладке «Таблица» или выберите «Весь список по текущим фильтрам».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'recipient_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
 {% endblock %}

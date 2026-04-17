@@ -1,0 +1,175 @@
+{% if is_edit %}
+    body.sw-entity-edit-page {
+        background-color: #fde8d8;
+        background-image:
+            radial-gradient(ellipse 88% 55% at 96% 4%, rgba(251, 146, 60, 0.35), transparent 54%),
+            radial-gradient(ellipse 72% 48% at 2% 96%, rgba(249, 115, 22, 0.22), transparent 52%),
+            radial-gradient(ellipse 45% 35% at 48% 72%, rgba(253, 186, 116, 0.45), transparent 60%),
+            linear-gradient(168deg, #fff7ed 0%, #ffedd5 32%, #ffe4d4 62%, #fed7aa 100%);
+    }
+    body.sw-entity-edit-page .main-content {
+        background: transparent;
+        max-width: 920px;
+    }
+    body.sw-entity-edit-page .sw-entity-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    body.sw-entity-edit-page .sw-edit-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.sw-entity-edit-page .sw-edit-page-title__icon {
+        flex-shrink: 0;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #ea580c 100%);
+        box-shadow:
+            0 6px 22px rgba(234, 88, 12, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-entity-edit-page .sw-edit-page-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(105deg, #7c2d12 0%, #c2410c 35%, #ea580c 65%, #f97316 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-entity-edit-page .sw-edit-page-title__label {
+            color: #9a3412;
+            background: none;
+        }
+    }
+    body.sw-entity-edit-page .sw-edit-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #9a3412;
+        border: 1.5px solid rgba(234, 88, 12, 0.4);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 247, 237, 0.92) 100%);
+        box-shadow:
+            0 4px 18px rgba(234, 88, 12, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-entity-edit-page .sw-edit-back-btn:hover {
+        color: #7c2d12;
+        border-color: rgba(234, 88, 12, 0.65);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(234, 88, 12, 0.22);
+    }
+    body.sw-entity-edit-page .sw-edit-back-btn i {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card {
+        border: 1px solid rgba(251, 146, 60, 0.35);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.82);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(154, 52, 18, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .card-body {
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #9a3412;
+        border-bottom: none;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #fb923c;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(255, 237, 213, 0.65) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .section-title i {
+        color: #ea580c;
+        font-size: 1.05rem;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .form-label {
+        color: #7c2d12;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .form-control,
+    body.sw-entity-edit-page .sw-edit-form-card .form-select,
+    body.sw-entity-edit-page .sw-edit-form-card textarea.form-control {
+        border-color: rgba(251, 146, 60, 0.35);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .form-control:focus,
+    body.sw-entity-edit-page .sw-edit-form-card .form-select:focus,
+    body.sw-entity-edit-page .sw-edit-form-card textarea.form-control:focus {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.22);
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .border-top {
+        border-color: rgba(251, 146, 60, 0.22) !important;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(120, 113, 108, 0.35);
+        color: #57534e;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .btn-outline-secondary:hover {
+        background: rgba(255, 247, 237, 0.9);
+        border-color: #a8a29e;
+        color: #44403c;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .btn-primary {
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        box-shadow: 0 4px 16px rgba(234, 88, 12, 0.35);
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .btn-primary:hover {
+        background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.42);
+        transform: translateY(-1px);
+    }
+    body.sw-entity-edit-page .sw-edit-form-card:hover {
+        box-shadow:
+            0 14px 38px rgba(154, 52, 18, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+{% endif %}

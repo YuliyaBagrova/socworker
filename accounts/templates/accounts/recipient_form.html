@@ -1,16 +1,33 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}{{ title }} - SocWorker{% endblock %}
 
+{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% endif %}{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/sw_edit_form_theme.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
+<div class="page-header{% if is_edit %} sw-entity-form-header{% endif %}">
+    {% if is_edit %}
+    <h1 class="sw-edit-page-title mb-0">
+        <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+        <span class="sw-edit-page-title__label">{{ title }}</span>
+    </h1>
+    <a href="{% url 'accounts:recipients_list' %}" class="sw-edit-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> Назад к списку
+    </a>
+    {% else %}
     <h2><i class="bi bi-person-plus-fill"></i> {{ title }}</h2>
     <a href="{% url 'accounts:recipients_list' %}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Назад к списку
     </a>
+    {% endif %}
 </div>
 
-<div class="card">
+<div class="card{% if is_edit %} sw-edit-form-card{% endif %}">
     <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
@@ -136,4 +153,8 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/belarus_phone_mask.js' %}"></script>
 {% endblock %}

@@ -1,7 +1,66 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+
+from .belarus_phone import validate_belarus_phone_optional
+
+
+WORKLOAD_LOAD_COEF_REFERENCE_HOURS = Decimal('168')
+
+
+def workload_rate_from_load(load: Decimal) -> Decimal:
+    """
+    Ставка по коэффициенту нагрузки:
+    0.0 — при нагрузке ≤ 0.12; 0.25 — ≤ 0.37; 0.5 — ≤ 0.62; 0.75 — ≤ 0.87; 1.0 — > 0.87.
+    """
+    if load <= Decimal('0.12'):
+        return Decimal('0')
+    if load <= Decimal('0.37'):
+        return Decimal('0.25')
+    if load <= Decimal('0.62'):
+        return Decimal('0.5')
+    if load <= Decimal('0.87'):
+        return Decimal('0.75')
+    return Decimal('1')
+
+
+class UserProfile(models.Model):
+    """Дополнительные данные учётной записи (фото для главной и профиля)."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='socworker_profile',
+        verbose_name='Пользователь',
+    )
+    avatar = models.ImageField(
+        upload_to='profiles/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name='Фото профиля',
+        help_text='Необязательно. JPG, PNG или WebP, до 2 МБ.',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Профиль пользователя'
+        verbose_name_plural = 'Профили пользователей'
+
+    def __str__(self):
+        return f'Профиль: {self.user.get_username()}'
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                prev = UserProfile.objects.get(pk=self.pk)
+                if prev.avatar and self.avatar != prev.avatar:
+                    prev.avatar.delete(save=False)
+            except UserProfile.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
 
 
 class SocialWorker(models.Model):
@@ -59,16 +118,13 @@ class SocialWorker(models.Model):
     )
     
     # Контактная информация
-    phone_regex = RegexValidator(
-        regex=r'^\+?1?\d{9,15}$',
-        message="Номер телефона должен быть в формате: '+999999999'. До 15 цифр."
-    )
     phone = models.CharField(
-        validators=[phone_regex],
-        max_length=17,
+        validators=[validate_belarus_phone_optional],
+        max_length=22,
         verbose_name='Телефон',
         blank=True,
-        null=True
+        null=True,
+        help_text='Формат: +375 (XX) XXX-XX-XX',
     )
     address = models.TextField(
         verbose_name='Адрес',
@@ -158,6 +214,14 @@ class SocialWorker(models.Model):
         if self.middle_name:
             parts.append(self.middle_name)
         return ' '.join(parts)
+
+    def get_short_name(self):
+        """Фамилия и инициал имени — для компактных подписей в списках."""
+        ln = (self.last_name or '').strip()
+        fn = (self.first_name or '').strip()
+        if fn:
+            return f'{ln} {fn[0]}.'.strip()
+        return ln or self.get_full_name()
     
     @property
     def is_active(self):
@@ -275,10 +339,12 @@ class ServiceRecipient(models.Model):
         blank=True
     )
     phone = models.CharField(
-        max_length=20,
+        max_length=22,
         verbose_name='Телефон',
         blank=True,
-        null=True
+        null=True,
+        validators=[validate_belarus_phone_optional],
+        help_text='Формат: +375 (XX) XXX-XX-XX',
     )
     address = models.TextField(
         verbose_name='Адрес проживания',
@@ -475,3 +541,147 @@ class SafetyBriefingRecord(models.Model):
 
     def __str__(self):
         return f'{self.social_worker.get_full_name()} — {self.briefing_title} ({self.briefing_date})'
+
+
+class WorkloadRecord(models.Model):
+    """
+    Учёт нагрузки: строка журнала (работник, населённый пункт, тип жилья, кратность и время визитов,
+    автоматический расчёт отработанного времени, коэффициента нагрузки и ставки).
+    """
+
+    HOUSING_TYPE_CHOICES = [
+        ('house', 'Дом'),
+        ('apartment', 'Квартира'),
+    ]
+
+    social_worker = models.ForeignKey(
+        SocialWorker,
+        on_delete=models.CASCADE,
+        related_name='workload_records',
+        verbose_name='Работник',
+    )
+    recipient = models.ForeignKey(
+        ServiceRecipient,
+        on_delete=models.SET_NULL,
+        related_name='workload_records',
+        null=True,
+        blank=True,
+    )
+    location = models.ForeignKey(
+        ServiceLocation,
+        on_delete=models.SET_NULL,
+        related_name='workload_records',
+        null=True,
+        blank=True,
+    )
+    housing_type = models.CharField(
+        max_length=20,
+        choices=HOUSING_TYPE_CHOICES,
+        default='apartment',
+        verbose_name='Тип (дом или квартира)',
+    )
+
+    period_year = models.PositiveIntegerField(
+        verbose_name='Год',
+        validators=[MinValueValidator(2000), MaxValueValidator(2100)],
+    )
+    period_month = models.PositiveSmallIntegerField(
+        verbose_name='Месяц',
+        validators=[MinValueValidator(1), MaxValueValidator(12)],
+    )
+
+    visits_per_week = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal('0'),
+        verbose_name='Кратность посещений (раз в неделю)',
+    )
+    visits_per_month = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Кратность посещений (раз в месяц)',
+        help_text='Если не указано — считается как кратность за неделю × 4 (как в типовой таблице нагрузки).',
+    )
+    visit_duration_minutes = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Время 1 посещения (минут)',
+    )
+
+    worked_minutes_month = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Время отработано за месяц (минут)',
+    )
+    worked_hours_month = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0'),
+        verbose_name='Время отработано за месяц (часов)',
+    )
+    work_time_norm_minutes = models.PositiveIntegerField(
+        default=10080,
+        verbose_name='Норма рабочего времени (минут в месяц)',
+        help_text='По умолчанию 10080 мин (168 ч в месяц), как в расчётных таблицах нагрузки.',
+    )
+    load_coefficient = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        default=Decimal('0'),
+        verbose_name='Коэффициент нагрузки',
+    )
+    rate = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=Decimal('0'),
+        verbose_name='Ставка',
+    )
+
+    notes = models.TextField(verbose_name='Примечание', blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Запись учёта нагрузки'
+        verbose_name_plural = 'Учёт нагрузки'
+        ordering = ['-period_year', '-period_month', 'social_worker__last_name', 'pk']
+        indexes = [
+            models.Index(fields=['period_year', 'period_month']),
+            models.Index(fields=['social_worker', 'period_year', 'period_month']),
+        ]
+
+    def __str__(self):
+        return f'{self.social_worker.get_full_name()} — {self.period_month:02d}.{self.period_year}'
+
+    @property
+    def work_time_norm_hours(self):
+        """Для отображения в колонке «Норма» (168 ч), как в расчётной таблице."""
+        return WORKLOAD_LOAD_COEF_REFERENCE_HOURS.quantize(Decimal('0.1'))
+
+    def recompute_derived(self):
+        """Пересчитывает кратность за месяц, время, нагрузку и ставку (без save)."""
+        vpw = self.visits_per_week or Decimal('0')
+        vpm = self.visits_per_month
+        if vpm is None:
+            vpm = (vpw * Decimal('4')).quantize(Decimal('0.01'))
+        else:
+            vpm = vpm.quantize(Decimal('0.01'))
+        self.visits_per_month = vpm
+
+        dur = int(self.visit_duration_minutes or 0)
+        self.worked_minutes_month = int((vpm * Decimal(dur)).quantize(Decimal('1')))
+        worked_hours = (Decimal(self.worked_minutes_month) / Decimal('60')).quantize(Decimal('0.01'))
+        self.worked_hours_month = worked_hours
+
+        if WORKLOAD_LOAD_COEF_REFERENCE_HOURS <= 0:
+            self.load_coefficient = Decimal('0')
+        else:
+            self.load_coefficient = (
+                worked_hours / WORKLOAD_LOAD_COEF_REFERENCE_HOURS
+            ).quantize(Decimal('0.01'))
+        self.rate = workload_rate_from_load(self.load_coefficient)
+
+    def save(self, *args, **kwargs):
+        self.recompute_derived()
+        super().save(*args, **kwargs)

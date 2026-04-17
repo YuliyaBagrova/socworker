@@ -1,0 +1,20 @@
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="text-muted small me-1">Инвентаризация</span>
+    <a href="{% url 'inventory:panel' %}" class="btn btn-sm {% if request.resolver_match.url_name == 'panel' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        Обзор
+    </a>
+    <a href="{% url 'inventory:unit_list' %}" class="btn btn-sm {% if request.resolver_match.url_name == 'unit_list' or request.resolver_match.url_name == 'unit_create' or request.resolver_match.url_name == 'unit_edit' or request.resolver_match.url_name == 'unit_delete' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        Единицы учёта
+    </a>
+    <a href="{% url 'inventory:report_csv' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-download"></i> Отчёт CSV
+    </a>
+    {% if inventory_can_manage %}
+        <a href="{% url 'inventory:department_list' %}" class="btn btn-sm {% if 'department' in request.resolver_match.url_name %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Отделения
+        </a>
+        <a href="{% url 'inventory:staff_list' %}" class="btn btn-sm {% if 'staff' in request.resolver_match.url_name %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Пользователи
+        </a>
+    {% endif %}
+</div>

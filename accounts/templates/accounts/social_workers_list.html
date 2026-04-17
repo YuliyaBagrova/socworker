@@ -2,102 +2,705 @@
 
 {% block title %}Социальные работники - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-workers-page"{% endblock %}
+
+{% block inline_css %}
+    /* Фон: насыщеннее и контрастнее, в той же палитре, что и шапка (тёмный фиолет + индиго) */
+    body.sw-workers-page {
+        background-color: #cfd6eb;
+        background-image:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(118, 75, 162, 0.42), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(102, 126, 234, 0.38), transparent 54%),
+            radial-gradient(ellipse 50% 38% at 72% 88%, rgba(236, 72, 153, 0.12), transparent 58%),
+            radial-gradient(ellipse 48% 36% at 18% 12%, rgba(34, 211, 238, 0.1), transparent 55%),
+            linear-gradient(175deg, #e8ecf9 0%, #d8dff5 26%, #ddd5f5 52%, #cfd8ef 78%, #c5cde8 100%);
+    }
+    body.sw-workers-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-workers-layout {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-height: calc(100vh - var(--navbar-height) - 2.5rem);
+    }
+    body.home-return-on.sw-workers-page .sw-workers-layout {
+        min-height: calc(100vh - var(--navbar-height) - 46px - 2.5rem);
+    }
+    .sw-workers-layout .sw-table-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        margin-bottom: 0 !important;
+    }
+    .sw-workers-layout .sw-table-card > .card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+    }
+    /* Заголовок панели — брендовый градиент + иконка в «плитке» как в шапке */
+    .sw-workers-page-header {
+        align-items: center;
+    }
+    .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        box-shadow:
+            0 6px 22px rgba(102, 126, 234, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(108deg, #1f1a36 0%, #3d2f5c 28%, #5a4a8c 52%, #667eea 78%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        .sw-page-title__label {
+            color: #2d2652;
+            background: none;
+        }
+    }
+    .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    /* Тулбар: стекло + акцентная полоска, в тон шапке */
+    .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-toolbar-btn.btn-outline-primary {
+        color: #4338ca;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(245, 243, 255, 0.9) 100%);
+        border-color: rgba(102, 126, 234, 0.32);
+        border-left: 3px solid #667eea;
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.1);
+    }
+    .sw-toolbar-btn.btn-outline-primary:hover {
+        color: #312e81;
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    }
+    .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    /* Панель фильтров — как стеклянный блок на главной (.dash-glass) */
+    .sw-filter-dash {
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--dash-glass-border);
+        border-radius: 18px;
+        box-shadow:
+            0 8px 32px rgba(26, 26, 46, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        transition: box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    .sw-filter-dash:hover {
+        box-shadow:
+            0 12px 36px rgba(102, 126, 234, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.2rem;
+    }
+    /* Заголовок блока фильтров — как сверху, но компактнее */
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.14);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        font-size: 1.12rem;
+        box-shadow:
+            0 4px 16px rgba(102, 126, 234, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #3d2f5c;
+    }
+    .sw-select-wrap {
+        position: relative;
+    }
+    .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: var(--dash-violet-light);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #4f46e5;
+    }
+    .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #4f46e5;
+        transform: translateY(-50%) scale(1);
+    }
+    .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--dash-violet);
+        margin-bottom: 0.4rem;
+    }
+    .sw-filter-dash .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+    }
+    .sw-filter-dash .input-group-text {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-right: none;
+        color: var(--dash-violet-light);
+        font-size: 1rem;
+    }
+    .sw-filter-dash .form-control.sw-search-input {
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-left: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a1a2e;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 0 12px 12px 0;
+    }
+    .sw-filter-dash .form-control.sw-search-input::placeholder {
+        color: #7a7694;
+        font-weight: 400;
+    }
+    .sw-filter-dash .form-control.sw-search-input:focus {
+        border-color: var(--primary);
+        box-shadow: none;
+        background: #fff;
+    }
+    .sw-filter-dash .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2d2652;
+        background: rgba(255, 255, 255, 0.92);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(45, 38, 82, 0.05);
+    }
+    .sw-filter-dash .form-select.sw-status-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        background: #fff;
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        padding: 0.62rem 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        box-shadow:
+            0 4px 18px rgba(99, 102, 241, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow:
+            0 10px 28px rgba(102, 126, 234, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+        transform: translateY(0);
+    }
+    .sw-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 14px 14px;
+        flex: 1 1 auto;
+        min-height: 12rem;
+    }
+    .sw-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .sw-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    .sw-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #3c4043;
+    }
+    .sw-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .sw-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    .sw-sheet tbody tr.data-row:hover {
+        background: #f0edff !important;
+    }
+    .sw-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 14rem;
+        white-space: normal;
+    }
+    .sw-sheet .col-narrow {
+        white-space: nowrap;
+    }
+    .sw-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .sw-sheet a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+    }
+    .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        border-width: 1px;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    }
+    .sw-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.12);
+    }
+    /* Удаление: круглая кнопка с градиентом и «парящим» наведением */
+    .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    a.sw-action-btn.sw-action-btn--destructive:visited {
+        color: #fff;
+    }
+    .sw-action-btn.sw-action-btn--destructive:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    /* Просмотр / редактирование: тот же круглый градиентный стиль, что и у удаления */
+    .sw-action-btn.sw-action-btn--view {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #a5b4fc 0%, #6366f1 38%, #4f46e5 82%, #4338ca 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 2px 6px rgba(67, 56, 202, 0.22),
+            0 8px 18px rgba(99, 102, 241, 0.3);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    a.sw-action-btn.sw-action-btn--view:visited {
+        color: #fff;
+    }
+    .sw-action-btn.sw-action-btn--view:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(67, 56, 202, 0.28),
+            0 12px 26px rgba(99, 102, 241, 0.38);
+    }
+    .sw-action-btn.sw-action-btn--view:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(165, 180, 252, 0.65),
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 8px 18px rgba(99, 102, 241, 0.32);
+    }
+    .sw-action-btn.sw-action-btn--edit {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    a.sw-action-btn.sw-action-btn--edit:visited {
+        color: #fff;
+    }
+    .sw-action-btn.sw-action-btn--edit:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    .sw-action-btn.sw-action-btn--edit:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    .sw-sheet .sw-actions-cell a.sw-action-btn {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-sheet .sw-actions-cell a.sw-action-btn:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-actions-cell {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .sw-workers-layout .sw-table-card > .card-body > .empty-state {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 16rem;
+        padding: 2.5rem 1rem;
+    }
+    .sw-workers-layout .sw-table-card .pagination-wrap {
+        flex-shrink: 0;
+    }
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-people-fill"></i> Социальные работники</h2>
-    <div class="d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline-danger" title="Скачать PDF"
+{% include 'accounts/includes/workload_return_banner.html' %}
+
+<div class="sw-workers-layout">
+<div class="page-header sw-workers-page-header flex-wrap mb-0">
+    <h1 class="sw-page-title mb-0">
+        <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></span>
+        <span class="sw-page-title__label">Социальные работники</span>
+    </h1>
+    <div class="sw-toolbar-group">
+        <button type="button" class="btn btn-outline-danger sw-toolbar-btn" title="Скачать PDF"
                 data-bs-toggle="modal" data-bs-target="#socialWorkersPdfModal">
             <i class="bi bi-file-earmark-pdf-fill"></i> PDF
         </button>
-        <a href="{% url 'accounts:assigned_persons' %}" class="btn btn-outline-primary">
+        <button type="button" class="btn btn-outline-success sw-toolbar-btn" title="Скачать CSV"
+                data-bs-toggle="modal" data-bs-target="#socialWorkersCsvModal">
+            <i class="bi bi-filetype-csv"></i> CSV
+        </button>
+        <a href="{% url 'accounts:assigned_persons' %}" class="btn btn-outline-primary sw-toolbar-btn">
             <i class="bi bi-diagram-3-fill"></i> Закреплённые лица
         </a>
-        <a href="{% url 'accounts:social_worker_create' %}" class="btn btn-primary">
+        <a href="{% url 'accounts:social_worker_create' %}" class="btn btn-primary sw-toolbar-btn">
             <i class="bi bi-plus-circle"></i> Добавить работника
         </a>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-body py-3">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-6">
-                <label for="search" class="form-label">Поиск</label>
+<div class="sw-filter-dash mb-0">
+    <div class="sw-filter-dash-inner">
+        <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+            <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+            <span class="sw-page-title__label">Поиск и сортировка</span>
+        </h2>
+        <form method="get" class="row g-3 align-items-end">
+            {% if workload_return %}
+                {% for k, v in workload_return.items %}
+                    <input type="hidden" name="{{ k }}" value="{{ v }}">
+                {% endfor %}
+            {% endif %}
+            <div class="col-12 col-lg-4">
+                <label for="search" class="sw-filter-label d-block">Поиск</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" class="form-control border-start-0" id="search" name="search"
-                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер...">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control sw-search-input" id="search" name="search"
+                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер…">
                 </div>
             </div>
-            <div class="col-md-4">
-                <label for="status" class="form-label">Статус</label>
-                <select class="form-select" id="status" name="status">
-                    <option value="">Все статусы</option>
-                    {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+            <div class="col-12 col-lg-3">
+                <label for="status" class="sw-filter-label d-block">Статус</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="status" name="status">
+                        <option value="">Все статусы</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label d-none d-md-block">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
+            <div class="col-12 col-lg-3">
+                <label for="sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="При смене варианта список обновится"
+                            onchange="this.form.submit()">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
                     <i class="bi bi-search"></i> Найти
                 </button>
             </div>
             {% if has_active_filters %}
-            <div class="col-12 mt-2">
-                <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary btn-sm">
+            <div class="col-12 pt-1">
+                <a href="{% url 'accounts:social_workers_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                     <i class="bi bi-x-lg"></i> Показать всех работников
                 </a>
-                <span class="text-muted small ms-2">Сбросить поиск и фильтр по статусу</span>
+                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск и фильтр по статусу</span>
             </div>
             {% endif %}
         </form>
     </div>
 </div>
 
-<div class="card">
+<div class="card sw-table-card">
     <div class="card-body p-0">
         {% if page_obj %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
+            <div class="sw-sheet-wrap">
+                <table class="sw-sheet mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF">
+                            <th class="text-center col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
                                 <input type="checkbox" class="form-check-input" id="socialWorkerSelectAll"
                                        aria-label="Отметить всех на странице">
                             </th>
-                            <th>Таб. №</th>
-                            <th>ФИО</th>
-                            <th>Год рожд.</th>
-                            <th>Адрес</th>
-                            <th>Телефон</th>
-                            <th>Мед. осмотр</th>
-                            <th>Последний осмотр</th>
-                            <th>Медосмотр назначен</th>
-                            <th>Статус</th>
-                            <th class="text-center">Действия</th>
+                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-text-left">ФИО</th>
+                            <th class="col-narrow">Год рожд.</th>
+                            <th class="col-text-left">Адрес</th>
+                            <th class="col-narrow">Телефон</th>
+                            <th class="col-narrow">Мед. осмотр</th>
+                            <th class="col-narrow">Дата приёма на работу</th>
+                            <th class="col-text-left">Примечания</th>
+                            <th class="col-narrow">Статус</th>
+                            <th class="text-center col-narrow">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for worker in page_obj %}
-                            <tr>
+                            <tr class="data-row">
                                 <td class="text-center align-middle">
                                     <input type="checkbox" class="form-check-input social-worker-select"
                                            name="worker_pick" value="{{ worker.pk }}"
                                            aria-label="Выбрать {{ worker.get_full_name }}">
                                 </td>
-                                <td><span class="fw-medium">{{ worker.employee_id }}</span></td>
-                                <td>
+                                <td class="col-narrow"><span class="fw-semibold">{{ worker.employee_id }}</span></td>
+                                <td class="col-text-left">
                                     <a href="{% url 'accounts:social_worker_detail' worker.pk %}">
                                         {{ worker.get_full_name }}
                                     </a>
                                 </td>
-                                <td>{{ worker.birth_date|date:"Y"|default:"—" }}</td>
-                                <td title="{{ worker.address|default:'' }}">{{ worker.address|default:"—"|truncatewords:4 }}</td>
-                                <td>{{ worker.phone|default:"—" }}</td>
-                                <td>
+                                <td class="col-narrow">{{ worker.birth_date|date:"Y"|default:"—" }}</td>
+                                <td class="col-text-left" title="{{ worker.address|default:'' }}">{{ worker.address|default:"—"|truncatewords:4 }}</td>
+                                <td class="col-narrow">{{ worker.phone|default:"—" }}</td>
+                                <td class="col-narrow">
                                     {% if worker.medical_checkup == 'passed' %}
                                         <span class="badge bg-success">Пройден</span>
                                     {% elif worker.medical_checkup == 'not_passed' %}
@@ -106,9 +709,9 @@
                                         <span class="badge text-dark bg-warning">Просрочен</span>
                                     {% endif %}
                                 </td>
-                                <td class="small">{% if worker.last_medical_checkup_date %}{{ worker.last_medical_checkup_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-                                <td class="small">{% if worker.medical_checkup_planned_date %}{{ worker.medical_checkup_planned_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-                                <td>
+                                <td class="col-narrow">{% if worker.hire_date %}{{ worker.hire_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                                <td class="col-text-left small" title="{{ worker.notes|default:''|striptags }}">{% if worker.notes %}{{ worker.notes|truncatechars:48 }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                                <td class="col-narrow">
                                     {% if worker.status == 'active' %}
                                         <span class="badge bg-success">Активный</span>
                                     {% elif worker.status == 'inactive' %}
@@ -120,15 +723,18 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="btn-group-actions justify-content-center">
-                                        <a href="{% url 'accounts:social_worker_detail' worker.pk %}" class="btn btn-sm btn-outline-primary" title="Просмотр">
-                                            <i class="bi bi-eye"></i>
+                                    <div class="sw-actions-cell">
+                                        <a href="{% url 'accounts:social_worker_detail' worker.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Смотреть">
+                                            <i class="bi bi-eye" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Смотреть</span>
                                         </a>
-                                        <a href="{% url 'accounts:social_worker_edit' worker.pk %}" class="btn btn-sm btn-outline-warning" title="Редактировать">
-                                            <i class="bi bi-pencil"></i>
+                                        <a href="{% url 'accounts:social_worker_edit' worker.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Редактировать</span>
                                         </a>
-                                        <a href="{% url 'accounts:social_worker_delete' worker.pk %}" class="btn btn-sm btn-outline-danger" title="Удалить">
-                                            <i class="bi bi-trash"></i>
+                                        <a href="{% url 'accounts:social_worker_delete' worker.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Удалить</span>
                                         </a>
                                     </div>
                                 </td>
@@ -139,17 +745,17 @@
             </div>
 
             {% if page_obj.has_other_pages %}
-                <div class="card-body border-top pt-3 pb-2">
+                <div class="card-body border-top pt-3 pb-2 pagination-wrap">
                     <nav>
                         <ul class="pagination pagination-sm justify-content-center mb-0">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}&sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}&sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
@@ -159,12 +765,12 @@
                             </li>
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}&sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}&sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-right"></i>
                                     </a>
                                 </li>
@@ -184,11 +790,18 @@
         {% endif %}
     </div>
 </div>
+</div>
 
 <form id="socialWorkersPdfForm" method="post" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
     <input type="hidden" name="scope" id="socialWorkersPdfScope" value="all">
     <span id="socialWorkersPdfIdFields"></span>
+</form>
+
+<form id="socialWorkersCsvForm" method="post" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="socialWorkersCsvScope" value="all">
+    <span id="socialWorkersCsvIdFields"></span>
 </form>
 
 <div class="modal fade" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
@@ -228,6 +841,44 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="socialWorkersCsvModal" tabindex="-1" aria-labelledby="socialWorkersCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="socialWorkersCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="swCsvScopeAll">
+                            Весь список социальных работников
+                        </label>
+                        <div class="small text-muted ms-4">Все записи из базы</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="swCsvScopeSelected">
+                            Только отмеченные в таблице
+                        </label>
+                        <div class="small text-muted ms-4">Флажки слева</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="socialWorkersCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -249,6 +900,33 @@
             const form = document.getElementById('socialWorkersPdfForm');
             const scopeInput = document.getElementById('socialWorkersPdfScope');
             const idContainer = document.getElementById('socialWorkersPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.social-worker-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного работника в таблице или выберите «Весь список социальных работников».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'worker_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+    const csvConfirm = document.getElementById('socialWorkersCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="sw_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('socialWorkersCsvForm');
+            const scopeInput = document.getElementById('socialWorkersCsvScope');
+            const idContainer = document.getElementById('socialWorkersCsvIdFields');
             scopeInput.value = scope;
             idContainer.innerHTML = '';
             if (scope === 'selected') {

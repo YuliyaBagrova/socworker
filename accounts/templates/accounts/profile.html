@@ -2,23 +2,130 @@
 
 {% block title %}О пользователе - SocWorker{% endblock %}
 
+{% block inline_css %}
+    .profile-action-bar .btn { border-radius: 10px; }
+    .profile-avatar-card {
+        border-radius: 16px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+        background: linear-gradient(180deg, #fafbff 0%, #fff 45%);
+    }
+    .profile-avatar-ring {
+        width: 112px;
+        height: 112px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        padding: 4px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.25);
+    }
+    .profile-avatar-ring img,
+    .profile-avatar-ring .profile-avatar-fallback {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        border: 2px solid #fff;
+    }
+    .profile-avatar-fallback {
+        background: linear-gradient(145deg, #5a67d6, #6b4a9e);
+        color: #fff;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+    }
+    .profile-avatar-form .form-label { font-size: 0.85rem; color: #5f6368; }
+    .profile-avatar-form .form-control { border-radius: 10px; }
+    .profile-accordion .accordion-button:not(.collapsed) {
+        background: rgba(102, 126, 234, 0.08);
+        color: #1a1a2e;
+        box-shadow: none;
+    }
+    .profile-accordion .accordion-button:focus { box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.25); }
+    .profile-quick-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+        gap: 0.5rem;
+    }
+    .profile-quick-grid a {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid #e8eaed;
+        background: #fafbfc;
+        color: #1a1a2e;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .profile-quick-grid a:hover {
+        background: #f0f2ff;
+        border-color: rgba(102, 126, 234, 0.35);
+        color: var(--primary, #667eea);
+    }
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-person-circle"></i> О пользователе</h2>
+<div class="page-header flex-wrap profile-action-bar">
+    <h2 class="mb-0"><i class="bi bi-person-circle"></i> О пользователе</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-key"></i> Смена пароля
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Выход
+        </a>
+    </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-4 mb-4">
     <div class="col-md-4">
-        <div class="card h-100">
+        <div class="card h-100 profile-avatar-card shadow-sm">
             <div class="card-body p-4 text-center">
-                <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, #667eea, #764ba2); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
-                    <i class="bi bi-person-fill" style="font-size:1.8rem; color:#fff;"></i>
+                <div class="profile-avatar-ring">
+                    {% if socworker_profile.avatar %}
+                        <img src="{{ socworker_profile.avatar.url }}" alt="Фото профиля">
+                    {% else %}
+                        <div class="profile-avatar-fallback" role="img" aria-label="Инициалы">{{ avatar_initials }}</div>
+                    {% endif %}
                 </div>
-                <h5 class="fw-bold">{{ user.get_full_name|default:user.username }}</h5>
+                <h5 class="fw-bold mb-2">{{ user.get_full_name|default:user.username }}</h5>
                 {% if user.is_staff %}
-                    <span class="badge bg-success">Администратор</span>
+                    <span class="badge bg-success rounded-pill">Администратор</span>
                 {% else %}
-                    <span class="badge bg-primary">Пользователь</span>
+                    <span class="badge rounded-pill" style="background:linear-gradient(135deg,#667eea,#764ba2);">Пользователь</span>
+                {% endif %}
+                <p class="small text-muted mt-3 mb-0 text-start">По желанию загрузите своё фото — оно показывается на главной панели в блоке приветствия. Форматы: JPG, PNG, WebP или GIF, до 2 МБ.</p>
+            </div>
+            <div class="card-body border-top pt-3 profile-avatar-form">
+                <form method="post" enctype="multipart/form-data" class="mb-0">
+                    {% csrf_token %}
+                    {% if avatar_form.non_field_errors %}
+                        <div class="alert alert-danger small py-2">{{ avatar_form.non_field_errors }}</div>
+                    {% endif %}
+                    {% if avatar_form.avatar.errors %}
+                        <div class="text-danger small mb-2">{{ avatar_form.avatar.errors }}</div>
+                    {% endif %}
+                    <label class="form-label" for="{{ avatar_form.avatar.id_for_label }}">{{ avatar_form.avatar.label }}</label>
+                    {{ avatar_form.avatar }}
+                    <button type="submit" name="save_avatar" value="1" class="btn btn-primary btn-sm w-100 mt-3 rounded-pill fw-semibold">
+                        <i class="bi bi-cloud-upload me-1"></i>Сохранить фото
+                    </button>
+                </form>
+                {% if socworker_profile.avatar %}
+                <form method="post" class="mt-2 mb-0">
+                    {% csrf_token %}
+                    <button type="submit" name="clear_avatar" value="1" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
+                        <i class="bi bi-x-lg me-1"></i>Удалить фото
+                    </button>
+                </form>
                 {% endif %}
             </div>
             <div class="card-body border-top pt-3">
@@ -85,6 +192,109 @@
                             Первый вход
                         {% endif %}
                     </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card profile-accordion">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0"><i class="bi bi-grid-1x2-fill me-2 text-primary"></i> Дополнительные возможности</h5>
+        <p class="text-muted small mb-0 mt-1">Разверните блок — быстрые действия и разделы приложения.</p>
+    </div>
+    <div class="card-body p-0">
+        <div class="accordion accordion-flush" id="profileUserAccordion">
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header" id="profileHeadQuick">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#profileCollapseQuick" aria-expanded="false" aria-controls="profileCollapseQuick">
+                        <i class="bi bi-lightning-charge-fill text-warning me-2"></i> Быстрый доступ
+                    </button>
+                </h2>
+                <div id="profileCollapseQuick" class="accordion-collapse collapse" aria-labelledby="profileHeadQuick" data-bs-parent="#profileUserAccordion">
+                    <div class="accordion-body pt-0">
+                        <div class="profile-quick-grid">
+                            <a href="{% url 'accounts:dashboard' %}"><i class="bi bi-house-door-fill text-primary"></i> Главная</a>
+                            <a href="{% url 'accounts:social_workers_list' %}"><i class="bi bi-people-fill text-primary"></i> Соц. работники</a>
+                            <a href="{% url 'accounts:recipients_list' %}"><i class="bi bi-person-heart text-danger"></i> Получатели</a>
+                            <a href="{% url 'accounts:services_panel' %}"><i class="bi bi-briefcase-fill text-success"></i> Услуги</a>
+                            <a href="{% url 'accounts:visit_planning' %}"><i class="bi bi-calendar-week text-info"></i> Планирование</a>
+                            <a href="{% url 'accounts:workload_panel' %}"><i class="bi bi-calculator text-warning"></i> Нагрузка</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header" id="profileHeadWork">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#profileCollapseWork" aria-expanded="false" aria-controls="profileCollapseWork">
+                        <i class="bi bi-clipboard2-pulse text-danger me-2"></i> Медосмотр и безопасность
+                    </button>
+                </h2>
+                <div id="profileCollapseWork" class="accordion-collapse collapse" aria-labelledby="profileHeadWork" data-bs-parent="#profileUserAccordion">
+                    <div class="accordion-body pt-0">
+                        <div class="profile-quick-grid">
+                            <a href="{% url 'accounts:medical_checkup_panel' %}"><i class="bi bi-heart-pulse text-danger"></i> Медосмотр</a>
+                            <a href="{% url 'accounts:safety_briefing_panel' %}"><i class="bi bi-shield-check" style="color:#764ba2;"></i> Техника безопасности</a>
+                            <a href="{% url 'accounts:assigned_persons' %}"><i class="bi bi-diagram-3-fill text-primary"></i> Закреплённые лица</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header" id="profileHeadReports">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#profileCollapseReports" aria-expanded="false" aria-controls="profileCollapseReports">
+                        <i class="bi bi-file-earmark-bar-graph text-success me-2"></i> Отчёты и выгрузки
+                    </button>
+                </h2>
+                <div id="profileCollapseReports" class="accordion-collapse collapse" aria-labelledby="profileHeadReports" data-bs-parent="#profileUserAccordion">
+                    <div class="accordion-body pt-0">
+                        <div class="profile-quick-grid">
+                            <a href="{% url 'accounts:report_select' %}"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> PDF / CSV отчёты</a>
+                            <a href="{% url 'accounts:workload_summary' %}"><i class="bi bi-people text-warning"></i> Сводка нагрузки</a>
+                            <a href="{% url 'accounts:workload_records_list' %}"><i class="bi bi-list-ul text-secondary"></i> Журнал нагрузки</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header" id="profileHeadInv">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#profileCollapseInv" aria-expanded="false" aria-controls="profileCollapseInv">
+                        <i class="bi bi-box-seam text-secondary me-2"></i> Инвентаризация
+                    </button>
+                </h2>
+                <div id="profileCollapseInv" class="accordion-collapse collapse" aria-labelledby="profileHeadInv" data-bs-parent="#profileUserAccordion">
+                    <div class="accordion-body pt-0">
+                        <div class="profile-quick-grid">
+                            <a href="{% url 'inventory:panel' %}"><i class="bi bi-speedometer2 text-primary"></i> Панель инвентаризации</a>
+                            <a href="{% url 'inventory:report_csv' %}"><i class="bi bi-filetype-csv text-success"></i> Отчёт CSV</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="profileHeadSecurity">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#profileCollapseSecurity" aria-expanded="false" aria-controls="profileCollapseSecurity">
+                        <i class="bi bi-shield-lock text-primary me-2"></i> Безопасность аккаунта
+                    </button>
+                </h2>
+                <div id="profileCollapseSecurity" class="accordion-collapse collapse" aria-labelledby="profileHeadSecurity" data-bs-parent="#profileUserAccordion">
+                    <div class="accordion-body pt-0">
+                        <p class="small text-muted mb-3">Регулярно обновляйте пароль и выходите из системы на общих компьютерах.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'accounts:password_change' %}" class="btn btn-primary btn-sm"><i class="bi bi-key"></i> Сменить пароль</a>
+                            <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Выйти из системы</a>
+                        </div>
+                        {% if user.is_staff %}
+                        <hr class="my-3">
+                        <p class="small text-muted mb-2">Администрирование Django:</p>
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener"><i class="bi bi-gear-wide-connected"></i> Админ-панель</a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

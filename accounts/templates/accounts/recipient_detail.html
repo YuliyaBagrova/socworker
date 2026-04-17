@@ -1,143 +1,398 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load phone_extras %}
 
 {% block title %}{{ recipient.get_full_name }} - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-worker-detail-page"{% endblock %}
+
+{% block inline_css %}
+    body.sw-worker-detail-page {
+        background-color: #d8eafc;
+        background-image:
+            radial-gradient(ellipse 88% 55% at 94% 6%, rgba(56, 189, 248, 0.32), transparent 54%),
+            radial-gradient(ellipse 72% 48% at 4% 94%, rgba(129, 140, 248, 0.22), transparent 52%),
+            radial-gradient(ellipse 50% 40% at 50% 88%, rgba(125, 211, 252, 0.35), transparent 58%),
+            linear-gradient(168deg, #f0f9ff 0%, #e0f2fe 32%, #e8f0fe 62%, #dbeafe 100%);
+    }
+    body.sw-worker-detail-page .main-content {
+        background: transparent;
+        max-width: 1040px;
+    }
+    body.sw-worker-detail-page .sw-detail-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.35rem;
+    }
+    @media (min-width: 768px) {
+        body.sw-worker-detail-page .sw-detail-header {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+        min-width: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #6366f1 100%);
+        box-shadow:
+            0 6px 22px rgba(56, 189, 248, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-worker-detail-page .sw-detail-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(105deg, #0c4a6e 0%, #075985 28%, #2563eb 58%, #4f46e5 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        word-break: break-word;
+    }
+    @supports not (background-clip: text) {
+        body.sw-worker-detail-page .sw-detail-title__label {
+            color: #0c4a6e;
+            background: none;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.55rem;
+        flex-shrink: 0;
+    }
+    @media (min-width: 768px) {
+        body.sw-worker-detail-page .sw-detail-actions {
+            justify-content: flex-end;
+            padding-top: 0.2rem;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        order: 1;
+        padding: 0.5rem 1.15rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #0c4a6e;
+        border: 1.5px solid rgba(14, 165, 233, 0.45);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%);
+        box-shadow:
+            0 3px 16px rgba(14, 165, 233, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-worker-detail-page .sw-detail-back-btn:hover {
+        color: #082f49;
+        border-color: rgba(2, 132, 199, 0.55);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(14, 165, 233, 0.2);
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        order: 2;
+        padding: 0.52rem 1.2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #fff;
+        border: none;
+        background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 45%, #6366f1 100%);
+        box-shadow:
+            0 4px 18px rgba(59, 130, 246, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(99, 102, 241, 0.38);
+    }
+    body.sw-worker-detail-page .sw-detail-card {
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.82);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow:
+            0 10px 36px rgba(15, 76, 129, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+        margin-bottom: 1.1rem;
+    }
+    body.sw-worker-detail-page .sw-detail-card:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-card:hover {
+        box-shadow:
+            0 14px 40px rgba(59, 130, 246, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-worker-detail-page .sw-detail-card__head {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin: 0;
+        padding: 0.85rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+        background: linear-gradient(90deg, rgba(224, 242, 254, 0.75) 0%, rgba(255, 255, 255, 0.4) 100%);
+    }
+    body.sw-worker-detail-page .sw-detail-card__head i {
+        color: #0284c7;
+        font-size: 1.05rem;
+    }
+    body.sw-worker-detail-page .sw-detail-card__body {
+        padding: 1.1rem 1.15rem 1.15rem;
+    }
+    body.sw-worker-detail-page .sw-detail-row {
+        display: grid;
+        grid-template-columns: minmax(7rem, 10rem) 1fr;
+        gap: 0.35rem 1rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+        font-size: 0.9rem;
+    }
+    body.sw-worker-detail-page .sw-detail-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-row dt,
+    body.sw-worker-detail-page .sw-detail-row .sw-detail-k {
+        margin: 0;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    body.sw-worker-detail-page .sw-detail-row dd,
+    body.sw-worker-detail-page .sw-detail-row .sw-detail-v {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 500;
+    }
+    body.sw-worker-detail-page .sw-detail-notes {
+        color: #334155;
+        font-size: 0.9rem;
+        line-height: 1.55;
+    }
+    body.sw-worker-detail-page .sw-detail-link {
+        color: #0284c7;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    body.sw-worker-detail-page .sw-detail-link:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+    body.sw-worker-detail-page .sw-detail-delete {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1.5px solid rgba(239, 68, 68, 0.35);
+        color: #b91c1c;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.9) 100%);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    body.sw-worker-detail-page .sw-detail-delete:hover {
+        color: #991b1b;
+        border-color: rgba(220, 38, 38, 0.5);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.15);
+    }
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-person-heart"></i> {{ recipient.get_full_name }}</h2>
-    <div class="d-flex gap-2">
-        <a href="{% url 'accounts:recipient_edit' recipient.pk %}" class="btn btn-outline-warning">
-            <i class="bi bi-pencil"></i> Редактировать
+<div class="sw-detail-header">
+    <h1 class="sw-detail-title mb-0">
+        <span class="sw-detail-title__icon" aria-hidden="true"><i class="bi bi-person-heart"></i></span>
+        <span class="sw-detail-title__label">{{ recipient.get_full_name }}</span>
+    </h1>
+    <div class="sw-detail-actions">
+        <a href="{% url 'accounts:recipients_list' %}" class="sw-detail-back-btn">
+            <i class="bi bi-arrow-left-circle"></i> Назад к списку
         </a>
-        <a href="{% url 'accounts:recipients_list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Назад
+        <a href="{% url 'accounts:recipient_edit' recipient.pk %}" class="sw-detail-edit-btn">
+            <i class="bi bi-pencil-square"></i> Редактировать
         </a>
     </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-person me-1 text-primary"></i> Персональная информация</h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Табельный номер</div>
-                    <div class="col-sm-8">{{ recipient.employee_id }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">ФИО</div>
-                    <div class="col-sm-8">{{ recipient.get_full_name }}</div>
-                </div>
-                {% if recipient.birth_date %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Дата рождения</div>
-                    <div class="col-sm-8">{{ recipient.birth_date|date:"d.m.Y" }}</div>
-                </div>
-                {% endif %}
-                {% if recipient.phone %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Телефон</div>
-                    <div class="col-sm-8">{{ recipient.phone }}</div>
-                </div>
-                {% endif %}
-                {% if recipient.address %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Адрес проживания</div>
-                    <div class="col-sm-8">{{ recipient.address }}</div>
-                </div>
-                {% endif %}
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-person"></i> Персональная информация</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Табельный номер</dt>
+                        <dd class="fw-semibold">{{ recipient.employee_id }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>ФИО</dt>
+                        <dd>{{ recipient.get_full_name }}</dd>
+                    </div>
+                    {% if recipient.birth_date %}
+                    <div class="sw-detail-row">
+                        <dt>Дата рождения</dt>
+                        <dd>{{ recipient.birth_date|date:"d.m.Y" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if recipient.phone %}
+                    <div class="sw-detail-row">
+                        <dt>Телефон</dt>
+                        <dd>
+                            {% with tel=recipient.phone|phone_tel_href %}
+                                {% if tel %}
+                                    <a href="{{ tel }}" class="sw-detail-link">{{ recipient.phone }}</a>
+                                {% else %}
+                                    {{ recipient.phone }}
+                                {% endif %}
+                            {% endwith %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if recipient.address %}
+                    <div class="sw-detail-row">
+                        <dt>Адрес проживания</dt>
+                        <dd>{{ recipient.address }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clipboard2-pulse me-1 text-primary"></i> Информация об обслуживании</h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Группа инвалидности</div>
-                    <div class="col-sm-8">{{ recipient.get_disability_group_display }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Сумма оплаты</div>
-                    <div class="col-sm-8">{{ recipient.payment_percent }}%</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Кратность посещения</div>
-                    <div class="col-sm-8">{{ recipient.get_visit_frequency_display }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Статус проживания</div>
-                    <div class="col-sm-8">{{ recipient.get_living_status_display }}</div>
-                </div>
-                {% if recipient.admission_date %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Дата приёма</div>
-                    <div class="col-sm-8">{{ recipient.admission_date|date:"d.m.Y" }}</div>
-                </div>
-                {% endif %}
-                {% if recipient.visit_days %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">Дни посещений</div>
-                    <div class="col-sm-8">{{ recipient.visit_days }}</div>
-                </div>
-                {% endif %}
-                <div class="row mb-2">
-                    <div class="col-sm-4 text-muted fw-medium">АПИ количество</div>
-                    <div class="col-sm-8">{{ recipient.fire_detector_count }}</div>
-                </div>
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-clipboard2-pulse"></i> Информация об обслуживании</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Группа инвалидности</dt>
+                        <dd>{{ recipient.get_disability_group_display }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Сумма оплаты</dt>
+                        <dd>{{ recipient.payment_percent }}%</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Кратность посещения</dt>
+                        <dd>{{ recipient.get_visit_frequency_display }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Статус проживания</dt>
+                        <dd>{{ recipient.get_living_status_display }}</dd>
+                    </div>
+                    {% if recipient.admission_date %}
+                    <div class="sw-detail-row">
+                        <dt>Дата приёма</dt>
+                        <dd>{{ recipient.admission_date|date:"d.m.Y" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if recipient.visit_days %}
+                    <div class="sw-detail-row">
+                        <dt>Дни посещений</dt>
+                        <dd>{{ recipient.visit_days }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="sw-detail-row">
+                        <dt>АПИ количество</dt>
+                        <dd>{{ recipient.fire_detector_count }}</dd>
+                    </div>
+                </dl>
             </div>
         </div>
 
         {% if recipient.notes %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-chat-left-text me-1 text-primary"></i> Примечания</h5>
-            </div>
-            <div class="card-body">{{ recipient.notes|linebreaks }}</div>
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-chat-left-text"></i> Примечания</h2>
+            <div class="sw-detail-card__body sw-detail-notes">{{ recipient.notes|linebreaks }}</div>
         </div>
         {% endif %}
     </div>
 
     <div class="col-lg-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-link-45deg me-1 text-primary"></i> Назначение</h5>
-            </div>
-            <div class="card-body">
-                <small class="text-muted d-block mb-1">Социальный работник</small>
-                {% if recipient.social_worker %}
-                    <a href="{% url 'accounts:social_worker_detail' recipient.social_worker.pk %}">
-                        {{ recipient.social_worker.get_full_name }}
-                    </a>
-                {% else %}
-                    <span class="text-muted">Не назначен</span>
-                {% endif %}
-                <small class="text-muted d-block mt-3 mb-1">Населённый пункт (услуги)</small>
-                {% if recipient.location %}
-                    <span>{{ recipient.location.get_location_type_display }} {{ recipient.location.name }}</span>
-                {% else %}
-                    <span class="text-muted">Не указан</span>
-                {% endif %}
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-link-45deg"></i> Назначение</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Соц. работник</dt>
+                        <dd>
+                            {% if recipient.social_worker %}
+                                <a href="{% url 'accounts:social_worker_detail' recipient.social_worker.pk %}" class="sw-detail-link">{{ recipient.social_worker.get_full_name }}</a>
+                            {% else %}
+                                <span class="text-muted">Не назначен</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Населённый пункт</dt>
+                        <dd>
+                            {% if recipient.location %}
+                                {{ recipient.location.get_location_type_display }} {{ recipient.location.name }}
+                            {% else %}
+                                <span class="text-muted">Не указан</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-clock-history me-1 text-primary"></i> Метаданные</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-2">
-                    <small class="text-muted">Создано:</small>
-                    <small class="d-block">{{ recipient.created_at|date:"d.m.Y H:i" }}</small>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted">Обновлено:</small>
-                    <small class="d-block">{{ recipient.updated_at|date:"d.m.Y H:i" }}</small>
-                </div>
-                <a href="{% url 'accounts:recipient_delete' recipient.pk %}" class="btn btn-outline-danger btn-sm w-100">
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-clock-history"></i> Метаданные</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Создано</dt>
+                        <dd class="small">{{ recipient.created_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Обновлено</dt>
+                        <dd class="small">{{ recipient.updated_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                </dl>
+                <a href="{% url 'accounts:recipient_delete' recipient.pk %}" class="sw-detail-delete">
                     <i class="bi bi-trash"></i> Удалить получателя
                 </a>
             </div>

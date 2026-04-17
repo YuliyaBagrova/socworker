@@ -1,112 +1,542 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}Услуги — {{ worker.get_full_name }} - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-services-page sw-services-detail-page"{% endblock %}
+
 {% block inline_css %}
-    .services-detail-banner {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-        border: 1px solid #e8eaed;
-        border-radius: 14px;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1.25rem;
+    body.sw-services-page {
+        min-height: 100vh;
+        background-color: #e4f4dc;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(220, 252, 200, 0.38) 45%, rgba(190, 242, 100, 0.22) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(217, 249, 157, 0.5), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(163, 230, 53, 0.28), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(134, 239, 172, 0.35), transparent 58%),
+            linear-gradient(118deg, rgba(187, 247, 208, 0.45) 0%, rgba(74, 222, 128, 0.12) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(250, 250, 210, 0.35) 0%, rgba(217, 249, 157, 0.18) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(21, 128, 61, 0.06) 100%),
+            url("{% static 'img/services-panel-bg.png' %}");
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
     }
-    .services-detail-banner .line1 {
+    body.sw-services-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-services-layout {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .sw-services-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--dash-glass-border);
+        box-shadow: 0 8px 32px rgba(26, 26, 46, 0.12);
+    }
+    .sw-services-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, rgba(26, 26, 46, 0.38) 0%, rgba(74, 63, 111, 0.22) 52%, rgba(26, 26, 46, 0.14) 100%);
+        pointer-events: none;
+    }
+    .sw-services-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0 !important;
+    }
+    .sw-services-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-services-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #6ee7b7 0%, #10b981 42%, #059669 88%, #047857 100%);
+        box-shadow:
+            0 6px 22px rgba(5, 150, 105, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-services-dash .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            105deg,
+            #ffffff 0%,
+            #f7fee7 18%,
+            #ecfccb 38%,
+            #d9f99d 52%,
+            #bbf7d0 68%,
+            #86efac 82%,
+            #6ee7b7 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.22));
+    }
+    @supports not (background-clip: text) {
+        .sw-services-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #f0fdf4;
+            background: none;
+            filter: none;
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+        }
+    }
+    .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-toolbar-btn.btn-outline-secondary {
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(249, 250, 251, 0.9) 100%);
+        border-color: rgba(107, 114, 128, 0.25);
+        border-left: 3px solid #9ca3af;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+    .sw-toolbar-btn.btn-outline-secondary:hover {
+        color: #1f2937;
+        border-color: rgba(75, 85, 99, 0.35);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+    .sw-srv-context {
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(240, 253, 244, 0.95) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.98);
+        border-radius: 18px;
+        box-shadow:
+            0 10px 36px rgba(20, 83, 45, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+        position: relative;
+    }
+    .sw-srv-context::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #4ade80 0%, #22c55e 45%, #15803d 100%);
+        border-radius: 18px 0 0 18px;
+    }
+    .sw-srv-context-inner {
+        padding: 1.15rem 1.25rem 1.2rem 1.5rem;
+    }
+    .sw-srv-context__kicker {
+        font-size: 0.72rem;
         font-weight: 700;
-        font-size: 1.05rem;
-        color: #1a1a2e;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #15803d;
         margin-bottom: 0.35rem;
     }
-    .services-detail-banner .line2 {
-        font-size: 0.95rem;
-        color: #5f6368;
+    .sw-srv-context__title {
+        font-size: clamp(1.05rem, 2vw, 1.35rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+        margin: 0 0 0.5rem;
+        line-height: 1.25;
     }
-    .services-detail-banner .line2 strong {
-        color: #333;
+    .sw-srv-context__meta {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: #334155;
+    }
+    .sw-srv-context__meta strong {
+        color: #14532d;
+        font-weight: 600;
+    }
+    .sw-srv-table-card {
+        border: 1px solid rgba(255, 255, 255, 0.98);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 244, 0.96) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        box-shadow:
+            0 10px 36px rgba(20, 83, 45, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+    }
+    .sw-srv-table-wrap {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+        min-width: 0;
+    }
+    .sw-srv-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .sw-srv-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+    }
+    .sw-srv-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #1e293b;
+    }
+    .sw-srv-sheet .col-narrow {
+        white-space: nowrap;
+    }
+    .sw-srv-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 14rem;
+        white-space: normal;
+    }
+    .sw-srv-sheet tbody tr:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .sw-srv-sheet tbody tr:nth-child(even) {
+        background: #fff;
+    }
+    .sw-srv-sheet tbody tr:hover {
+        background: #f0edff !important;
+    }
+    .sw-srv-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .sw-srv-sheet a:hover {
+        color: var(--accent, #764ba2);
+        text-decoration: underline;
+    }
+    /* Пустое состояние: в едином стиле с панелью услуг */
+    .sw-srv-empty-state {
+        position: relative;
+        margin: 0 auto;
+        max-width: 28rem;
+        padding: 2.25rem 1.5rem 2.5rem;
+        text-align: center;
+    }
+    .sw-srv-empty-state__visual {
+        margin-bottom: 1.1rem;
+    }
+    .sw-srv-empty-state__icon-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 1.15rem;
+        font-size: 1.65rem;
+        color: #fff;
+        background: linear-gradient(145deg, #6ee7b7 0%, #10b981 45%, #059669 100%);
+        box-shadow:
+            0 10px 28px rgba(5, 150, 105, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .sw-srv-empty-state__badge {
+        display: inline-block;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #047857;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.28);
+        padding: 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    .sw-srv-empty-state__title {
+        font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #0f172a;
+        margin: 0 0 0.85rem;
+        line-height: 1.35;
+    }
+    .sw-srv-empty-state__chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .sw-srv-empty-state__chip {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #14532d;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    }
+    .sw-srv-empty-state__chip--loc {
+        color: #1e3a5f;
+        border-color: rgba(102, 126, 234, 0.35);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.9) 100%);
+    }
+    .sw-srv-empty-state__hint {
+        text-align: left;
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.1rem;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(240, 253, 250, 0.95) 0%, rgba(236, 253, 245, 0.88) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.22);
+        box-shadow: 0 4px 18px rgba(15, 118, 110, 0.06);
+    }
+    .sw-srv-empty-state__hint > i {
+        flex-shrink: 0;
+        font-size: 1.25rem;
+        color: #059669;
+        margin-top: 0.1rem;
+    }
+    .sw-srv-empty-state__hint-title {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #047857;
+        margin-bottom: 0.35rem;
+    }
+    .sw-srv-empty-state__hint-text {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #334155;
+        margin: 0;
+    }
+    .sw-srv-empty-state__actions {
+        margin-top: 1.35rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .sw-srv-empty-state__actions .btn {
+        font-weight: 600;
+        font-size: 0.8125rem;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+    }
+    .sw-srv-footer-note {
+        font-size: 0.8125rem;
+        color: #334155;
+        font-weight: 500;
+        text-align: right;
+        margin-top: 0.5rem;
     }
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-briefcase-fill"></i> Услуги</h2>
-    <div class="d-flex gap-2 flex-wrap">
-        <a href="{% url 'accounts:report_pdf' 'services' %}?worker_pk={{ worker.pk }}&location_pk={{ location.pk }}"
-           class="btn btn-outline-danger btn-sm" title="Скачать PDF">
-            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-        </a>
-        <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Назад к услугам
-        </a>
-    </div>
-</div>
+{% include 'accounts/includes/workload_return_banner.html' %}
 
-<div class="services-detail-banner">
-    <div class="line1">СОЦИАЛЬНЫЙ РАБОТНИК — {{ worker.get_full_name }}</div>
-    <div class="line2">
-        Место оказания услуг: <strong>{{ location.get_location_type_display }} {{ location.name }}</strong>
-        <span class="text-muted">(таб. № работника: {{ worker.employee_id }})</span>
-    </div>
-</div>
+<div class="sw-services-layout">
+    <section class="sw-services-dash" aria-label="Панель Услуги">
+        <div class="page-header sw-services-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-briefcase-fill"></i></span>
+                <span class="sw-page-title__label">Услуги</span>
+            </h1>
+            <div class="sw-toolbar-group">
+                <a href="{% url 'accounts:report_pdf' 'services' %}?worker_pk={{ worker.pk }}&location_pk={{ location.pk }}"
+                   class="btn btn-outline-danger sw-toolbar-btn" title="Скачать PDF">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                </a>
+                <a href="{% url 'accounts:report_csv' 'services' %}?worker_pk={{ worker.pk }}&location_pk={{ location.pk }}"
+                   class="btn btn-outline-success sw-toolbar-btn" title="Скачать CSV">
+                    <i class="bi bi-filetype-csv"></i> CSV
+                </a>
+                <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary sw-toolbar-btn">
+                    <i class="bi bi-arrow-left"></i> К панели услуг
+                </a>
+            </div>
+        </div>
+    </section>
 
-<div class="card">
-    <div class="card-body p-0">
-        {% if recipients %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Таб. №</th>
-                            <th>Ф.И.О. обслуживаемого гражданина</th>
-                            <th>Год рождения</th>
-                            <th>Адрес проживания</th>
-                            <th>Группа инвалидности</th>
-                            <th>Оплата</th>
-                            <th>Кратность посещения</th>
-                            <th>Статус проживания</th>
-                            <th>Дата приёма</th>
-                            <th>Дни посещений</th>
-                            <th>АПИ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for r in recipients %}
+    <div class="sw-srv-context mb-0">
+        <div class="sw-srv-context-inner">
+            <div class="sw-srv-context__kicker">Связка</div>
+            <p class="sw-srv-context__title mb-0">{{ worker.get_full_name }}</p>
+            <p class="sw-srv-context__meta mt-2 mb-0">
+                Место оказания услуг: <strong>{{ location.get_location_type_display }} {{ location.name }}</strong>
+                <span class="text-muted"> · таб. № работника {{ worker.employee_id }}</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="sw-srv-table-card">
+        <div class="card-body p-0">
+            {% if recipients %}
+                <div class="sw-srv-table-wrap">
+                    <table class="sw-srv-sheet mb-0">
+                        <thead>
                             <tr>
-                                <td>{{ r.employee_id }}</td>
-                                <td>
-                                    <a href="{% url 'accounts:recipient_detail' r.pk %}">
-                                        {{ r.get_full_name }}
-                                    </a>
-                                </td>
-                                <td>{{ r.birth_date|date:"Y"|default:"—" }}</td>
-                                <td>{{ r.address|default:"—" }}</td>
-                                <td>{{ r.get_disability_group_display }}</td>
-                                <td>{{ r.payment_percent }}%</td>
-                                <td>{{ r.get_visit_frequency_display }}</td>
-                                <td>{{ r.get_living_status_display }}</td>
-                                <td>{{ r.admission_date|date:"d.m.Y"|default:"—" }}</td>
-                                <td>{{ r.visit_days|default:"—" }}</td>
-                                <td>{{ r.fire_detector_count }}</td>
+                                <th class="col-narrow">Таб. №</th>
+                                <th class="col-text-left">Ф.И.О. обслуживаемого гражданина</th>
+                                <th>Год рожд.</th>
+                                <th class="col-text-left">Адрес проживания</th>
+                                <th>Гр. инвал.</th>
+                                <th>Оплата</th>
+                                <th>Кратность</th>
+                                <th>Категория</th>
+                                <th>Дата приёма</th>
+                                <th>Дни посещ.</th>
+                                <th>АПИ</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <p>Нет обслуживаемых граждан для <strong>{{ worker.get_full_name }}</strong>
-                    в населённом пункте <strong>{{ location.name }}</strong>.</p>
-                <p class="small text-muted mb-0">
-                    Укажите «Населённый пункт» в карточке получателя услуг или добавьте в адрес проживания название этого пункта.
-                </p>
-            </div>
-        {% endif %}
+                        </thead>
+                        <tbody>
+                            {% for r in recipients %}
+                                <tr>
+                                    <td><span class="fw-semibold">{{ r.employee_id }}</span></td>
+                                    <td class="col-text-left">
+                                        <a href="{% url 'accounts:recipient_detail' r.pk %}">{{ r.get_full_name }}</a>
+                                    </td>
+                                    <td>{{ r.birth_date|date:"Y"|default:"—" }}</td>
+                                    <td class="col-text-left">{{ r.address|default:"—" }}</td>
+                                    <td>{{ r.get_disability_group_display }}</td>
+                                    <td>{{ r.payment_percent }}%</td>
+                                    <td>{{ r.get_visit_frequency_display }}</td>
+                                    <td>{{ r.get_living_status_display }}</td>
+                                    <td>{{ r.admission_date|date:"d.m.Y"|default:"—" }}</td>
+                                    <td>{{ r.visit_days|default:"—" }}</td>
+                                    <td>{{ r.fire_detector_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="sw-srv-empty-state" role="status" aria-live="polite">
+                    <div class="sw-srv-empty-state__visual">
+                        <span class="sw-srv-empty-state__icon-wrap" aria-hidden="true">
+                            <i class="bi bi-people"></i>
+                        </span>
+                    </div>
+                    <span class="sw-srv-empty-state__badge">Нет записей по связке</span>
+                    <h2 class="sw-srv-empty-state__title">Обслуживаемых граждан для этой комбинации не найдено</h2>
+                    <div class="sw-srv-empty-state__chips">
+                        <span class="sw-srv-empty-state__chip">{{ worker.get_full_name }}</span>
+                        <span class="sw-srv-empty-state__chip sw-srv-empty-state__chip--loc">{{ location.get_location_type_display }} {{ location.name }}</span>
+                    </div>
+                    <div class="sw-srv-empty-state__hint">
+                        <i class="bi bi-lightbulb-fill" aria-hidden="true"></i>
+                        <div>
+                            <span class="sw-srv-empty-state__hint-title">Как появятся данные</span>
+                            <p class="sw-srv-empty-state__hint-text">
+                                Укажите «Населённый пункт» в карточке получателя услуг или добавьте в адрес проживания название этого пункта — тогда гражданин попадёт в эту таблицу.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sw-srv-empty-state__actions">
+                        <a href="{% url 'accounts:recipients_list' %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-list-ul me-1"></i> Список подопечных
+                        </a>
+                        <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-grid-1x2 me-1"></i> Все связки
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
-</div>
 
-{% if recipients %}
-<div class="text-muted small mt-3 text-end">
-    Всего записей: {{ recipients|length }}
+    {% if recipients %}
+    <p class="sw-srv-footer-note mb-0">Всего записей: {{ recipients|length }}</p>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}

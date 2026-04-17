@@ -1,0 +1,23 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Удалить запись нагрузки{% endblock %}
+
+{% block content %}
+{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+
+<div class="page-header">
+    <h2><i class="bi bi-trash"></i> Удаление записи</h2>
+</div>
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-body">
+        <p>Удалить строку учёта за <strong>{{ record.period_month|stringformat:"02d" }}.{{ record.period_year }}</strong>
+            — {{ record.social_worker.get_full_name }}?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'accounts:workload_records_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

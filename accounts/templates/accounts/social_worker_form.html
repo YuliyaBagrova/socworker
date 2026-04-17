@@ -1,59 +1,72 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}{{ title }} - SocWorker{% endblock %}
 
+{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% endif %}{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/sw_edit_form_theme.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
+<div class="page-header{% if is_edit %} sw-entity-form-header{% endif %}">
+    {% if is_edit %}
+    <h1 class="sw-edit-page-title mb-0">
+        <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+        <span class="sw-edit-page-title__label">{{ title }}</span>
+    </h1>
+    <a href="{% url 'accounts:social_workers_list' %}" class="sw-edit-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> Назад к списку
+    </a>
+    {% else %}
     <h2><i class="bi bi-person-plus-fill"></i> {{ title }}</h2>
     <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Назад к списку
     </a>
+    {% endif %}
 </div>
 
-<div class="card">
+<div class="card{% if is_edit %} sw-edit-form-card{% endif %}">
     <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
 
             <div class="section-title"><i class="bi bi-person"></i> Персональная информация</div>
             <div class="row g-3 mb-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label for="{{ form.employee_id.id_for_label }}" class="form-label">{{ form.employee_id.label }} <span class="text-danger">*</span></label>
+                    {{ form.employee_id }}
+                    {% if form.employee_id.errors %}<div class="text-danger small mt-1">{{ form.employee_id.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
                     <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }} <span class="text-danger">*</span></label>
                     {{ form.last_name }}
                     {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }} <span class="text-danger">*</span></label>
                     {{ form.first_name }}
                     {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="{{ form.middle_name.id_for_label }}" class="form-label">{{ form.middle_name.label }}</label>
                     {{ form.middle_name }}
                     {% if form.middle_name.errors %}<div class="text-danger small mt-1">{{ form.middle_name.errors }}</div>{% endif %}
                 </div>
             </div>
             <div class="row g-3 mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="{{ form.birth_date.id_for_label }}" class="form-label">{{ form.birth_date.label }}</label>
                     {{ form.birth_date }}
                     {% if form.birth_date.errors %}<div class="text-danger small mt-1">{{ form.birth_date.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-6">
-                    <label for="{{ form.employee_id.id_for_label }}" class="form-label">{{ form.employee_id.label }} <span class="text-danger">*</span></label>
-                    {{ form.employee_id }}
-                    {% if form.employee_id.errors %}<div class="text-danger small mt-1">{{ form.employee_id.errors }}</div>{% endif %}
-                </div>
-            </div>
-
-            <div class="section-title"><i class="bi bi-geo-alt"></i> Контактная информация</div>
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
                     {{ form.phone }}
                     {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors }}</div>{% endif %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}</label>
                     {{ form.address }}
                     {% if form.address.errors %}<div class="text-danger small mt-1">{{ form.address.errors }}</div>{% endif %}
@@ -66,16 +79,6 @@
                     <label for="{{ form.medical_checkup.id_for_label }}" class="form-label">{{ form.medical_checkup.label }}</label>
                     {{ form.medical_checkup }}
                     {% if form.medical_checkup.errors %}<div class="text-danger small mt-1">{{ form.medical_checkup.errors }}</div>{% endif %}
-                </div>
-                <div class="col-md-4">
-                    <label for="{{ form.last_medical_checkup_date.id_for_label }}" class="form-label">{{ form.last_medical_checkup_date.label }}</label>
-                    {{ form.last_medical_checkup_date }}
-                    {% if form.last_medical_checkup_date.errors %}<div class="text-danger small mt-1">{{ form.last_medical_checkup_date.errors }}</div>{% endif %}
-                </div>
-                <div class="col-md-4">
-                    <label for="{{ form.medical_checkup_planned_date.id_for_label }}" class="form-label">{{ form.medical_checkup_planned_date.label }}</label>
-                    {{ form.medical_checkup_planned_date }}
-                    {% if form.medical_checkup_planned_date.errors %}<div class="text-danger small mt-1">{{ form.medical_checkup_planned_date.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                     <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
@@ -109,4 +112,8 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/belarus_phone_mask.js' %}"></script>
 {% endblock %}

@@ -1,147 +1,856 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}Услуги - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-services-page"{% endblock %}
+
 {% block inline_css %}
-    .selector-list {
-        max-height: 380px;
-        overflow-y: auto;
+    body.sw-services-page {
+        min-height: 100vh;
+        background-color: #e4f4dc;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(220, 252, 200, 0.38) 45%, rgba(190, 242, 100, 0.22) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(217, 249, 157, 0.5), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(163, 230, 53, 0.28), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(134, 239, 172, 0.35), transparent 58%),
+            linear-gradient(118deg, rgba(187, 247, 208, 0.45) 0%, rgba(74, 222, 128, 0.12) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(250, 250, 210, 0.35) 0%, rgba(217, 249, 157, 0.18) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(21, 128, 61, 0.06) 100%),
+            url("{% static 'img/services-panel-bg.png' %}");
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
     }
-    .selector-list .list-group-item {
-        cursor: pointer;
-        padding: 0.65rem 1rem;
-        font-size: 0.88rem;
+    body.sw-services-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-services-layout {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .sw-services-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--dash-glass-border);
+        box-shadow: 0 8px 32px rgba(26, 26, 46, 0.12);
+    }
+    .sw-services-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, rgba(26, 26, 46, 0.38) 0%, rgba(74, 63, 111, 0.22) 52%, rgba(26, 26, 46, 0.14) 100%);
+        pointer-events: none;
+    }
+    .sw-services-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0 !important;
+    }
+    .sw-services-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-services-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #6ee7b7 0%, #10b981 42%, #059669 88%, #047857 100%);
+        box-shadow:
+            0 6px 22px rgba(5, 150, 105, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-services-dash .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            105deg,
+            #ffffff 0%,
+            #f7fee7 18%,
+            #ecfccb 38%,
+            #d9f99d 52%,
+            #bbf7d0 68%,
+            #86efac 82%,
+            #6ee7b7 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.22));
+    }
+    @supports not (background-clip: text) {
+        .sw-services-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #f0fdf4;
+            background: none;
+            filter: none;
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+        }
+    }
+    .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-toolbar-btn.btn-primary {
         border: none;
-        border-bottom: 1px solid #f0f2f5;
-        transition: background 0.15s;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
-    .selector-list .list-group-item:hover {
-        background: #f5f7ff;
+    .sw-filter-dash.sw-services-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(236, 253, 245, 0.55) 45%, rgba(209, 250, 229, 0.4) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow:
+            0 4px 6px -1px rgba(15, 118, 110, 0.06),
+            0 12px 28px -8px rgba(20, 83, 45, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
     }
-    .selector-list .list-group-item.active {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    .sw-filter-dash.sw-services-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #34d399 0%, #10b981 40%, #059669 100%);
+        opacity: 0.95;
+    }
+    .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #047857;
+        background: linear-gradient(145deg, rgba(209, 250, 229, 0.95) 0%, rgba(167, 243, 208, 0.85) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.28);
+        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.12);
+    }
+    .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #0f766e;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #059669;
+        background: rgba(16, 185, 129, 0.14);
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.2s ease;
+    }
+    .sw-services-guide__toggle:hover {
+        background: rgba(16, 185, 129, 0.22);
+        border-color: rgba(5, 150, 105, 0.45);
+        box-shadow: 0 2px 12px rgba(5, 150, 105, 0.15);
+    }
+    .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
+    }
+    .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(5, 150, 105, 0.2);
+        border-color: rgba(4, 120, 87, 0.45);
+    }
+    .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    .sw-services-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 253, 244, 0.75) 100%);
+        border: 1px solid rgba(167, 243, 208, 0.55);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 4px 20px rgba(15, 118, 110, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    #servicesGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(52, 211, 153, 0.85);
+    }
+    .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #34d399, #10b981);
+        box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.5);
+    }
+    .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #0f766e;
+    }
+    .sw-sel-card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 244, 0.92) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.98);
+        border-radius: 18px;
+        box-shadow:
+            0 10px 36px rgba(20, 83, 45, 0.11),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+    .sw-sel-card__head {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid rgba(34, 197, 94, 0.15);
+        background: linear-gradient(90deg, rgba(220, 252, 231, 0.9) 0%, rgba(255, 255, 255, 0.75) 100%);
+    }
+    .sw-sel-card__head-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: #fff;
+    }
+    .sw-sel-card__head-icon--workers {
+        background: linear-gradient(145deg, #f87171 0%, #dc2626 100%);
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25);
+    }
+    .sw-sel-card__head-icon--loc {
+        background: linear-gradient(145deg, #34d399 0%, #059669 100%);
+        box-shadow: 0 4px 14px rgba(5, 150, 105, 0.22);
+    }
+    .sw-sel-card__head-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--dash-violet);
+        letter-spacing: -0.02em;
+    }
+    .sw-sel-card__search {
+        flex-shrink: 0;
+        padding: 0.65rem 0.9rem 0.75rem;
+        border-bottom: 1px solid rgba(34, 197, 94, 0.14);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(236, 253, 245, 0.42) 100%);
+    }
+    .sw-sel-search-wrap {
+        position: relative;
+    }
+    .sw-sel-search-wrap .sw-sel-search-icon {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #059669;
+        opacity: 0.85;
+        font-size: 0.95rem;
+        pointer-events: none;
+        z-index: 2;
+    }
+    .sw-sel-search-input {
+        border-radius: 12px !important;
+        border: 1px solid rgba(16, 185, 129, 0.28) !important;
+        padding: 0.45rem 0.75rem 0.45rem 2.4rem !important;
+        font-size: 0.875rem;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.96) !important;
+        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.06);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sw-sel-search-input:focus {
+        border-color: rgba(102, 126, 234, 0.45) !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.14);
+    }
+    .sw-sel-search-input::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+    }
+    .sw-sel-search-hint {
+        font-size: 0.6875rem;
+        margin: 0.4rem 0 0;
+        color: #64748b;
+        letter-spacing: 0.01em;
+        line-height: 1.35;
+    }
+    .sw-sel-no-match {
+        display: none;
+        padding: 1rem 0.75rem;
+        text-align: center;
+        font-size: 0.8125rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .sw-sel-no-match.is-visible {
+        display: block;
+    }
+    .sw-selector-list {
+        flex: 1 1 auto;
+        max-height: min(400px, 52vh);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0.4rem 0.5rem 0.65rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sw-selector-list .list-group-item {
+        cursor: pointer;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.875rem;
+        border: 1px solid rgba(34, 197, 94, 0.14);
+        border-radius: 12px;
+        margin-bottom: 0.4rem;
+        background: rgba(255, 255, 255, 0.92);
+        color: #1e293b;
+        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    }
+    .sw-selector-list .list-group-item:last-child {
+        margin-bottom: 0;
+    }
+    .sw-selector-list .list-group-item:hover {
+        border-color: rgba(102, 126, 234, 0.22);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.1);
+    }
+    .sw-selector-list .list-group-item.active {
+        background: linear-gradient(135deg, #6366f1 0%, #7c3aed 55%, #764ba2 100%);
         color: #fff;
         border-color: transparent;
+        box-shadow:
+            0 6px 20px rgba(102, 126, 234, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
-    .selector-list .list-group-item.active .text-muted,
-    .selector-list .list-group-item.active .badge {
-        color: rgba(255,255,255,0.95) !important;
-        background: rgba(255,255,255,0.2) !important;
+    .sw-selector-list .list-group-item.active .text-muted,
+    .sw-selector-list .list-group-item.active .badge {
+        color: rgba(255, 255, 255, 0.95) !important;
     }
-    .service-matrix-card .table {
-        font-size: 0.82rem;
+    .sw-selector-list .list-group-item.active .badge {
+        background: rgba(255, 255, 255, 0.22) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25);
     }
-    .service-matrix-card .table tbody td {
-        vertical-align: middle;
+    .sw-selector-list .list-group-item.active .bi-geo-alt {
+        color: rgba(255, 255, 255, 0.9) !important;
     }
-    .go-btn.disabled {
+    .sw-loc-del-btn {
+        border: none;
+        width: 1.65rem;
+        height: 1.65rem;
+        padding: 0;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: #b91c1c;
+        background: rgba(254, 226, 226, 0.85);
+        transition: background 0.15s ease, transform 0.12s ease;
+    }
+    .sw-loc-del-btn:hover {
+        background: #fecaca;
+        color: #991b1b;
+        transform: scale(1.06);
+    }
+    .sw-go-column {
+        display: flex;
+        align-items: stretch;
+    }
+    @media (max-width: 991.98px) {
+        .sw-go-column {
+            min-height: auto;
+        }
+    }
+    .sw-go-card {
+        width: 100%;
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--dash-glass-border);
+        border-radius: 18px;
+        box-shadow:
+            0 8px 32px rgba(26, 26, 46, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        padding: 1.15rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 11rem;
+    }
+    .sw-go-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 16rem;
+        padding: 0.75rem 1.15rem;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        color: #fff;
+        border: none;
+        background: linear-gradient(135deg, #6366f1 0%, #667eea 42%, #7c3aed 100%);
+        box-shadow:
+            0 6px 22px rgba(102, 126, 234, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-go-btn:not(.disabled):hover {
+        color: #fff;
+        filter: brightness(1.05);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 28px rgba(118, 75, 162, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-go-btn.disabled {
         pointer-events: none;
-        opacity: 0.55;
+        opacity: 0.5;
+        filter: grayscale(0.15);
+    }
+    .sw-go-hint {
+        margin: 0.85rem 0 0;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #334155;
+        font-weight: 500;
+        max-width: 14rem;
+    }
+    .sw-matrix-card {
+        border: 1px solid rgba(255, 255, 255, 0.98);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(236, 253, 245, 0.94) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        box-shadow:
+            0 10px 36px rgba(20, 83, 45, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+    }
+    .sw-matrix-card__head {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid rgba(34, 197, 94, 0.16);
+        background: linear-gradient(90deg, rgba(220, 252, 231, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+    }
+    .sw-matrix-card__head h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dash-violet);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-matrix-wrap {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+    .sw-matrix-table {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .sw-matrix-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.5rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+    }
+    .sw-matrix-table thead th:first-child,
+    .sw-matrix-table tbody td:first-child {
+        text-align: left;
+    }
+    .sw-matrix-table tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.5rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #1e293b;
+    }
+    .sw-matrix-table tbody tr:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .sw-matrix-table tbody tr:nth-child(even) {
+        background: #fff;
+    }
+    .sw-matrix-table tbody tr:hover {
+        background: #f0edff !important;
+    }
+    .sw-matrix-table a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .sw-matrix-open {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.38rem 0.75rem;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #4338ca;
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.92) 100%);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .sw-matrix-open:hover {
+        color: #312e81;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+    }
+    .sw-services-page .empty-state-in-card {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #6b7280;
+    }
+    .sw-services-page .empty-state-in-card .bi {
+        font-size: 2.25rem;
+        opacity: 0.45;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .sw-modal-services .modal-content {
+        border-radius: 16px;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        box-shadow: 0 20px 50px rgba(45, 38, 82, 0.15);
     }
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-briefcase-fill"></i> Услуги</h2>
-    <a href="{% url 'accounts:location_create' %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-circle"></i> Добавить нас. пункт
-    </a>
-</div>
+{% include 'accounts/includes/workload_return_banner.html' %}
 
-<p class="text-muted small mb-3">
-    Выберите социального работника и населённый пункт, затем нажмите «Показать таблицу услуг»,
-    либо откройте готовую связку в таблице ниже. Учитываются получатели с выбранным пунктом в карточке
-    <strong>и</strong> записи без пункта, если в адресе указано название этого населённого пункта.
-</p>
-
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-people-fill me-1 text-danger"></i> Социальные работники</h5>
-            </div>
-            <div class="card-body p-0 selector-list">
-                {% if workers %}
-                    <div class="list-group list-group-flush" id="workerList">
-                        {% for w in workers %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center"
-                                 data-worker-id="{{ w.pk }}"
-                                 onclick="selectWorker(this, {{ w.pk }})">
-                                <span><strong>{{ w.get_full_name }}</strong></span>
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ w.recipients.count }} подоп.</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-people" style="font-size:2rem;"></i>
-                        <p class="mt-2 mb-0">Нет социальных работников</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-1 text-primary"></i> Населённые пункты (города и деревни)</h5>
-            </div>
-            <div class="card-body p-0 selector-list">
-                {% if locations %}
-                    <div class="list-group list-group-flush" id="locationList">
-                        {% for loc in locations %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center"
-                                 data-location-id="{{ loc.pk }}"
-                                 onclick="selectLocation(this, {{ loc.pk }})">
-                                <span>
-                                    <i class="bi bi-geo-alt me-1 text-muted"></i>
-                                    {{ loc.get_location_type_display }} <strong>{{ loc.name }}</strong>
-                                </span>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary" title="Всего закреплено с этим пунктом">{{ loc.recipients.count }}</span>
-                                    <form method="post" action="{% url 'accounts:location_delete' loc.pk %}" style="display:inline;" onclick="event.stopPropagation();">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" style="font-size:0.7rem;"
-                                                onclick="return confirm('Удалить «{{ loc.name }}»?')" title="Удалить">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-geo-alt" style="font-size:2rem;"></i>
-                        <p class="mt-2 mb-0">Нет населённых пунктов в базе</p>
-                        <a href="{% url 'accounts:location_create' %}" class="btn btn-sm btn-outline-primary mt-2">Добавить первый пункт</a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 d-flex align-items-stretch">
-        <div class="card w-100 border-0 bg-transparent shadow-none">
-            <div class="card-body d-flex flex-column justify-content-center text-center p-2">
-                <a id="goBtn" href="#" class="btn btn-primary go-btn disabled">
-                    <i class="bi bi-table"></i> Показать таблицу услуг
+<div class="sw-services-layout">
+    <section class="sw-services-dash" aria-label="Панель Услуги">
+        <div class="page-header sw-services-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-briefcase-fill"></i></span>
+                <span class="sw-page-title__label">Услуги</span>
+            </h1>
+            <div class="sw-toolbar-group">
+                <button type="button" class="btn btn-outline-success sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#servicesAllCsvModal">
+                    <i class="bi bi-filetype-csv"></i> CSV (все связки)
+                </button>
+                <a href="{% url 'accounts:location_create' %}" class="btn btn-primary sw-toolbar-btn">
+                    <i class="bi bi-plus-circle"></i> Добавить нас. пункт
                 </a>
-                <p id="goHint" class="text-muted small mt-3 mb-0">Выберите работника и населённый пункт</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade sw-modal-services" id="servicesAllCsvModal" tabindex="-1" aria-labelledby="servicesAllCsvModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="servicesAllCsvModalLabel">
+                        <i class="bi bi-filetype-csv text-success me-2"></i>Скачать CSV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-muted mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт»?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Нет</button>
+                    <form method="get" action="{% url 'accounts:report_csv' 'services_all' %}" target="_blank" class="d-inline"
+                          onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('servicesAllCsvModal'));if(m)m.hide();">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">Да, скачать</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{% if service_links %}
-<div class="card service-matrix-card mt-4">
-    <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-grid-3x3-gap me-1 text-primary"></i> Все связки «работник — населённый пункт»</h5>
+    <div class="sw-filter-dash mb-0 sw-services-guide">
+        <div class="sw-filter-dash-inner sw-services-guide__inner">
+            <div class="sw-services-guide__top">
+                <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+                <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span class="sw-services-guide__title">Как пользоваться панелью</span>
+                    <button type="button" id="servicesGuideToggle" class="sw-services-guide__toggle"
+                            data-bs-toggle="collapse" data-bs-target="#servicesGuideCollapse"
+                            aria-expanded="false" aria-controls="servicesGuideCollapse">
+                        Подсказка
+                        <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="collapse" id="servicesGuideCollapse">
+                <div class="sw-services-guide__panel">
+                    <p class="sw-services-guide__lead">
+                        Выберите работника и населённый пункт, затем нажмите «Таблица услуг» или откройте готовую связку в списке ниже.
+                    </p>
+                    <ul class="sw-services-guide__list">
+                        <li><strong>В карточке указан пункт</strong> — учитываются все подходящие получатели с этим населённым пунктом.</li>
+                        <li><strong>Пункт не указан</strong> — запись тоже попадёт в выборку, если в адресе есть название выбранного населённого пункта.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+
+    <div class="row g-3 align-items-stretch">
+        <div class="col-lg-5">
+            <div class="sw-sel-card h-100">
+                <div class="sw-sel-card__head">
+                    <span class="sw-sel-card__head-icon sw-sel-card__head-icon--workers" aria-hidden="true"><i class="bi bi-people-fill"></i></span>
+                    <h3 class="sw-sel-card__head-title">Социальные работники</h3>
+                </div>
+                <div class="sw-sel-card__search">
+                    <label class="visually-hidden" for="workerListSearch">Поиск по социальным работникам</label>
+                    <div class="sw-sel-search-wrap">
+                        <i class="bi bi-search sw-sel-search-icon" aria-hidden="true"></i>
+                        <input type="search" id="workerListSearch" class="form-control sw-sel-search-input"
+                               placeholder="ФИО, таб. №, телефон…" autocomplete="off" data-services-search="workerList">
+                    </div>
+                    <p class="sw-sel-search-hint mb-0">Фильтр по списку; прокрутка сохраняется.</p>
+                </div>
+                <div class="sw-selector-list" id="workerListContainer">
+                    {% if workers %}
+                        <div class="list-group list-group-flush" id="workerList">
+                            {% for w in workers %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center"
+                                     data-worker-id="{{ w.pk }}"
+                                     data-services-filter="{{ w.get_full_name }} {{ w.employee_id|default:'' }} {{ w.phone|default:'' }}"
+                                     onclick="selectWorker(this, {{ w.pk }})">
+                                    <span class="text-truncate me-2"><strong>{{ w.get_full_name }}</strong></span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary flex-shrink-0">{{ w.recipients.count }} подоп.</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="sw-sel-no-match" id="workerListNoMatch" aria-live="polite">Никого не найдено — сбросьте поиск.</div>
+                    {% else %}
+                        <div class="empty-state-in-card">
+                            <i class="bi bi-people"></i>
+                            <p class="mb-0">Нет социальных работников</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="sw-sel-card h-100">
+                <div class="sw-sel-card__head">
+                    <span class="sw-sel-card__head-icon sw-sel-card__head-icon--loc" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+                    <h3 class="sw-sel-card__head-title">Населённые пункты</h3>
+                </div>
+                <div class="sw-sel-card__search">
+                    <label class="visually-hidden" for="locationListSearch">Поиск по населённым пунктам</label>
+                    <div class="sw-sel-search-wrap">
+                        <i class="bi bi-search sw-sel-search-icon" aria-hidden="true"></i>
+                        <input type="search" id="locationListSearch" class="form-control sw-sel-search-input"
+                               placeholder="Название, тип пункта…" autocomplete="off" data-services-search="locationList">
+                    </div>
+                    <p class="sw-sel-search-hint mb-0">Число — получатели услуг по этому пункту: в карточке выбран пункт или в адресе указано его название.</p>
+                </div>
+                <div class="sw-selector-list" id="locationListContainer">
+                    {% if locations %}
+                        <div class="list-group list-group-flush" id="locationList">
+                            {% for loc in locations %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center"
+                                     data-location-id="{{ loc.pk }}"
+                                     data-services-filter="{{ loc.name }} {{ loc.get_location_type_display }}"
+                                     onclick="selectLocation(this, {{ loc.pk }})">
+                                    <span class="text-truncate me-2">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i>
+                                        {{ loc.get_location_type_display }} <strong>{{ loc.name }}</strong>
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                        <span class="badge rounded-pill bg-success bg-opacity-15 text-success border border-success border-opacity-25"
+                                              title="Получатели услуг по этому населённому пункту">{{ loc.recipients_living_count }}</span>
+                                        <form method="post" action="{% url 'accounts:location_delete' loc.pk %}" style="display:inline;" onclick="event.stopPropagation();">
+                                            {% csrf_token %}
+                                            <button type="submit" class="sw-loc-del-btn"
+                                                    onclick="return confirm('Удалить «{{ loc.name }}»?')" title="Удалить пункт">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="sw-sel-no-match" id="locationListNoMatch" aria-live="polite">Ничего не найдено — измените запрос.</div>
+                    {% else %}
+                        <div class="empty-state-in-card">
+                            <i class="bi bi-geo-alt"></i>
+                            <p class="mb-2">Нет населённых пунктов в базе</p>
+                            <a href="{% url 'accounts:location_create' %}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Добавить первый пункт</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-2 sw-go-column">
+            <div class="sw-go-card h-100">
+                <a id="goBtn" href="#" class="sw-go-btn disabled">
+                    <i class="bi bi-table"></i> Таблица услуг
+                </a>
+                <p id="goHint" class="sw-go-hint">Выберите работника и населённый пункт</p>
+            </div>
+        </div>
+    </div>
+
+    {% if service_links %}
+    <div class="sw-matrix-card mt-1">
+        <div class="sw-matrix-card__head">
+            <h2><i class="bi bi-grid-3x3-gap"></i> Все связки «работник — населённый пункт»</h2>
+        </div>
+        <div class="sw-matrix-wrap">
+            <table class="sw-matrix-table mb-0">
                 <thead>
                     <tr>
                         <th>Социальный работник</th>
@@ -160,14 +869,14 @@
                         <td>{{ row.location.get_location_type_display }} {{ row.location.name }}</td>
                         <td class="text-center">
                             {% if row.count %}
-                                <span class="badge bg-primary">{{ row.count }}</span>
+                                <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea, #764ba2); font-weight: 600;">{{ row.count }}</span>
                             {% else %}
                                 <span class="text-muted">0</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <a href="{% url 'accounts:services_detail' row.worker.pk row.location.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Таблица
+                            <a href="{% url 'accounts:services_detail' row.worker.pk row.location.pk %}" class="sw-matrix-open">
+                                <i class="bi bi-eye"></i> Открыть
                             </a>
                         </td>
                     </tr>
@@ -176,9 +885,8 @@
             </table>
         </div>
     </div>
+    {% endif %}
 </div>
-{% endif %}
-
 {% endblock %}
 
 {% block extra_js %}
@@ -190,6 +898,51 @@
     function buildDetailUrl(workerId, locationId) {
         return DETAIL_URL_TEMPLATE.replace(/\/services\/\d+\/\d+/, '/services/' + workerId + '/' + locationId);
     }
+
+    function servicesApplyListFilter(input) {
+        const listId = input.getAttribute('data-services-search');
+        if (!listId) return;
+        const root = document.getElementById(listId);
+        const noMatchEl = document.getElementById(listId + 'NoMatch');
+        if (!root) return;
+        const items = root.querySelectorAll('[data-services-filter]');
+        const q = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+        let visible = 0;
+        items.forEach(function (item) {
+            const hay = (item.getAttribute('data-services-filter') || '').toLowerCase();
+            const show = !q || hay.indexOf(q) !== -1;
+            /* Bootstrap .d-flex использует !important — скрывать только через d-none */
+            item.classList.toggle('d-none', !show);
+            if (show) visible += 1;
+        });
+        if (noMatchEl) {
+            noMatchEl.classList.toggle('is-visible', items.length > 0 && visible === 0);
+        }
+        if (listId === 'workerList') {
+            const sel = document.querySelector('#workerList .list-group-item.active');
+            if (sel && sel.classList.contains('d-none')) {
+                sel.classList.remove('active');
+                selectedWorker = null;
+                updateGoBtn();
+            }
+        }
+        if (listId === 'locationList') {
+            const sel = document.querySelector('#locationList .list-group-item.active');
+            if (sel && sel.classList.contains('d-none')) {
+                sel.classList.remove('active');
+                selectedLocation = null;
+                updateGoBtn();
+            }
+        }
+    }
+
+    document.querySelectorAll('[data-services-search]').forEach(function (inp) {
+        function run() {
+            servicesApplyListFilter(inp);
+        }
+        inp.addEventListener('input', run);
+        inp.addEventListener('search', run);
+    });
 
     function selectWorker(el, id) {
         document.querySelectorAll('#workerList .list-group-item').forEach(i => i.classList.remove('active'));

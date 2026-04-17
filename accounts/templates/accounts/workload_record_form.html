@@ -1,0 +1,49 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}{% if is_edit %}Редактирование{% else %}Новая запись{% endif %} — нагрузка{% endblock %}
+
+{% block content %}
+{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+
+<div class="page-header">
+    <h2><i class="bi bi-journal-plus"></i> {% if is_edit %}Редактирование записи{% else %}Новая запись учёта{% endif %}</h2>
+    <a href="{% url 'accounts:workload_records_list' %}" class="btn btn-outline-secondary btn-sm">К журналу</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <p class="text-muted small">
+                    После сохранения автоматически считаются: кратность за месяц (если не задана — из недели),
+                    время за месяц в минутах и часах, коэффициент нагрузки и ставка по норме времени.
+                </p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                            {% for err in field.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </form>
+
+                {% if is_edit and record %}
+                    <hr class="my-4">
+                    <h6 class="section-title"><i class="bi bi-lightning-charge"></i> Расчётные поля</h6>
+                    <div class="row g-2 small">
+                        <div class="col-md-4"><span class="text-muted">Кратность / мес:</span> {{ record.visits_per_month }}</div>
+                        <div class="col-md-4"><span class="text-muted">Мин / мес:</span> {{ record.worked_minutes_month }}</div>
+                        <div class="col-md-4"><span class="text-muted">Час / мес:</span> {{ record.worked_hours_month }}</div>
+                        <div class="col-md-4"><span class="text-muted">Нагрузка:</span> {{ record.load_coefficient }}</div>
+                        <div class="col-md-4"><span class="text-muted">Ставка:</span> <strong>{{ record.rate }}</strong></div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

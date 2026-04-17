@@ -6,7 +6,16 @@ from .models import (
     PlannedVisit,
     VisitTaskReminder,
     SafetyBriefingRecord,
+    WorkloadRecord,
+    UserProfile,
 )
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'updated_at')
+    search_fields = ('user__username', 'user__email')
+    raw_id_fields = ('user',)
 
 
 @admin.register(SafetyBriefingRecord)
@@ -113,3 +122,21 @@ class ServiceLocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'location_type')
     list_filter = ('location_type',)
     search_fields = ('name',)
+
+
+@admin.register(WorkloadRecord)
+class WorkloadRecordAdmin(admin.ModelAdmin):
+    list_display = (
+        'period_year', 'period_month', 'social_worker', 'location',
+        'worked_minutes_month', 'load_coefficient', 'rate',
+    )
+    list_filter = ('period_year', 'period_month', 'housing_type')
+    search_fields = (
+        'social_worker__last_name', 'social_worker__first_name',
+        'recipient__last_name', 'notes',
+    )
+    autocomplete_fields = ('social_worker', 'recipient', 'location')
+    readonly_fields = (
+        'worked_minutes_month', 'worked_hours_month', 'load_coefficient', 'rate',
+        'visits_per_month', 'created_at', 'updated_at',
+    )

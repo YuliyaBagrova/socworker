@@ -1,5 +1,10 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm,
+    PasswordChangeForm,
+)
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
@@ -10,18 +15,57 @@ from .models import (
     PlannedVisit,
     VisitTaskReminder,
     SafetyBriefingRecord,
+    WorkloadRecord,
+    UserProfile,
 )
+from .belarus_phone import BY_PHONE_EXAMPLE, normalize_belarus_phone
 from .visit_schedule import validate_visit_frequency_and_days
+
+_PHONE_WIDGET_ATTRS = {
+    'class': 'form-control js-belarus-phone',
+    'placeholder': BY_PHONE_EXAMPLE,
+    'maxlength': '22',
+}
+
+
+class UserProfileAvatarForm(forms.ModelForm):
+    """Загрузка фото профиля (необязательно)."""
+
+    class Meta:
+        model = UserProfile
+        fields = ['avatar']
+        labels = {'avatar': 'Изображение'}
+        widgets = {
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/jpeg,image/png,image/webp,image/gif',
+            }),
+        }
+
+    def clean_avatar(self):
+        f = self.cleaned_data.get('avatar')
+        if not f:
+            return f
+        try:
+            size = f.size
+        except (AttributeError, OSError, TypeError):
+            return f
+        if size > 2 * 1024 * 1024:
+            raise ValidationError('Размер файла не более 2 МБ.')
+        name = (getattr(f, 'name', '') or '').lower()
+        if not name.endswith(('.jpg', '.jpeg', '.png', '.webp', '.gif')):
+            raise ValidationError('Допустимы форматы: JPG, PNG, WebP, GIF.')
+        return f
 
 
 class CustomUserCreationForm(UserCreationForm):
     """Форма регистрации пользователя"""
     email = forms.EmailField(
         required=True,
-        label='Email',
+        label='Электронная почта',
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Введите email'
+            'placeholder': 'Введите адрес электронной почты'
         })
     )
     first_name = forms.CharField(
@@ -55,6 +99,7 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Имя пользователя'
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Введите пароль'
@@ -65,6 +110,11 @@ class CustomUserCreationForm(UserCreationForm):
         })
         self.fields['password1'].label = 'Пароль'
         self.fields['password2'].label = 'Подтверждение пароля'
+        self.fields['password1'].help_text = (
+            'Пароль не должен быть слишком похож на имя пользователя, '
+            'должен содержать не менее 8 символов и не быть слишком простым.'
+        )
+        self.fields['password2'].help_text = ''
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -77,27 +127,85 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomAuthenticationForm(AuthenticationForm):
-    """Форма входа пользователя"""
-    username = forms.CharField(
-        label='Имя пользователя',
-        widget=forms.TextInput(attrs={
+    """Вход по адресу электронной почты и паролю (поле username в POST — email)."""
+
+    username = forms.EmailField(
+        label='Электронная почта',
+        widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Введите имя пользователя',
-            'autofocus': True
-        })
+            'placeholder': 'Введите email',
+            'autocomplete': 'email',
+            'autofocus': True,
+        }),
     )
     password = forms.CharField(
         label='Пароль',
+        strip=False,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Введите пароль'
-        })
+            'placeholder': 'Введите пароль',
+            'autocomplete': 'current-password',
+        }),
     )
 
     error_messages = {
-        'invalid_login': 'Неверное имя пользователя или пароль.',
+        'invalid_login': 'Неверный email или пароль.',
         'inactive': 'Этот аккаунт неактивен.',
     }
+
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(request=request, *args, **kwargs)
+        self.fields['username'].max_length = 254
+        if hasattr(self.fields['username'].widget, 'attrs'):
+            self.fields['username'].widget.attrs['maxlength'] = '254'
+
+    def clean(self):
+        email = (self.cleaned_data.get('username') or '').strip()
+        password = self.cleaned_data.get('password')
+        self.user_cache = None
+        if email and password:
+            UserModel = get_user_model()
+            matches = list(UserModel.objects.filter(email__iexact=email))
+            if len(matches) == 1:
+                self.user_cache = authenticate(
+                    self.request,
+                    username=matches[0].get_username(),
+                    password=password,
+                )
+            elif len(matches) > 1:
+                raise ValidationError(
+                    'Найдено несколько учётных записей с этим email. Обратитесь к администратору.',
+                    code='ambiguous_email',
+                )
+            else:
+                self.user_cache = authenticate(
+                    self.request,
+                    username=email,
+                    password=password,
+                )
+        if self.user_cache is None:
+            raise self.get_invalid_login_error()
+        self.confirm_login_allowed(self.user_cache)
+        return self.cleaned_data
+
+    def get_invalid_login_error(self):
+        return ValidationError(
+            self.error_messages['invalid_login'],
+            code='invalid_login',
+        )
+
+
+class StyledPasswordChangeForm(PasswordChangeForm):
+    """Смена пароля с классами Bootstrap для полей."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].label = 'Текущий пароль'
+        self.fields['new_password1'].label = 'Новый пароль'
+        self.fields['new_password2'].label = 'Подтверждение нового пароля'
+        for name, field in self.fields.items():
+            ac = 'current-password' if name == 'old_password' else 'new-password'
+            field.widget.attrs.update({'class': 'form-control', 'autocomplete': ac})
 
 
 class SocialWorkerForm(forms.ModelForm):
@@ -108,7 +216,7 @@ class SocialWorkerForm(forms.ModelForm):
         fields = [
             'first_name', 'last_name', 'middle_name',
             'birth_date', 'phone', 'address',
-            'medical_checkup', 'last_medical_checkup_date', 'medical_checkup_planned_date',
+            'medical_checkup',
             'status', 'employee_id',
             'hire_date', 'notes'
         ]
@@ -129,10 +237,7 @@ class SocialWorkerForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': '+7 (999) 123-45-67'
-            }),
+            'phone': forms.TextInput(attrs=_PHONE_WIDGET_ATTRS.copy()),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -140,14 +245,6 @@ class SocialWorkerForm(forms.ModelForm):
             }),
             'medical_checkup': forms.Select(attrs={
                 'class': 'form-select'
-            }),
-            'last_medical_checkup_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'medical_checkup_planned_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
             }),
             'status': forms.Select(attrs={
                 'class': 'form-select'
@@ -166,6 +263,9 @@ class SocialWorkerForm(forms.ModelForm):
                 'placeholder': 'Дополнительные примечания'
             }),
         }
+
+    def clean_phone(self):
+        return normalize_belarus_phone(self.cleaned_data.get('phone') or '')
 
 
 class ServiceRecipientForm(forms.ModelForm):
@@ -205,10 +305,7 @@ class ServiceRecipientForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': '+7 (999) 123-45-67'
-            }),
+            'phone': forms.TextInput(attrs=_PHONE_WIDGET_ATTRS.copy()),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 2,
@@ -254,6 +351,9 @@ class ServiceRecipientForm(forms.ModelForm):
                 'placeholder': 'Дополнительные примечания'
             }),
         }
+
+    def clean_phone(self):
+        return normalize_belarus_phone(self.cleaned_data.get('phone') or '')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -388,3 +488,76 @@ class SafetyBriefingRecordForm(forms.ModelForm):
         if not self.instance.pk:
             self.fields['passed'].initial = True
         self.fields['notes'].label = 'Примечание'
+
+
+class WorkloadRecordForm(forms.ModelForm):
+    """Ввод строки учёта нагрузки; отработанное время, коэффициент и ставка считаются автоматически."""
+
+    class Meta:
+        model = WorkloadRecord
+        fields = [
+            'social_worker',
+            'recipient',
+            'location',
+            'housing_type',
+            'period_year',
+            'period_month',
+            'visits_per_week',
+            'visits_per_month',
+            'visit_duration_minutes',
+            'work_time_norm_minutes',
+            'notes',
+        ]
+        help_texts = {
+            'visits_per_month': 'Необязательно: если пусто — кратность за месяц = за неделю × 4.',
+            'work_time_norm_minutes': 'Справочное поле (мин/мес). Коэффициент нагрузки в таблице всегда считается как отработано (часы) ÷ 168 ч.',
+        }
+        widgets = {
+            'social_worker': forms.Select(attrs={'class': 'form-select'}),
+            'recipient': forms.Select(attrs={'class': 'form-select'}),
+            'location': forms.Select(attrs={'class': 'form-select'}),
+            'housing_type': forms.Select(attrs={'class': 'form-select'}),
+            'period_year': forms.NumberInput(attrs={'class': 'form-control', 'min': 2000, 'max': 2100}),
+            'period_month': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 12}),
+            'visits_per_week': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': 0}),
+            'visits_per_month': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': 0}),
+            'visit_duration_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'work_time_norm_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['social_worker'].queryset = SocialWorker.objects.order_by('last_name', 'first_name')
+        self.fields['social_worker'].label = 'Работник'
+        self.fields['recipient'].queryset = ServiceRecipient.objects.select_related(
+            'social_worker', 'location',
+        ).order_by('last_name', 'first_name')
+        self.fields['recipient'].label = 'Подопечный'
+        self.fields['recipient'].required = False
+        self.fields['recipient'].empty_label = '— не указан —'
+        self.fields['location'].queryset = ServiceLocation.objects.order_by('name')
+        self.fields['location'].label = 'Населённый пункт'
+        self.fields['location'].required = False
+        self.fields['location'].empty_label = '— не указан —'
+        self.fields['housing_type'].label = 'Тип жилья'
+        self.fields['period_year'].label = 'Год'
+        self.fields['period_month'].label = 'Месяц'
+        self.fields['visits_per_week'].label = 'Кратность посещений (раз в неделю)'
+        self.fields['visits_per_month'].label = 'Кратность посещений (раз в месяц)'
+        self.fields['visits_per_month'].required = False
+        self.fields['visit_duration_minutes'].label = 'Время 1 посещения (минут)'
+        self.fields['work_time_norm_minutes'].label = 'Норма рабочего времени (минут в месяц)'
+        self.fields['notes'].label = 'Примечание'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        recipient = cleaned_data.get('recipient')
+        location = cleaned_data.get('location')
+
+        if recipient:
+            if recipient.social_worker_id:
+                cleaned_data['social_worker'] = recipient.social_worker
+            if not location and recipient.location_id:
+                cleaned_data['location'] = recipient.location
+        return cleaned_data

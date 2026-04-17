@@ -87,8 +87,8 @@
         .alert { border-radius: 10px; border: none; }
         .auth-footer {
             text-align: center;
-            margin-top: 1.75rem;
-            padding-top: 1.5rem;
+            margin-top: 0.5rem;
+            padding-top: 0.65rem;
             border-top: 1px solid #f0f2f5;
         }
         .auth-footer a {
@@ -99,6 +99,21 @@
         .auth-footer a:hover { text-decoration: underline; }
         .errorlist { list-style: none; padding: 0; margin: 0.4rem 0 0; }
         .errorlist li { color: #dc3545; font-size: 0.8rem; }
+
+        .password-input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .password-input-group .password-toggle-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-color: #dde1e6;
+            color: #5f6368;
+        }
+        .password-input-group .password-toggle-btn:hover {
+            background: #f5f6f8;
+            color: #1a1a2e;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -116,7 +131,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -129,6 +144,24 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function () {
+        document.querySelectorAll('.password-input-group .password-toggle-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var g = btn.closest('.password-input-group');
+                var inp = g ? g.querySelector('input') : null;
+                if (!inp) return;
+                var show = inp.getAttribute('type') === 'password';
+                inp.setAttribute('type', show ? 'text' : 'password');
+                var ic = btn.querySelector('i');
+                if (ic) {
+                    ic.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+                }
+                btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+            });
+        });
+    })();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

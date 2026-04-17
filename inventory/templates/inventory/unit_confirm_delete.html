@@ -1,0 +1,17 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Удалить единицу{% endblock %}
+{% block content %}
+{% include 'inventory/includes/inventory_subnav.html' %}
+
+<div class="page-header"><h2><i class="bi bi-trash"></i> Удаление</h2></div>
+<div class="card" style="max-width: 480px;">
+    <div class="card-body">
+        <p>Удалить «{{ unit.name }}» ({{ unit.inventory_number }})?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'inventory:unit_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

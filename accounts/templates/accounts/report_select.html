@@ -41,6 +41,9 @@
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfSocialWorkers">
                         <i class="bi bi-download"></i> Скачать PDF
                     </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvSocialWorkers">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
                     <a href="{% url 'accounts:social_workers_list' %}" class="panel-link">
                         <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
                     </a>
@@ -62,6 +65,9 @@
                 <div class="report-card-actions mt-2">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfRecipients">
                         <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvRecipients">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
                     </button>
                     <a href="{% url 'accounts:recipients_list' %}" class="panel-link">
                         <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
@@ -85,6 +91,9 @@
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfAssigned">
                         <i class="bi bi-download"></i> Скачать PDF
                     </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvAssigned">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
                     <a href="{% url 'accounts:assigned_persons' %}" class="panel-link">
                         <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
                     </a>
@@ -107,7 +116,111 @@
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfServicesAll">
                         <i class="bi bi-download"></i> Скачать PDF
                     </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvServicesAll">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
                     <a href="{% url 'accounts:services_panel' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Планирование визитов -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(52,152,219,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-calendar-week" style="font-size:2rem; color:#3498db;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Планирование визитов</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить сводку по подопечным, визитам на сегодня и завтра и окну напоминаний (при отсутствии фильтров — по всей базе).
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfVisitPlanning">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvVisitPlanning">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
+                    <a href="{% url 'accounts:visit_planning' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Расчёт нагрузки -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(241,196,15,0.15); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-calculator" style="font-size:2rem; color:#d68910;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Расчёт нагрузки</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить таблицу учёта рабочего времени за выбранный месяц (по умолчанию — текущий месяц, все работники).
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfWorkload">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvWorkload">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
+                    <a href="{% url 'accounts:workload_panel' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Прохождение медосмотра -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(231,76,60,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-heart-pulse" style="font-size:2rem; color:#e74c3c;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Прохождение медосмотра</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить список сотрудников со статусом медосмотра, датами и назначениями.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfMedical">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvMedical">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
+                    <a href="{% url 'accounts:medical_checkup_panel' %}" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Техника безопасности -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                <div style="width:72px; height:72px; border-radius:50%; background:rgba(155,89,182,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem;">
+                    <i class="bi bi-shield-check" style="font-size:2rem; color:#9b59b6;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Техника безопасности</h5>
+                <p class="text-muted flex-grow-1">
+                    Выгрузить журнал инструктажей по охране труда и технике безопасности.
+                </p>
+                <div class="report-card-actions mt-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmPdfSafety">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#confirmCsvSafety">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
+                    <a href="{% url 'accounts:safety_briefing_panel' %}" class="panel-link">
                         <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
                     </a>
                 </div>
@@ -195,6 +308,256 @@
                 <form method="get" action="{% url 'accounts:report_pdf' 'services_all' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfServicesAll'));if(m)m.hide();">
                     <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfVisitPlanning" tabindex="-1" aria-labelledby="confirmPdfVisitPlanningLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfVisitPlanningLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать отчёт по всем данным планирования (без фильтров на панели)?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:visit_planning_pdf' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfVisitPlanning'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfWorkload" tabindex="-1" aria-labelledby="confirmPdfWorkloadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfWorkloadLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать учёт нагрузки за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:workload_panel_pdf' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfWorkload'));if(m)m.hide();">
+                    <input type="hidden" name="year" value="{{ report_year }}">
+                    <input type="hidden" name="month" value="{{ report_month }}">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfMedical" tabindex="-1" aria-labelledby="confirmPdfMedicalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfMedicalLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:medical_checkup_panel_pdf' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfMedical'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmPdfSafety" tabindex="-1" aria-labelledby="confirmPdfSafetyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmPdfSafetyLabel">Подтверждение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:safety_briefing_panel_pdf' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfSafety'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-primary">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSV: подтверждение скачивания всего списка -->
+<div class="modal fade" id="confirmCsvSocialWorkers" tabindex="-1" aria-labelledby="confirmCsvSocialWorkersLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvSocialWorkersLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать весь список социальных работников в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvSocialWorkers'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvRecipients" tabindex="-1" aria-labelledby="confirmCsvRecipientsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvRecipientsLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать весь список получателей услуг в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_csv' 'recipients' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvRecipients'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvAssigned" tabindex="-1" aria-labelledby="confirmCsvAssignedLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvAssignedLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать весь список закреплений в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_csv' 'assigned' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvAssigned'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvServicesAll" tabindex="-1" aria-labelledby="confirmCsvServicesAllLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvServicesAllLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт» в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:report_csv' 'services_all' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvServicesAll'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvVisitPlanning" tabindex="-1" aria-labelledby="confirmCsvVisitPlanningLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvVisitPlanningLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать отчёт планирования в CSV по всем данным (без фильтров на панели)?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:visit_planning_csv' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvVisitPlanning'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvWorkload" tabindex="-1" aria-labelledby="confirmCsvWorkloadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvWorkloadLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать учёт нагрузки в CSV за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:workload_panel_csv' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvWorkload'));if(m)m.hide();">
+                    <input type="hidden" name="year" value="{{ report_year }}">
+                    <input type="hidden" name="month" value="{{ report_month }}">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvMedical" tabindex="-1" aria-labelledby="confirmCsvMedicalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvMedicalLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать весь список медосмотра в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:medical_checkup_panel_csv' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvMedical'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmCsvSafety" tabindex="-1" aria-labelledby="confirmCsvSafetyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmCsvSafetyLabel">Подтверждение CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Скачать весь журнал инструктажей в CSV?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+                <form method="get" action="{% url 'accounts:safety_briefing_panel_csv' %}" target="_blank" class="d-inline"
+                      onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvSafety'));if(m)m.hide();">
+                    <button type="submit" class="btn btn-success">Да</button>
                 </form>
             </div>
         </div>

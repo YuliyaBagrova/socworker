@@ -1,0 +1,60 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Единицы учёта{% endblock %}
+{% block content %}
+{% include 'inventory/includes/inventory_subnav.html' %}
+
+<div class="page-header flex-wrap">
+    <h2 class="mb-0"><i class="bi bi-list-ul"></i> Единицы учёта</h2>
+    {% if inventory_can_add_unit %}
+        <a href="{% url 'inventory:unit_create' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Добавить</a>
+    {% endif %}
+</div>
+
+<p class="text-muted small mb-3">
+    {% if inventory_role == 'warehouse_keeper' %}Полный список организации.
+    {% elif inventory_role == 'department_head' %}Единицы, закреплённые за сотрудниками вашего отделения.
+    {% else %}Только единицы, за которые вы ответственны.{% endif %}
+</p>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Инв. №</th>
+                        <th>Название</th>
+                        <th>Стоимость</th>
+                        <th>Ответственный</th>
+                        {% if inventory_can_manage %}<th></th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in units %}
+                        <tr>
+                            <td>{{ u.inventory_number }}</td>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.cost }}</td>
+                            <td>
+                                {% if u.responsible.inventory_profile %}
+                                    {{ u.responsible.inventory_profile.full_name }} ({{ u.responsible.username }})
+                                {% else %}
+                                    {{ u.responsible.username }}
+                                {% endif %}
+                            </td>
+                            {% if inventory_can_manage %}
+                                <td class="text-nowrap">
+                                    <a href="{% url 'inventory:unit_edit' u.pk %}" class="btn btn-sm btn-outline-primary py-0 px-2">Изм.</a>
+                                    <a href="{% url 'inventory:unit_delete' u.pk %}" class="btn btn-sm btn-outline-danger py-0 px-2">Удал.</a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="{% if inventory_can_manage %}5{% else %}4{% endif %}" class="text-center text-muted py-4">Нет записей.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

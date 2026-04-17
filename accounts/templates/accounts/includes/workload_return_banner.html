@@ -1,0 +1,12 @@
+{% if workload_return %}
+<div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" role="alert">
+    <span>
+        <i class="bi bi-calculator me-1"></i>
+        Вы перешли из панели <strong>«Расчёт нагрузки»</strong>.
+    </span>
+    <a class="btn btn-sm btn-primary"
+       href="{% url 'accounts:workload_panel' %}?year={{ workload_return.wl_year|default:'' }}&month={{ workload_return.wl_month|default:'' }}{% if workload_return.wl_worker %}&worker={{ workload_return.wl_worker }}{% endif %}">
+        <i class="bi bi-arrow-left"></i> Вернуться к расчёту нагрузки
+    </a>
+</div>
+{% endif %}

@@ -2,262 +2,785 @@
 
 {% block title %}Закреплённые лица - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-assigned-page"{% endblock %}
+
 {% block inline_css %}
-    .assigned-table {
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-        font-size: 0.85rem;
+    body.sw-assigned-page {
+        background-color: #cfd6eb;
+        background-image:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(118, 75, 162, 0.42), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(102, 126, 234, 0.38), transparent 54%),
+            radial-gradient(ellipse 50% 38% at 72% 88%, rgba(236, 72, 153, 0.12), transparent 58%),
+            radial-gradient(ellipse 48% 36% at 18% 12%, rgba(34, 211, 238, 0.1), transparent 55%),
+            linear-gradient(175deg, #e8ecf9 0%, #d8dff5 26%, #ddd5f5 52%, #cfd8ef 78%, #c5cde8 100%);
     }
-    .assigned-table th {
-        padding: 0.6rem 0.75rem;
-        text-transform: uppercase;
+    body.sw-assigned-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-workers-layout {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-height: calc(100vh - var(--navbar-height) - var(--below-nav-stack-height, 0px) - 2.5rem);
+    }
+    .sw-workers-layout .sw-table-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        margin-bottom: 0 !important;
+    }
+    .sw-workers-layout .sw-table-card > .card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+    }
+    .sw-workers-page-header {
+        align-items: center;
+    }
+    .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        box-shadow:
+            0 6px 22px rgba(102, 126, 234, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    /* Заголовок страницы — без градиента на тексте */
+    .sw-workers-page-header > .sw-page-title > .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        color: #2d2652;
+        background: none;
+        -webkit-background-clip: unset;
+        background-clip: unset;
+        -webkit-text-fill-color: unset;
+    }
+    .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+        text-decoration: none;
+    }
+    .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    .sw-toolbar-btn.sw-back-workers {
+        color: #312e4f;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 246, 255, 0.92) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        border-left: 3px solid #6366f1;
+        box-shadow:
+            0 2px 14px rgba(99, 102, 241, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        padding-left: 1rem;
+        padding-right: 1.15rem;
+        border-radius: 999px;
+    }
+    .sw-toolbar-btn.sw-back-workers:hover {
+        color: #1e1b36;
+        border-color: rgba(102, 126, 234, 0.55);
+        box-shadow:
+            0 8px 24px rgba(102, 126, 234, 0.22),
+            inset 0 1px 0 #fff;
+    }
+    .sw-toolbar-btn.sw-back-workers i {
+        font-size: 1.12rem;
+        color: #6366f1;
+    }
+    .sw-filter-dash {
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--dash-glass-border);
+        border-radius: 18px;
+        box-shadow:
+            0 8px 32px rgba(26, 26, 46, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        transition: box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    .sw-filter-dash:hover {
+        box-shadow:
+            0 12px 36px rgba(102, 126, 234, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.2rem;
+    }
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.14);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        font-size: 1.12rem;
+        box-shadow:
+            0 4px 16px rgba(102, 126, 234, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #3d2f5c;
+    }
+    .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         font-size: 0.72rem;
-        letter-spacing: 0.5px;
         font-weight: 700;
-        white-space: nowrap;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--dash-violet);
+        margin-bottom: 0.4rem;
     }
-    .assigned-table td {
-        padding: 0.55rem 0.75rem;
+    .sw-filter-dash .form-control.sw-search-input {
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-left: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a1a2e;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 0 12px 12px 0;
+    }
+    .sw-filter-dash .form-control.sw-search-input::placeholder {
+        color: #7a7694;
+        font-weight: 400;
+    }
+    .sw-filter-dash .form-control.sw-search-input:focus {
+        border-color: var(--primary);
+        box-shadow: none;
+        background: #fff;
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        padding: 0.62rem 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        box-shadow:
+            0 4px 18px rgba(99, 102, 241, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow:
+            0 10px 28px rgba(102, 126, 234, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+        transform: translateY(0);
+    }
+    .sw-filter-dash .btn.sw-assign-reset {
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 0.62rem 1rem;
+        border: 1px solid rgba(102, 126, 234, 0.25);
+        color: #4b5568;
+        background: rgba(255, 255, 255, 0.88);
+    }
+    .sw-filter-dash .btn.sw-assign-reset:hover {
+        background: #fff;
+        border-color: rgba(102, 126, 234, 0.4);
+        color: #2d2652;
+    }
+    .assign-sort-tabs {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+    .assign-sort-tabs .stab {
+        font-size: 0.8125rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        color: #4a4668;
+        background: rgba(255, 255, 255, 0.65);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .assign-sort-tabs .stab:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(102, 126, 234, 0.35);
+        transform: translateY(-1px);
+    }
+    .assign-sort-tabs .stab.active-all {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+    }
+    .assign-sort-tabs .stab.active-red {
+        background: linear-gradient(135deg, #e74c5e 0%, #c0392b 100%);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 14px rgba(231, 76, 94, 0.35);
+    }
+    .assign-sort-tabs .stab.active-blue {
+        background: linear-gradient(135deg, #5a7eea 0%, #4060c8 100%);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 14px rgba(90, 126, 234, 0.35);
+    }
+    .sw-filter-dash .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+    }
+    .sw-filter-dash .input-group-text {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-right: none;
+        color: var(--dash-violet-light);
+        font-size: 1rem;
+    }
+    .sw-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 14px 14px;
+        flex: 1 1 auto;
+        min-height: 12rem;
+    }
+    .assigned-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .assigned-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        vertical-align: middle;
+        padding: 0.55rem 0.45rem;
+        border: 1px solid #cdd1d6;
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.74rem;
+        line-height: 1.25;
+    }
+    .assigned-sheet thead th.col-action {
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+    }
+    .assigned-sheet thead th.c-red {
+        background: #e74c5e;
+        color: #fff;
+        border-color: #c0392b;
+    }
+    .assigned-sheet thead th.c-blue {
+        background: #5a7eea;
+        color: #fff;
+        border-color: #4060c8;
+    }
+    .assigned-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.48rem 0.45rem;
+        vertical-align: middle;
+        font-size: 0.8125rem;
+    }
+    .assigned-sheet tbody tr.data-row:nth-child(odd) td.col-action {
+        background: #fafbfc;
+    }
+    .assigned-sheet tbody tr.data-row:nth-child(even) td.col-action {
+        background: #fff;
+    }
+    .assigned-sheet tbody tr.data-row:hover td.col-action {
+        background: #f0edff !important;
+    }
+    .assigned-sheet td.c-red {
+        background: #fdf0f1;
+        color: #721c24;
+    }
+    .assigned-sheet td.c-blue {
+        background: #eef2fd;
+        color: #1e3a6e;
+    }
+    .assigned-sheet tbody tr.data-row:hover td.c-red {
+        background: #fce8ea;
+    }
+    .assigned-sheet tbody tr.data-row:hover td.c-blue {
+        background: #e4ebfc;
+    }
+    .assigned-sheet td.c-red a {
+        color: #c0392b;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .assigned-sheet td.c-blue a {
+        color: #3355aa;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .assigned-sheet td.c-red a:hover,
+    .assigned-sheet td.c-blue a:hover {
+        text-decoration: underline;
+    }
+    .assigned-sheet td.empty-cell {
+        color: #888;
+        font-style: italic;
+    }
+    .assigned-sheet td.b-left-red, .assigned-sheet th.b-left-red {
+        border-left: 3px solid #e74c5e;
+    }
+    .assigned-sheet td.b-left-blue, .assigned-sheet th.b-left-blue {
+        border-left: 3px solid #5a7eea;
+    }
+    .assigned-sheet td.bsep, .assigned-sheet th.bsep {
+        border-right: 3px solid #c5cad3;
+    }
+    .assigned-sheet td.bsep2, .assigned-sheet th.bsep2 {
+        border-right: 3px solid #c5cad3;
+    }
+    .assigned-sheet td.col-action {
+        text-align: center;
+        background: #fff;
         vertical-align: middle;
     }
-    .assigned-table a { text-decoration: none; }
-    .assigned-table a:hover { text-decoration: underline; }
-
-    /* red (worker) */
-    .assigned-table th.c-red { background: #e74c5e; color: #fff; border-bottom: 2px solid #c0392b; }
-    .assigned-table td.c-red { background: #fdf0f1; border-bottom: 1px solid #f5c6cb; color: #721c24; }
-    .assigned-table td.c-red a { color: #c0392b; font-weight: 600; }
-
-    /* blue (recipient) */
-    .assigned-table th.c-blue { background: #5a7eea; color: #fff; border-bottom: 2px solid #4060c8; }
-    .assigned-table td.c-blue { background: #eef2fd; border-bottom: 1px solid #bdd0fb; color: #1e3a6e; }
-    .assigned-table td.c-blue a { color: #3355aa; font-weight: 500; }
-
-    /* action col */
-    .assigned-table th.col-action { background: #f8f9fb; color: #5f6368; border-bottom: 2px solid #e8eaed; }
-    .assigned-table td.col-action { background: #fff; border-bottom: 1px solid #f0f2f5; text-align: center; }
-
-    .assigned-table td.empty-cell { color: #999; font-style: italic; }
-
-    /* left outer border = first group colour */
-    .assigned-table td.b-left-red, .assigned-table th.b-left-red { border-left: 3px solid #e74c5e; }
-    .assigned-table td.b-left-blue, .assigned-table th.b-left-blue { border-left: 3px solid #5a7eea; }
-
-    /* separator between groups */
-    .assigned-table td.bsep, .assigned-table th.bsep { border-right: 3px solid #ccc; }
-
-    /* right border before action */
-    .assigned-table td.bsep2, .assigned-table th.bsep2 { border-right: 3px solid #ccc; }
-
-    /* sort tabs */
-    .sort-tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-    .sort-tabs .stab {
-        font-size: 0.82rem; padding: 0.35rem 0.85rem; border-radius: 8px;
-        font-weight: 500; text-decoration: none; border: 1px solid #dde1e6; color: #5f6368;
-        transition: all 0.2s; display: flex; align-items: center; gap: 0.35rem;
+    .sw-actions-cell {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
     }
-    .sort-tabs .stab:hover { background: #f0f2f5; color: #333; }
-    .sort-tabs .stab.active-all {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #fff; border-color: transparent;
+    .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        border-width: 1px;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
     }
-    .sort-tabs .stab.active-red { background: #e74c5e; color: #fff; border-color: transparent; }
-    .sort-tabs .stab.active-blue { background: #5a7eea; color: #fff; border-color: transparent; }
-
-    .search-box { max-width: 380px; }
-    .btn-unassign { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .sw-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.12);
+    }
+    .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    a.sw-action-btn.sw-action-btn--destructive:visited {
+        color: #fff;
+    }
+    .sw-action-btn.sw-action-btn--destructive:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    /* Поле поиска и «Найти» в одной строке (input-group) */
+    .assign-search-form .assign-search-input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+    }
+    .assign-search-form .assign-search-input-group > .input-group-text {
+        border-radius: 12px 0 0 12px;
+    }
+    .assign-search-form .assign-search-input-group > .form-control.sw-search-input {
+        border-radius: 0;
+        border-left: none;
+    }
+    .assign-search-form .assign-search-input-group > .btn.sw-filter-submit {
+        border-radius: 0 12px 12px 0;
+        padding-left: 1rem;
+        padding-right: 1.1rem;
+        white-space: nowrap;
+    }
+    .assign-search-form .assign-search-reset-row {
+        margin-top: 0.45rem;
+    }
+    .sw-workers-layout .sw-table-card > .card-body > .empty-state {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 16rem;
+        padding: 2.5rem 1rem;
+    }
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-diagram-3-fill"></i> Закреплённые лица</h2>
-    <div class="d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline-danger btn-sm" title="Скачать PDF"
-                data-bs-toggle="modal" data-bs-target="#assignedPdfModal">
-            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-        </button>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignModal">
-            <i class="bi bi-link-45deg"></i> Закрепить подопечного
-        </button>
-        <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Назад к работникам
-        </a>
-    </div>
-</div>
+{% include 'accounts/includes/workload_return_banner.html' %}
 
-<!-- Sort tabs + search -->
-<div class="card mb-3">
-    <div class="card-body py-2">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-muted fw-medium" style="font-size:0.85rem;"><i class="bi bi-funnel"></i></span>
-                <div class="sort-tabs">
-                    <a href="?sort=all" class="stab {% if sort == 'all' %}active-all{% endif %}">
-                        <i class="bi bi-list-ul"></i> Весь список
-                    </a>
-                    <a href="?sort=worker" class="stab {% if sort == 'worker' %}active-red{% endif %}">
-                        <i class="bi bi-people-fill"></i> По соц. работникам
-                    </a>
-                    <a href="?sort=recipient" class="stab {% if sort == 'recipient' %}active-blue{% endif %}">
-                        <i class="bi bi-person-heart"></i> По подопечным
-                    </a>
+<div class="sw-workers-layout">
+    <div class="page-header sw-workers-page-header flex-wrap mb-0">
+        <h1 class="sw-page-title mb-0">
+            <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-diagram-3-fill"></i></span>
+            <span class="sw-page-title__label">Закреплённые лица</span>
+        </h1>
+        <div class="sw-toolbar-group">
+            <button type="button" class="btn btn-outline-danger sw-toolbar-btn" title="Скачать PDF"
+                    data-bs-toggle="modal" data-bs-target="#assignedPdfModal">
+                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+            </button>
+            <button type="button" class="btn btn-outline-success sw-toolbar-btn" title="Скачать CSV"
+                    data-bs-toggle="modal" data-bs-target="#assignedCsvModal">
+                <i class="bi bi-filetype-csv"></i> CSV
+            </button>
+            <button type="button" class="btn btn-primary sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#assignModal">
+                <i class="bi bi-link-45deg"></i> Закрепить подопечного
+            </button>
+            <a href="{% url 'accounts:social_workers_list' %}" class="btn sw-toolbar-btn sw-back-workers">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+                <span>К социальным работникам</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="sw-filter-dash mb-0">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+                <span class="sw-page-title__label">Вид таблицы и поиск</span>
+            </h2>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-8 col-xl-7">
+                    <label class="sw-filter-label d-block">Вид таблицы</label>
+                    <div class="assign-sort-tabs">
+                        <a href="?sort=all{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'all' %}active-all{% endif %}">
+                            <i class="bi bi-list-ul"></i> Весь список
+                        </a>
+                        <a href="?sort=worker{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'worker' %}active-red{% endif %}">
+                            <i class="bi bi-people-fill"></i> По соц. работникам
+                        </a>
+                        <a href="?sort=recipient{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'recipient' %}active-blue{% endif %}">
+                            <i class="bi bi-person-heart"></i> По подопечным
+                        </a>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-xl-5">
+                    <form method="get" class="assign-search-form">
+                        {% if workload_return %}
+                            {% for k, v in workload_return.items %}
+                                <input type="hidden" name="{{ k }}" value="{{ v }}">
+                            {% endfor %}
+                        {% endif %}
+                        <input type="hidden" name="sort" value="{{ sort }}">
+                        <label for="assignSearchInput" class="sw-filter-label d-block">Поиск</label>
+                        <div class="input-group assign-search-input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control sw-search-input" id="assignSearchInput" name="search" value="{{ search }}"
+                                   placeholder="{% if sort == 'worker' %}ФИО или телефон работника…{% elif sort == 'recipient' %}ФИО, телефон или адрес подопечного…{% else %}Работник или подопечный: ФИО, телефон, адрес…{% endif %}">
+                            <button type="submit" class="btn btn-primary sw-filter-submit">
+                                <i class="bi bi-search"></i> Найти
+                            </button>
+                        </div>
+                        {% if search %}
+                            <div class="assign-search-reset-row">
+                                <a href="?sort={{ sort }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="btn btn-sm btn-outline-secondary sw-assign-reset" title="Сбросить поиск">
+                                    <i class="bi bi-x-lg me-1"></i>Сбросить поиск
+                                </a>
+                            </div>
+                        {% endif %}
+                    </form>
                 </div>
             </div>
-            {% if sort == 'worker' or sort == 'recipient' %}
-                <form method="get" class="d-flex gap-2 search-box">
-                    <input type="hidden" name="sort" value="{{ sort }}">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0" name="search" value="{{ search }}"
-                               placeholder="{% if sort == 'worker' %}ФИО или телефон работника{% else %}ФИО, телефон или адрес подопечного{% endif %}">
-                    </div>
-                    <button type="submit" class="btn btn-sm {% if sort == 'worker' %}btn-outline-danger{% else %}btn-outline-primary{% endif %}">
-                        <i class="bi bi-search"></i>
-                    </button>
+        </div>
+    </div>
+
+    <div class="card sw-table-card">
+        <div class="card-body p-0">
+            {% if rows %}
+                <div class="sw-sheet-wrap">
+                    <table class="assigned-sheet mb-0">
+                        <thead>
+                            <tr>
+                                <th class="col-action text-center" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                                    <input type="checkbox" class="form-check-input" id="assignedSelectAll"
+                                           aria-label="Отметить все строки">
+                                </th>
+                                {% if sort == 'recipient' %}
+                                    <th class="c-blue b-left-blue text-start">Ф.И.О. подопечного</th>
+                                    <th class="c-blue">Телефон подопечного</th>
+                                    <th class="c-blue bsep">Адрес проживания подопечного</th>
+                                    <th class="c-red">Ф.И.О. соц. работника</th>
+                                    <th class="c-red bsep2">Телефон соц. работника</th>
+                                {% else %}
+                                    <th class="c-red b-left-red text-start">Ф.И.О. соц. работника</th>
+                                    <th class="c-red bsep">Телефон соц. работника</th>
+                                    <th class="c-blue">Ф.И.О. подопечного</th>
+                                    <th class="c-blue">Телефон подопечного</th>
+                                    <th class="c-blue bsep2">Адрес проживания подопечного</th>
+                                {% endif %}
+                                <th class="col-action">Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                                <tr class="data-row">
+                                    <td class="col-action text-center align-middle">
+                                        {% if row.recipient %}
+                                            <input type="checkbox" class="form-check-input assigned-row-select"
+                                                   value="r:{{ row.recipient.pk }}"
+                                                   aria-label="Выбрать строку">
+                                        {% else %}
+                                            <input type="checkbox" class="form-check-input assigned-row-select"
+                                                   value="w:{{ row.worker.pk }}"
+                                                   aria-label="Выбрать {{ row.worker.get_full_name }}">
+                                        {% endif %}
+                                    </td>
+                                    {% if sort == 'recipient' %}
+                                        {% if row.recipient %}
+                                            <td class="c-blue b-left-blue text-start">
+                                                <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
+                                            </td>
+                                            <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
+                                            <td class="c-blue bsep">{{ row.recipient.address|default:"—" }}</td>
+                                        {% else %}
+                                            <td class="c-blue b-left-blue empty-cell text-start" colspan="3">Нет закреплённых подопечных</td>
+                                        {% endif %}
+                                        <td class="c-red text-start">
+                                            <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
+                                        </td>
+                                        <td class="c-red bsep2">{{ row.worker.phone|default:"—" }}</td>
+                                    {% else %}
+                                        <td class="c-red b-left-red text-start">
+                                            <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
+                                        </td>
+                                        <td class="c-red bsep">{{ row.worker.phone|default:"—" }}</td>
+                                        {% if row.recipient %}
+                                            <td class="c-blue text-start">
+                                                <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
+                                            </td>
+                                            <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
+                                            <td class="c-blue bsep2">{{ row.recipient.address|default:"—" }}</td>
+                                        {% else %}
+                                            <td class="c-blue empty-cell text-start" colspan="3">Нет закреплённых подопечных</td>
+                                        {% endif %}
+                                    {% endif %}
+                                    <td class="col-action">
+                                        {% if row.recipient %}
+                                            <div class="sw-actions-cell">
+                                                <button type="button"
+                                                        class="btn btn-sm sw-action-btn sw-action-btn--destructive btn-unassign-trigger"
+                                                        title="Открепить «{{ row.recipient.get_full_name }}» от {{ row.worker.get_full_name }}"
+                                                        aria-label="Открепить {{ row.recipient.get_full_name }} от {{ row.worker.get_full_name }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#assignedUnassignModal"
+                                                        data-unassign-url="{% url 'accounts:unassign_recipient' row.recipient.pk %}"
+                                                        data-recipient-name="{{ row.recipient.get_full_name }}"
+                                                        data-worker-name="{{ row.worker.get_full_name }}">
+                                                    <i class="bi bi-person-x" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-diagram-3"></i>
                     {% if search %}
-                        <a href="?sort={{ sort }}" class="btn btn-sm btn-outline-secondary" title="Сбросить">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
+                        <p>По запросу «{{ search }}» ничего не найдено</p>
+                        <a href="?sort={{ sort }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="btn btn-primary rounded-3 px-4">Сбросить поиск</a>
+                    {% else %}
+                        <p>Нет данных для отображения</p>
                     {% endif %}
-                </form>
+                </div>
             {% endif %}
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
-        {% if rows %}
-            <div class="table-responsive">
-                <table class="assigned-table">
-                    <thead>
-                        <tr>
-                            <th class="col-action text-center" style="width:2.5rem;" title="Для выгрузки в PDF">
-                                <input type="checkbox" class="form-check-input" id="assignedSelectAll"
-                                       aria-label="Отметить все строки">
-                            </th>
-                            {% if sort == 'recipient' %}
-                                <th class="c-blue b-left-blue">Ф.И.О. подопечного</th>
-                                <th class="c-blue">Телефон подопечного</th>
-                                <th class="c-blue bsep">Адрес проживания подопечного</th>
-                                <th class="c-red">Ф.И.О. соц. работника</th>
-                                <th class="c-red bsep2">Телефон соц. работника</th>
-                            {% else %}
-                                <th class="c-red b-left-red">Ф.И.О. соц. работника</th>
-                                <th class="c-red bsep">Телефон соц. работника</th>
-                                <th class="c-blue">Ф.И.О. подопечного</th>
-                                <th class="c-blue">Телефон подопечного</th>
-                                <th class="c-blue bsep2">Адрес проживания подопечного</th>
-                            {% endif %}
-                            <th class="col-action">Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in rows %}
-                            <tr>
-                                <td class="col-action text-center align-middle">
-                                    {% if row.recipient %}
-                                        <input type="checkbox" class="form-check-input assigned-row-select"
-                                               value="r:{{ row.recipient.pk }}"
-                                               aria-label="Выбрать строку">
-                                    {% else %}
-                                        <input type="checkbox" class="form-check-input assigned-row-select"
-                                               value="w:{{ row.worker.pk }}"
-                                               aria-label="Выбрать {{ row.worker.get_full_name }}">
-                                    {% endif %}
-                                </td>
-                                {% if sort == 'recipient' %}
-                                    {# LEFT: recipient (blue) #}
-                                    {% if row.recipient %}
-                                        <td class="c-blue b-left-blue">
-                                            <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
-                                        </td>
-                                        <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
-                                        <td class="c-blue bsep">{{ row.recipient.address|default:"—" }}</td>
-                                    {% else %}
-                                        <td class="c-blue b-left-blue empty-cell" colspan="3">Нет закреплённых подопечных</td>
-                                    {% endif %}
-                                    {# RIGHT: worker (red) #}
-                                    <td class="c-red">
-                                        <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
-                                    </td>
-                                    <td class="c-red bsep2">{{ row.worker.phone|default:"—" }}</td>
-                                {% else %}
-                                    {# LEFT: worker (red) #}
-                                    <td class="c-red b-left-red">
-                                        <a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a>
-                                    </td>
-                                    <td class="c-red bsep">{{ row.worker.phone|default:"—" }}</td>
-                                    {# RIGHT: recipient (blue) #}
-                                    {% if row.recipient %}
-                                        <td class="c-blue">
-                                            <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>
-                                        </td>
-                                        <td class="c-blue">{{ row.recipient.phone|default:"—" }}</td>
-                                        <td class="c-blue bsep2">{{ row.recipient.address|default:"—" }}</td>
-                                    {% else %}
-                                        <td class="c-blue empty-cell" colspan="3">Нет закреплённых подопечных</td>
-                                    {% endif %}
-                                {% endif %}
-                                <td class="col-action">
-                                    {% if row.recipient %}
-                                        <form method="post" action="{% url 'accounts:unassign_recipient' row.recipient.pk %}" style="display:inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-outline-danger btn-unassign" title="Открепить"
-                                                    onclick="return confirm('Открепить {{ row.recipient.get_full_name }} от {{ row.worker.get_full_name }}?')">
-                                                <i class="bi bi-x-circle"></i> Открепить
-                                            </button>
-                                        </form>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<form id="assignedUnassignForm" method="post" action="" class="d-none">
+    {% csrf_token %}
+</form>
+
+<div class="modal fade" id="assignedUnassignModal" tabindex="-1" aria-labelledby="assignedUnassignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+            <div class="modal-header border-0 text-white pb-2" style="background: linear-gradient(125deg, #fb7185 0%, #f43f5e 42%, #dc2626 100%);">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="assignedUnassignModalLabel">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                          style="width:2.35rem;height:2.35rem;background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.35);">
+                        <i class="bi bi-person-x" aria-hidden="true"></i>
+                    </span>
+                    Открепить подопечного
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-        {% else %}
-            <div class="empty-state">
-                <i class="bi bi-diagram-3"></i>
-                {% if search %}
-                    <p>По запросу «{{ search }}» ничего не найдено</p>
-                    <a href="?sort={{ sort }}" class="btn btn-outline-primary btn-sm">Сбросить поиск</a>
-                {% else %}
-                    <p>Нет данных для отображения</p>
-                {% endif %}
+            <div class="modal-body pt-3">
+                <p class="text-muted small mb-2">Подтвердите действие. Карточка подопечного останется в базе, изменится только закрепление за работником.</p>
+                <p class="mb-0 fw-semibold text-dark" id="assignedUnassignModalText" style="font-size: 0.95rem; line-height: 1.5;"></p>
             </div>
-        {% endif %}
+            <div class="modal-footer border-0 pt-0 pb-3 px-3 gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-3 fw-semibold" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn text-white rounded-3 px-4 fw-bold border-0" id="assignedUnassignConfirmBtn"
+                        style="background: linear-gradient(145deg, #f87171 0%, #ef4444 48%, #dc2626 100%); box-shadow: 0 4px 14px rgba(220,38,38,0.35);">
+                    Открепить
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Assign Modal -->
 <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff;">
-                <h5 class="modal-title" id="assignModalLabel">
-                    <i class="bi bi-link-45deg"></i> Закрепить подопечного за работником
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none; box-shadow:0 20px 50px rgba(45,38,82,0.25);">
+            <div class="modal-header border-0 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title fw-bold" id="assignModalLabel">
+                    <i class="bi bi-link-45deg me-2"></i>Закрепить подопечного за работником
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <form method="post" action="{% url 'accounts:assign_recipient' %}">
                 {% csrf_token %}
-                <div class="modal-body">
+                <div class="modal-body pt-3">
                     {% if unassigned_recipients %}
                         <div class="mb-3">
-                            <label for="worker_id" class="form-label fw-medium">Социальный работник</label>
-                            <select name="worker_id" id="worker_id" class="form-select" required>
+                            <label for="worker_id" class="form-label fw-semibold small text-uppercase text-muted">Социальный работник</label>
+                            <select name="worker_id" id="worker_id" class="form-select rounded-3" required>
                                 <option value="">— Выберите работника —</option>
                                 {% for w in all_workers %}
                                     <option value="{{ w.pk }}">{{ w.get_full_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="recipient_id" class="form-label fw-medium">Подопечный <small class="text-muted">(ещё не закреплённые)</small></label>
-                            <select name="recipient_id" id="recipient_id" class="form-select" required>
+                        <div class="mb-0">
+                            <label for="recipient_id" class="form-label fw-semibold small text-uppercase text-muted">Подопечный <span class="text-muted fw-normal">(ещё не закреплённые)</span></label>
+                            <select name="recipient_id" id="recipient_id" class="form-select rounded-3" required>
                                 <option value="">— Выберите подопечного —</option>
                                 {% for r in unassigned_recipients %}
                                     <option value="{{ r.pk }}">{{ r.get_full_name }}</option>
@@ -265,17 +788,17 @@
                             </select>
                         </div>
                     {% else %}
-                        <div class="text-center py-3">
-                            <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
-                            <p class="mt-2 mb-0 text-muted">Все подопечные уже закреплены за работниками.</p>
+                        <div class="text-center py-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem;"></i>
+                            <p class="mt-3 mb-0 text-muted">Все подопечные уже закреплены за работниками.</p>
                         </div>
                     {% endif %}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <div class="modal-footer border-0 pt-0 pb-3 px-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Отмена</button>
                     {% if unassigned_recipients %}
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Закрепить
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold" style="background: linear-gradient(135deg, #6366f1 0%, #764ba2 100%); border: none;">
+                            <i class="bi bi-check2-circle me-1"></i> Закрепить
                         </button>
                     {% endif %}
                 </div>
@@ -289,6 +812,13 @@
     <input type="hidden" name="scope" id="assignedPdfScope" value="all">
     <input type="hidden" name="sort" value="{{ sort }}">
     <span id="assignedPdfRowFields"></span>
+</form>
+
+<form id="assignedCsvForm" method="post" action="{% url 'accounts:report_csv' 'assigned' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="assignedCsvScope" value="all">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <span id="assignedCsvRowFields"></span>
 </form>
 
 <div class="modal fade" id="assignedPdfModal" tabindex="-1" aria-labelledby="assignedPdfModalLabel" aria-hidden="true">
@@ -323,6 +853,40 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
                 <button type="button" class="btn btn-danger" id="assignedPdfConfirm">
                     <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="assignedCsvModal" tabindex="-1" aria-labelledby="assignedCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="assignedCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в файл (порядок колонок — как на текущей вкладке).</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="assigned_csv_scope_choice" id="assignedCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="assignedCsvScopeAll">Весь список закреплений</label>
+                        <div class="small text-muted ms-4">Все пары из базы</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="assigned_csv_scope_choice" id="assignedCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="assignedCsvScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Строки с флажком</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="assignedCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
                 </button>
             </div>
         </div>
@@ -366,6 +930,50 @@
                 });
             }
             form.submit();
+        });
+    }
+    const csvConfirm = document.getElementById('assignedCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="assigned_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('assignedCsvForm');
+            const scopeInput = document.getElementById('assignedCsvScope');
+            const rowContainer = document.getElementById('assignedCsvRowFields');
+            scopeInput.value = scope;
+            rowContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.assigned-row-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одну строку или выберите «Весь список закреплений».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'row_ids';
+                    h.value = cb.value;
+                    rowContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+    var unassignModal = document.getElementById('assignedUnassignModal');
+    var unassignForm = document.getElementById('assignedUnassignForm');
+    var unassignText = document.getElementById('assignedUnassignModalText');
+    var unassignConfirm = document.getElementById('assignedUnassignConfirmBtn');
+    if (unassignModal && unassignForm && unassignText && unassignConfirm) {
+        unassignModal.addEventListener('show.bs.modal', function (e) {
+            var btn = e.relatedTarget;
+            if (!btn || !btn.classList.contains('btn-unassign-trigger')) return;
+            unassignForm.action = btn.getAttribute('data-unassign-url') || '';
+            var r = btn.getAttribute('data-recipient-name') || '';
+            var w = btn.getAttribute('data-worker-name') || '';
+            unassignText.textContent = 'Открепить «' + r + '» от социального работника «' + w + '»?';
+        });
+        unassignConfirm.addEventListener('click', function () {
+            if (unassignForm.action) unassignForm.submit();
         });
     }
 })();

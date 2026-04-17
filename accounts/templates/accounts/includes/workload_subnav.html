@@ -1,0 +1,21 @@
+{# Подпанель в стиле вкладок: active = accounting | workers | recipients #}
+<div class="workload-subnav mb-3">
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="text-muted small me-1">Нагрузка на соцработников</span>
+        <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}"
+           class="btn btn-sm {% if active == 'accounting' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Учёт рабочего времени
+        </a>
+        <a href="{% url 'accounts:social_workers_list' %}?from_workload=1&amp;wl_year={{ wl_year }}&amp;wl_month={{ wl_month }}{% if wl_worker %}&amp;wl_worker={{ wl_worker }}{% endif %}"
+           class="btn btn-sm {% if active == 'workers' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Работники
+        </a>
+        <a href="{% url 'accounts:recipients_list' %}?from_workload=1&amp;wl_year={{ wl_year }}&amp;wl_month={{ wl_month }}{% if wl_worker %}&amp;wl_worker={{ wl_worker }}{% endif %}"
+           class="btn btn-sm {% if active == 'recipients' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            Подопечные
+        </a>
+        <a href="{% url 'accounts:workload_panel' %}#workload-about" class="btn btn-sm btn-outline-secondary">
+            О программе
+        </a>
+    </div>
+</div>

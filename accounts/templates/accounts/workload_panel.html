@@ -1,0 +1,375 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Нагрузка на соцработников - SocWorker{% endblock %}
+
+{% block inline_css %}
+    .workload-sheet-wrap {
+        overflow-x: auto;
+        border-radius: 0 0 14px 14px;
+    }
+    .workload-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .workload-sheet thead th {
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: normal;
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 0.75rem;
+        max-width: 8.5rem;
+    }
+    .workload-sheet thead tr.workload-head-sub th {
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+    .workload-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+    }
+    .workload-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .workload-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    .workload-sheet .workload-total-row td {
+        background: #fdebd0 !important;
+        font-weight: 600;
+        border-color: #e8d4b8;
+    }
+    .workload-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 220px;
+    }
+    .workload-subnav .btn {
+        border-radius: 6px;
+    }
+{% endblock %}
+
+{% block content %}
+{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+
+<div class="page-header flex-wrap">
+    <h2 class="mb-0"><i class="bi bi-calculator"></i> Учёт рабочего времени</h2>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#workloadPdfModal">
+            <i class="bi bi-file-pdf"></i> PDF
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
+            <i class="bi bi-filetype-csv"></i> CSV
+        </button>
+        <a href="{% url 'accounts:workload_record_create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Добавить строку
+        </a>
+        <a href="{% url 'accounts:workload_records_list' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-list-ul"></i> Плоский список
+        </a>
+        <a href="{% url 'accounts:workload_summary' %}?year={{ year }}&month={{ month }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-people"></i> Сводка
+        </a>
+        <a href="{% url 'accounts:workload_export_csv' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm" title="Плоский список полей журнала">
+            <i class="bi bi-list-columns-reverse"></i> Журнал CSV
+        </a>
+    </div>
+</div>
+
+<form method="get" class="card mb-3">
+    <div class="card-body py-3">
+        <div class="row g-2 align-items-end flex-wrap">
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-0 small">Год</label>
+                <input type="number" name="year" class="form-control form-control-sm" value="{{ year }}" min="2000" max="2100">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label mb-0 small">Месяц</label>
+                <input type="number" name="month" class="form-control form-control-sm" value="{{ month }}" min="1" max="12">
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="form-label mb-0 small">Работник</label>
+                <select name="worker" class="form-select form-select-sm">
+                    <option value="">Все</option>
+                    {% for w in workers %}
+                        <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-sm">Показать</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card mb-3">
+    <div class="card-body py-2 px-3">
+        <p class="small text-muted mb-0">
+            Данные из справочников: социальные работники и подопечные — из общей базы; в строке указывается работник и при необходимости подопечный (ФИО в первом столбце).
+            Кратность за месяц при пустом поле = за неделю × 4. Коэффициент нагрузки (как на типовой таблице):
+            <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong>. В строке «ИТОГО» коэффициенты по строкам суммируются; ставка — по суммарной нагрузке.
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0 workload-sheet-wrap">
+        <table class="workload-sheet">
+            <thead>
+                <tr>
+                    <th rowspan="2" class="text-center align-middle" style="width:2.2rem;" title="Для выгрузки в PDF и CSV">
+                        <input type="checkbox" class="form-check-input" id="workloadSelectAll" aria-label="Отметить все строки">
+                    </th>
+                    <th rowspan="2">№</th>
+                    <th rowspan="2">ФИО соцработника / подопечного</th>
+                    <th rowspan="2">Населённый пункт</th>
+                    <th rowspan="2">Тип</th>
+                    <th rowspan="2">Кратность<br>(раз в неделю)</th>
+                    <th rowspan="2">Кратность<br>(раз в месяц)</th>
+                    <th rowspan="2">Время 1 посещения<br>(минут)</th>
+                    <th colspan="2" class="workload-cat-total-month">Всего отработано за месяц</th>
+                    <th rowspan="2">Норма рабочего<br>времени (часов)</th>
+                    <th rowspan="2">Коэф-т<br>нагрузки</th>
+                    <th rowspan="2">Ставка</th>
+                    <th rowspan="2"></th>
+                </tr>
+                <tr class="workload-head-sub">
+                    <th>Всего отработано за месяц (минут)</th>
+                    <th>Всего отработано за месяц (часов)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in workload_groups %}
+                    {% for row in g.rows %}
+                        {% with r=row.record %}
+                        <tr class="data-row">
+                            <td class="text-center align-middle">
+                                <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="Строка {{ row.num }}">
+                            </td>
+                            <td>{{ row.num }}</td>
+                            <td class="col-text-left">
+                                {% if r.recipient %}
+                                    {{ r.recipient.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">{{ r.social_worker.get_full_name }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="col-text-left">
+                                {% if r.location %}
+                                    {{ r.location.get_location_type_display }} {{ r.location.name }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ r.get_housing_type_display }}</td>
+                            <td>{{ r.visits_per_week }}</td>
+                            <td>{{ r.visits_per_month }}</td>
+                            <td>{{ r.visit_duration_minutes }}</td>
+                            <td>{{ r.worked_minutes_month }}</td>
+                            <td>{{ r.worked_hours_month }}</td>
+                            <td>{{ r.work_time_norm_hours }}</td>
+                            <td>{{ r.load_coefficient }}</td>
+                            <td></td>
+                            <td class="text-nowrap">
+                                <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm btn-outline-primary py-0 px-1" title="Изменить">изм.</a>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    <tr class="workload-total-row">
+                        <td></td>
+                        <td></td>
+                        <td class="col-text-left" colspan="6">ИТОГО по {{ g.worker.get_full_name }}</td>
+                        <td>{{ g.total_minutes }}</td>
+                        <td>{{ g.total_hours }}</td>
+                        <td>—</td>
+                        <td>{{ g.load_sum }}</td>
+                        <td><span class="badge rounded-pill bg-warning text-dark">{{ g.rate }}</span></td>
+                        <td></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="14" class="text-center text-muted py-5">
+                            Нет записей за выбранный период.
+                            <a href="{% url 'accounts:workload_record_create' %}">Добавить строку</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="workload-about" class="card mt-4">
+    <div class="card-header"><h5 class="mb-0">О расчёте нагрузки</h5></div>
+    <div class="card-body small text-muted">
+        <p class="mb-2">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
+        <p class="mb-0">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
+    </div>
+</div>
+
+<form id="workloadPdfForm" method="post" action="{% url 'accounts:workload_panel_pdf' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="workloadPdfScope" value="all">
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <span id="workloadPdfIdFields"></span>
+</form>
+
+<form id="workloadCsvForm" method="post" action="{% url 'accounts:workload_panel_csv' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="workloadCsvScope" value="all">
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <span id="workloadCsvIdFields"></span>
+</form>
+
+<div class="modal fade" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="workloadPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие строки учёта включить в отчёт за <strong>{{ month }}.{{ year }}</strong>.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="wl_pdf_scope_choice" id="wlPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="wlPdfScopeAll">Вся таблица на экране</label>
+                        <div class="small text-muted ms-4">Все строки за выбранный месяц (с учётом фильтра по работнику)</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="wl_pdf_scope_choice" id="wlPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="wlPdfScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки в первой колонке</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="workloadPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="workloadCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие строки учёта включить в файл за <strong>{{ month }}.{{ year }}</strong>.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="wl_csv_scope_choice" id="wlCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="wlCsvScopeAll">Вся таблица на экране</label>
+                        <div class="small text-muted ms-4">Все строки за месяц (с учётом фильтра по работнику)</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="wl_csv_scope_choice" id="wlCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="wlCsvScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки в первой колонке</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="workloadCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('workloadSelectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.workload-record-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    const modalConfirm = document.getElementById('workloadPdfConfirm');
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="wl_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('workloadPdfForm');
+            const scopeInput = document.getElementById('workloadPdfScope');
+            const idContainer = document.getElementById('workloadPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.workload-record-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одну строку в таблице или выберите «Вся таблица на экране».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'workload_record_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+    const csvConfirm = document.getElementById('workloadCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="wl_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('workloadCsvForm');
+            const scopeInput = document.getElementById('workloadCsvScope');
+            const idContainer = document.getElementById('workloadCsvIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.workload-record-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одну строку в таблице или выберите «Вся таблица на экране».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'workload_record_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
+{% endblock %}

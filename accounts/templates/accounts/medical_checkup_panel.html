@@ -6,6 +6,12 @@
 <div class="page-header flex-wrap">
     <h2><i class="bi bi-heart-pulse"></i> Прохождение медосмотра</h2>
     <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#medicalPdfModal">
+            <i class="bi bi-file-pdf"></i> PDF
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#medicalCsvModal">
+            <i class="bi bi-filetype-csv"></i> CSV
+        </button>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignMedicalModal">
             <i class="bi bi-calendar2-plus"></i> Назначить медосмотр
         </button>
@@ -60,6 +66,9 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
+                        <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                            <input type="checkbox" class="form-check-input" id="medicalSelectAll" aria-label="Отметить всех на странице">
+                        </th>
                         <th>Таб. №</th>
                         <th>ФИО</th>
                         <th>Поле в системе</th>
@@ -73,6 +82,9 @@
                 <tbody>
                     {% for w in page_obj %}
                     <tr>
+                        <td class="text-center align-middle">
+                            <input type="checkbox" class="form-check-input medical-worker-select" value="{{ w.pk }}" aria-label="Выбрать {{ w.get_full_name }}">
+                        </td>
                         <td>{{ w.employee_id }}</td>
                         <td><a href="{% url 'accounts:social_worker_detail' w.pk %}">{{ w.get_full_name }}</a></td>
                         <td>{{ w.get_medical_checkup_display }}</td>
@@ -176,4 +188,157 @@
         </div>
     </div>
 </div>
+
+<form id="medicalPdfForm" method="post" action="{% url 'accounts:medical_checkup_panel_pdf' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="medicalPdfScope" value="all">
+    <input type="hidden" name="worker" value="{{ filter_worker }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <span id="medicalPdfIdFields"></span>
+</form>
+
+<form id="medicalCsvForm" method="post" action="{% url 'accounts:medical_checkup_panel_csv' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="medicalCsvScope" value="all">
+    <input type="hidden" name="worker" value="{{ filter_worker }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <span id="medicalCsvIdFields"></span>
+</form>
+
+<div class="modal fade" id="medicalPdfModal" tabindex="-1" aria-labelledby="medicalPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="medicalPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт (с учётом фильтров выше).</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="mc_pdf_scope_choice" id="mcPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="mcPdfScopeAll">Весь список по фильтрам</label>
+                        <div class="small text-muted ms-4">Все сотрудники, попавшие в выборку (все страницы)</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="mc_pdf_scope_choice" id="mcPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="mcPdfScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Текущая страница; при необходимости перейдите на другую и отметьте ещё</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="medicalPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="medicalCsvModal" tabindex="-1" aria-labelledby="medicalCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="medicalCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="mc_csv_scope_choice" id="mcCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="mcCsvScopeAll">Весь список по фильтрам</label>
+                        <div class="small text-muted ms-4">Все сотрудники в выборке</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="mc_csv_scope_choice" id="mcCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="mcCsvScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Текущая страница</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="medicalCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('medicalSelectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.medical-worker-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+    const modalConfirm = document.getElementById('medicalPdfConfirm');
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="mc_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('medicalPdfForm');
+            const scopeInput = document.getElementById('medicalPdfScope');
+            const idContainer = document.getElementById('medicalPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.medical-worker-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного сотрудника в таблице или выберите «Весь список по фильтрам».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'medical_worker_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+    const csvConfirm = document.getElementById('medicalCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="mc_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('medicalCsvForm');
+            const scopeInput = document.getElementById('medicalCsvScope');
+            const idContainer = document.getElementById('medicalCsvIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.medical-worker-select:checked');
+                if (!checked.length) {
+                    alert('Отметьте хотя бы одного сотрудника в таблице или выберите «Весь список по фильтрам».');
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'medical_worker_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
 {% endblock %}

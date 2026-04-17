@@ -1,0 +1,54 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Инвентаризация{% endblock %}
+{% block content %}
+{% include 'inventory/includes/inventory_subnav.html' %}
+
+<div class="page-header flex-wrap">
+    <h2 class="mb-0"><i class="bi bi-box-seam"></i> Инвентаризация</h2>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted small mb-1">Ваша роль</h6>
+                <p class="fw-bold mb-0">
+                    {% if inventory_role == 'warehouse_keeper' %}Завхоз
+                    {% elif inventory_role == 'department_head' %}Руководитель отдела
+                    {% else %}Сотрудник{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted small mb-1">Единиц в вашей выборке</h6>
+                <p class="fw-bold mb-0">{{ n_units }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <a href="{% url 'inventory:unit_list' %}" class="btn btn-outline-primary btn-sm mb-2">Список единиц</a>
+                {% if inventory_can_add_unit %}
+                    <a href="{% url 'inventory:unit_create' %}" class="btn btn-outline-success btn-sm mb-2"><i class="bi bi-plus-lg"></i> Новая единица учёта</a>
+                {% endif %}
+                <a href="{% url 'inventory:report_csv' %}" class="btn btn-primary btn-sm">Скачать отчёт CSV</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h5 class="mb-0">Как устроен доступ</h5></div>
+    <div class="card-body small text-muted">
+        <ul class="mb-0 ps-3">
+            <li class="mb-2"><strong>Завхоз</strong> — полный доступ: любой ответственный, правка и удаление единиц, отделения и учётные записи, отчёт по всей организации. Остальные роли могут только создавать записи в пределах своих прав.</li>
+            <li class="mb-2"><strong>Руководитель отдела</strong> — видит единицы, закреплённые за сотрудниками своего отделения, и отчёт только по ним; может добавлять единицы с ответственным из своего отделения.</li>
+            <li><strong>Сотрудник</strong> — видит только свои единицы и отчёт по ним; может добавлять единицы с собой как ответственным.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

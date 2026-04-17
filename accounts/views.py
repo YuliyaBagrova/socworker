@@ -461,7 +461,8 @@ def social_worker_create(request):
     return render(request, 'accounts/social_worker_form.html', {
         'form': form,
         'title': 'Добавить социального работника',
-        'button_text': 'Добавить'
+        'button_text': 'Добавить',
+        'is_edit': False,
     })
 
 
@@ -494,7 +495,8 @@ def social_worker_edit(request, pk):
         'form': form,
         'worker': worker,
         'title': 'Редактировать социального работника',
-        'button_text': 'Сохранить изменения'
+        'button_text': 'Сохранить изменения',
+        'is_edit': True,
     })
 
 
@@ -948,7 +950,8 @@ def recipient_create(request):
     return render(request, 'accounts/recipient_form.html', {
         'form': form,
         'title': 'Добавить получателя услуг',
-        'button_text': 'Добавить'
+        'button_text': 'Добавить',
+        'is_edit': False,
     })
 
 
@@ -984,7 +987,8 @@ def recipient_edit(request, pk):
         'form': form,
         'recipient': recipient,
         'title': 'Редактировать получателя услуг',
-        'button_text': 'Сохранить изменения'
+        'button_text': 'Сохранить изменения',
+        'is_edit': True,
     })
 
 
@@ -1040,6 +1044,16 @@ def services_panel(request):
     """Панель 'Услуги': список работников и населённых пунктов"""
     workers = list(SocialWorker.objects.order_by('last_name', 'first_name').prefetch_related('recipients'))
     locations = list(ServiceLocation.objects.order_by('name'))
+    for loc in locations:
+        # Получатели, «привязанные» к пункту: в карточке выбран пункт или в адресе есть название пункта
+        # (та же идея, что и в таблице услуг по связке работник — пункт).
+        name_part = (loc.name or '').strip()
+        rq = Q(location=loc)
+        if name_part:
+            rq |= Q(location__isnull=True, address__icontains=name_part)
+        loc.recipients_living_count = (
+            ServiceRecipient.objects.filter(rq).distinct().count()
+        )
 
     worker_ids = [w.pk for w in workers]
     all_for_panel = list(
@@ -1370,8 +1384,8 @@ def report_pdf(request, report_type):
         headers = [
             PH('№'), PH('ФИО'), PH('Год рожд.'), PH('Адрес'),
             PH('Гр. инвал.'), PH('Оплата %'), PH('Кратность'),
-            PH('Прожив.'), PH('Дата приёма'), PH('Дни посещ.'),
-            PH('АПИ'), PH('Соц. работник'),
+            PH('Категория'), PH('Дата приёма'), PH('Дни посещ.'),
+            PH('АПИ'), PH('Примечания'), PH('Соц. работник'),
         ]
 
         data = [headers]
@@ -1388,10 +1402,11 @@ def report_pdf(request, report_type):
                 P(r.admission_date.strftime('%d.%m.%Y') if r.admission_date else '—'),
                 P(r.visit_days or '—'),
                 P(r.fire_detector_count),
+                P(r.notes or '—'),
                 P(r.social_worker.get_full_name() if r.social_worker else '—'),
             ])
 
-        col_widths = [22, 88, 36, 78, 42, 36, 55, 46, 52, 46, 28, 68]
+        col_widths = [20, 76, 32, 68, 38, 32, 48, 40, 46, 40, 22, 52, 62]
 
     elif report_type == 'assigned':
         filename = 'assigned_persons_report.pdf'
@@ -1659,3 +1674,23 @@ def report_pdf(request, report_type):
     response = HttpResponse(buf, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+from .views_extra import (  # noqa: E402
+    medical_checkup_panel_csv,
+    medical_checkup_panel_pdf,
+    report_csv,
+    safety_briefing_panel_csv,
+    safety_briefing_panel_pdf,
+    visit_planning_csv,
+    visit_planning_pdf,
+    workload_export_csv,
+    workload_panel,
+    workload_panel_csv,
+    workload_panel_pdf,
+    workload_record_create,
+    workload_record_delete,
+    workload_record_edit,
+    workload_records_list,
+    workload_summary,
+)
