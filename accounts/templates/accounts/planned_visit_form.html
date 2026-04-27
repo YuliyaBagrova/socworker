@@ -2,50 +2,253 @@
 
 {% block title %}{{ title }} — SocWorker{% endblock %}
 
+{% block body_attrs %} class="vp-planning-page vp-planned-visit-form-page"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/planned_visit_form_theme.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="page-header flex-wrap">
-    <h2><i class="bi bi-calendar-plus"></i> {{ title }}</h2>
+<div class="vp-pv-form-header">
+    <h1 class="vp-pv-page-title mb-0">
+        <span class="vp-pv-page-title__icon" aria-hidden="true">
+            {% if planned_visit %}<i class="bi bi-pencil-square"></i>{% else %}<i class="bi bi-calendar-plus"></i>{% endif %}
+        </span>
+        <span class="vp-pv-page-title__label">{{ title }}</span>
+    </h1>
+    {% if next_url %}
+    <a href="{{ next_url }}" class="vp-pv-back-btn"><i class="bi bi-arrow-left-circle-fill"></i> Назад</a>
+    {% else %}
+    <a href="{% url 'accounts:visit_planning' %}" class="vp-pv-back-btn"><i class="bi bi-arrow-left-circle-fill"></i> К планированию</a>
+    {% endif %}
 </div>
 
-<div class="card" style="max-width: 520px;">
-    <div class="card-body">
-        <form method="post">
+{{ recipient_assign_meta|json_script:"vp-pv-recipient-meta" }}
+
+<div class="card vp-pv-form-card">
+    <div class="card-body p-4">
+        <form method="post" novalidate id="vpPlannedVisitForm">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next_url }}">
-            <div class="alert alert-light border small py-2 mb-3 d-flex align-items-center flex-wrap gap-1">
-                <span class="badge rounded-pill bg-light text-dark border" style="background: rgba(240, 240, 245, 0.95) !important;">Сб / Вс</span>
-                <span class="text-muted">— выходные; в таймлайне и календаре такие колонки подсвечены.</span>
-            </div>
+
             {% if form.non_field_errors %}
-                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger rounded-3 mb-4">{{ form.non_field_errors }}</div>
             {% endif %}
-            {% for field in form.visible_fields %}
-                {% if field.name == 'social_worker' %}
-                    <h6 class="small fw-semibold text-secondary mb-2 mt-1">Назначить сотрудника</h6>
-                {% elif field.name == 'recipient' %}
-                    <h6 class="small fw-semibold text-secondary mb-2 mt-3">Подопечный</h6>
-                {% elif field.name == 'visit_date' %}
-                    <h6 class="small fw-semibold text-secondary mb-2 mt-3">Дата и время</h6>
-                {% endif %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+
+            <div class="section-title"><i class="bi bi-person-heart"></i> Подопечный</div>
+            <p class="section-lead mb-0">Колонка таблицы «Подопечный».</p>
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="{{ form.recipient.id_for_label }}">{{ form.recipient.label }}</label>
+                {{ form.recipient }}
+                {% for err in form.recipient.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="section-title"><i class="bi bi-postcard"></i> Таб. № и ФИО</div>
+            <p class="section-lead mb-0">Колонки «Таб. №» и отображение ФИО — подставляются при выборе подопечного.</p>
+            <div class="row g-3 mb-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="pv_form_recipient_emp">Таб. №</label>
+                    <input type="text" class="form-control" id="pv_form_recipient_emp" value="" readonly tabindex="-1" autocomplete="off">
                 </div>
-            {% endfor %}
-            <div class="d-flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-                {% if planned_visit %}
-                    <button type="submit" name="delete" value="1" class="btn btn-outline-danger"
-                            onclick="return confirm('Удалить этот запланированный визит?');">Удалить</button>
-                {% endif %}
+                <div class="col-md-6">
+                    <label class="form-label" for="pv_form_recipient_name">Подопечный (отображение)</label>
+                    <input type="text" class="form-control" id="pv_form_recipient_name" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-person-badge"></i> Соц. работник</div>
+            <p class="section-lead mb-0">Колонка «Соц. работник».</p>
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="{{ form.social_worker.id_for_label }}">{{ form.social_worker.label }}</label>
+                {{ form.social_worker }}
+                {% for err in form.social_worker.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="section-title"><i class="bi bi-calendar-week"></i> Кратность и дни посещений</div>
+            <p class="section-lead mb-0">Колонки «Кратность» и «Дни посещений».</p>
+            <div class="row g-3 mb-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.recipient_visit_frequency.id_for_label }}">{{ form.recipient_visit_frequency.label }}</label>
+                    {{ form.recipient_visit_frequency }}
+                    {% if form.recipient_visit_frequency.help_text %}<div class="form-text">{{ form.recipient_visit_frequency.help_text }}</div>{% endif %}
+                    {% for err in form.recipient_visit_frequency.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.recipient_visit_days.id_for_label }}">{{ form.recipient_visit_days.label }}</label>
+                    {{ form.recipient_visit_days }}
+                    {% if form.recipient_visit_days.help_text %}<div class="form-text">{{ form.recipient_visit_days.help_text }}</div>{% endif %}
+                    {% for err in form.recipient_visit_days.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-speedometer2"></i> Визитов в неделю</div>
+            <p class="section-lead mb-0">Колонка «Виз./нед.».</p>
+            <div class="vp-assign-vpw-pill mb-3 mt-3">
+                По кратности сейчас: <strong id="vpPvVpwValue">{{ visits_per_week_hint }}</strong>
+            </div>
+
+            <div class="section-title"><i class="bi bi-check2-circle"></i> Согласованность</div>
+            <p class="section-lead mb-0">Колонка «Согласованность».</p>
+            <div class="vp-assign-consistency-box mb-3 mt-3" id="vpPvConsistency">
+                <span class="text-muted">Укажите кратность и дни — здесь отобразится результат.</span>
+            </div>
+
+            <div class="section-title"><i class="bi bi-calendar-event"></i> Дата визита</div>
+            <p class="section-lead mb-0">Дата и время запланированного визита (колонка «Запланированные визиты»).</p>
+            <div class="row g-3 mb-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.visit_date.id_for_label }}">{{ form.visit_date.label }}</label>
+                    {{ form.visit_date }}
+                    {% for err in form.visit_date.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.visit_time.id_for_label }}">{{ form.visit_time.label }}</label>
+                    {{ form.visit_time }}
+                    {% for err in form.visit_time.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4 pt-3 border-top">
                 {% if next_url %}
-                    <a href="{{ next_url }}" class="btn btn-outline-secondary">Назад</a>
+                <a href="{{ next_url }}" class="btn btn-outline-secondary vp-pv-btn-cancel">Отмена</a>
                 {% else %}
-                    <a href="{% url 'accounts:visit_planning' %}" class="btn btn-outline-secondary">К планированию</a>
+                <a href="{% url 'accounts:visit_planning' %}" class="btn btn-outline-secondary vp-pv-btn-cancel">К планированию</a>
                 {% endif %}
+                <button type="submit" class="btn btn-primary vp-pv-btn-save"><i class="bi bi-check-circle"></i> {{ submit_label }}</button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var metaEl = document.getElementById('vp-pv-recipient-meta');
+    var RECIPIENT_META = {};
+    if (metaEl && metaEl.textContent) {
+        try { RECIPIENT_META = JSON.parse(metaEl.textContent); } catch (e) {}
+    }
+    var selR = document.getElementById('id_recipient');
+    var selW = document.getElementById('id_social_worker');
+    var emp = document.getElementById('pv_form_recipient_emp');
+    var name = document.getElementById('pv_form_recipient_name');
+    var freqEl = document.getElementById('id_recipient_visit_frequency');
+    var daysEl = document.getElementById('id_recipient_visit_days');
+    var vpwEl = document.getElementById('vpPvVpwValue');
+    var consEl = document.getElementById('vpPvConsistency');
+
+    function visitsPerWeek(freq) {
+        if (freq === 'daily') return 7;
+        if (freq === '1' || freq === '2' || freq === '3' || freq === '4' || freq === '5') {
+            return parseInt(freq, 10);
+        }
+        return 0;
+    }
+
+    function visitWeekdayFlags(visitDays) {
+        var flags = [false, false, false, false, false, false, false];
+        var vd = (visitDays || '').trim();
+        if (!vd) return flags;
+        var t = vd.toLowerCase().replace(/ё/g, 'е').replace(/;/g, ',');
+        var parts = t.split(',');
+        function consider(p) {
+            p = p.trim();
+            if (!p) return;
+            if (/^пн/.test(p) || p.indexOf('понедельник') >= 0) flags[0] = true;
+            if (/^вт/.test(p) || p.indexOf('вторник') >= 0) flags[1] = true;
+            if (/^ср/.test(p) || p === 'среда' || p.indexOf('среду') >= 0 || p.indexOf('среды') >= 0) flags[2] = true;
+            if (/^чт/.test(p) || p.indexOf('четверг') >= 0) flags[3] = true;
+            if (/^пт/.test(p) || p.indexOf('пятниц') >= 0) flags[4] = true;
+            if (/^сб/.test(p) || p.indexOf('суббот') >= 0) flags[5] = true;
+            if (/^вс/.test(p) || p.indexOf('воскресен') >= 0) flags[6] = true;
+        }
+        var i;
+        for (i = 0; i < parts.length; i++) consider(parts[i]);
+        if (!flags.some(function (x) { return x; })) {
+            if (t.indexOf('пн') >= 0 || t.indexOf('понедельник') >= 0) flags[0] = true;
+            if (t.indexOf('вт') >= 0 || t.indexOf('вторник') >= 0) flags[1] = true;
+            if (t.indexOf('ср') >= 0 || t.indexOf('среда') >= 0 || t.indexOf('среду') >= 0) flags[2] = true;
+            if (t.indexOf('чт') >= 0 || t.indexOf('четверг') >= 0) flags[3] = true;
+            if (t.indexOf('пт') >= 0 || t.indexOf('пятниц') >= 0) flags[4] = true;
+            if (t.indexOf('сб') >= 0 || t.indexOf('суббот') >= 0) flags[5] = true;
+            if (t.indexOf('вс') >= 0 || t.indexOf('воскресен') >= 0) flags[6] = true;
+        }
+        return flags;
+    }
+
+    function validateSchedule(freq, visitDays) {
+        if (!freq) return null;
+        var vd = (visitDays || '').trim();
+        var flags = visitWeekdayFlags(visitDays);
+        var n = 0;
+        for (var j = 0; j < 7; j++) if (flags[j]) n++;
+        var exp = visitsPerWeek(freq);
+
+        if (freq === 'daily') {
+            if (!vd) return null;
+            if (n !== 7) {
+                return 'При кратности «Ежедневно» оставьте «Дни посещений» пустыми (считаются все дни) или укажите все семь дней недели. Сейчас распознано дней: ' + n + '.';
+            }
+            return null;
+        }
+        if (!vd) {
+            return 'Укажите дни посещений через запятую (например: Пн, Ср, Пт). Число дней должно совпадать с кратностью: ' + exp + ' раз(а) в неделю.';
+        }
+        if (n !== exp) {
+            return 'Кратность — ' + exp + ' раз(а) в неделю, а в «Днях посещений» распознано ' + n + ' дн. Числа должны совпадать.';
+        }
+        if (n === 0) {
+            return 'Не удалось распознать дни недели в «Днях посещений». Используйте: Пн, Вт, Ср, …';
+        }
+        return null;
+    }
+
+    function syncRecipient() {
+        if (!selR || !emp || !name) return;
+        var pk = selR.value;
+        var m = pk ? RECIPIENT_META[pk] : null;
+        if (!m) {
+            emp.value = '';
+            name.value = '';
+            return;
+        }
+        emp.value = m.employee_id || '';
+        name.value = m.full_name || '';
+        if (selW && m.worker_pk) selW.value = m.worker_pk;
+    }
+
+    function syncVpwAndConsistency() {
+        var freq = freqEl ? freqEl.value : '';
+        var days = daysEl ? daysEl.value : '';
+        if (vpwEl) vpwEl.textContent = String(visitsPerWeek(freq));
+        if (!consEl) return;
+        consEl.classList.remove('is-ok', 'is-warn');
+        var err = validateSchedule(freq, days);
+        if (err) {
+            consEl.classList.add('is-warn');
+            consEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>' + err;
+        } else if (freq) {
+            consEl.classList.add('is-ok');
+            consEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> График согласован (как отметка «да» в таблице).';
+        } else {
+            consEl.innerHTML = '<span class="text-muted">Укажите кратность и дни — здесь отобразится результат.</span>';
+        }
+    }
+
+    if (selR) {
+        selR.addEventListener('change', function () {
+            syncRecipient();
+            syncVpwAndConsistency();
+        });
+    }
+    if (freqEl) freqEl.addEventListener('change', syncVpwAndConsistency);
+    if (daysEl) {
+        daysEl.addEventListener('input', syncVpwAndConsistency);
+        daysEl.addEventListener('change', syncVpwAndConsistency);
+    }
+    syncRecipient();
+    syncVpwAndConsistency();
+})();
+</script>
 {% endblock %}

@@ -1,12 +1,18 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.db.models import Q
-
 from accounts.belarus_phone import BY_PHONE_EXAMPLE, normalize_belarus_phone
 
-from .models import Department, InventoryProfile, InventoryUnit
+from .inv_user_sql import (
+    inv_department_id_for_user,
+    update_auth_user_inventory,
+    user_ids_in_department_or_self,
+    user_ids_with_inv_role_assigned,
+)
+from .models import Department, InvRole, InventoryUnit
 from .permissions import inventory_role
+
+User = get_user_model()
 
 
 class InventoryUnitForm(forms.ModelForm):
@@ -34,15 +40,11 @@ class InventoryUnitForm(forms.ModelForm):
         if role == 'warehouse_keeper':
             self.fields['responsible'].queryset = User.objects.order_by('username')
         elif role == 'department_head':
-            prof = getattr(user, 'inventory_profile', None)
-            dept_id = prof.department_id if prof else None
+            dept_id = inv_department_id_for_user(user.pk)
             if dept_id:
+                ids = user_ids_in_department_or_self(dept_id, user.pk)
                 self.fields['responsible'].queryset = (
-                    User.objects.filter(
-                        Q(pk=user.pk) | Q(inventory_profile__department_id=dept_id),
-                    )
-                    .distinct()
-                    .order_by('username')
+                    User.objects.filter(pk__in=ids).order_by('username')
                 )
             else:
                 self.fields['responsible'].queryset = User.objects.filter(pk=user.pk).order_by('username')
@@ -56,16 +58,13 @@ class InventoryUnitForm(forms.ModelForm):
             return responsible
         role = inventory_role(user)
         if role == 'department_head':
-            prof = getattr(user, 'inventory_profile', None)
-            dept_id = prof.department_id if prof else None
+            dept_id = inv_department_id_for_user(user.pk)
             if not dept_id:
                 if responsible != user:
                     raise forms.ValidationError('Укажите себя как ответственного или закрепите отделение в профиле.')
                 return responsible
-            r_prof = getattr(responsible, 'inventory_profile', None)
-            ok = responsible.pk == user.pk or (
-                r_prof is not None and r_prof.department_id == dept_id
-            )
+            r_dept = inv_department_id_for_user(responsible.pk)
+            ok = responsible.pk == user.pk or (r_dept is not None and r_dept == dept_id)
             if not ok:
                 raise forms.ValidationError('Ответственный должен быть из вашего отделения.')
         return responsible
@@ -92,14 +91,13 @@ class DepartmentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['name'].label = 'Название отделения'
         self.fields['head'].label = 'Руководитель отделения'
-        self.fields['head'].queryset = User.objects.filter(
-            inventory_profile__isnull=False,
-        ).order_by('inventory_profile__full_name', 'username')
+        ids = user_ids_with_inv_role_assigned()
+        self.fields['head'].queryset = User.objects.filter(pk__in=ids).order_by('last_name', 'first_name', 'username')
         self.fields['head'].required = False
 
 
 class InventoryStaffForm(forms.Form):
-    """Создание пользователя с профилем инвентаризации (логин/пароль в User)."""
+    """Создание пользователя с полями инвентаризации (логин/пароль в auth_user)."""
 
     username = forms.CharField(label='Логин', max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password1 = forms.CharField(
@@ -118,9 +116,9 @@ class InventoryStaffForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
-    role = forms.ChoiceField(
+    role = forms.ModelChoiceField(
         label='Роль',
-        choices=InventoryProfile.ROLE_CHOICES,
+        queryset=InvRole.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
     phone = forms.CharField(
@@ -159,13 +157,23 @@ class InventoryStaffForm(forms.Form):
             password=data['password1'],
             email='',
         )
-        profile = InventoryProfile.objects.create(
-            user=user,
-            full_name=data['full_name'].strip(),
-            position=(data.get('position') or '').strip(),
-            department=data.get('department'),
-            role=data['role'],
-            phone=(data.get('phone') or '').strip(),
+        dept = data.get('department')
+        role = data['role']
+        parts = (data.get('full_name') or '').strip().split(None, 1)
+        if len(parts) >= 2:
+            ln, fn = parts[0], parts[1]
+        elif parts:
+            ln, fn = parts[0], ''
+        else:
+            ln, fn = '', ''
+        update_auth_user_inventory(
+            user.pk,
+            inv_role_id=role.pk,
+            inv_department_id=dept.pk if dept else None,
+            inv_position=(data.get('position') or '').strip(),
+            inv_phone=(data.get('phone') or '').strip(),
+            last_name=ln,
+            first_name=fn,
         )
-        profile.sync_user_names()
-        return user, profile
+        return user
+

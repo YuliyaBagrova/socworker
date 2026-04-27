@@ -3,25 +3,22 @@ from __future__ import annotations
 
 from typing import Optional
 
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from .inv_user_sql import inv_role_code_for_user
 
 
 def inventory_role(user) -> Optional[str]:
     """
-    Возвращает роль: warehouse_keeper | department_head | employee.
-    Без профиля инвентаризации пользователь считается сотрудником (видит только свои единицы).
-    Суперпользователь — завхоз.
+    Код роли: warehouse_keeper | department_head | employee.
+    Суперпользователь — завхоз. Без записи в inv_roles — сотрудник.
     """
     if not user.is_authenticated:
         return None
     if user.is_superuser:
         return 'warehouse_keeper'
-    profile = getattr(user, 'inventory_profile', None)
-    if not profile:
+    code = inv_role_code_for_user(user.pk)
+    if not code:
         return 'employee'
-    return profile.role
+    return code
 
 
 def can_manage_inventory(user) -> bool:

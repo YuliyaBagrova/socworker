@@ -66,6 +66,7 @@
         flex-direction: column;
         min-height: 0;
         margin-bottom: 0 !important;
+        overflow: visible;
     }
     .sw-workers-layout .sw-table-card > .card-body {
         flex: 1 1 auto;
@@ -380,12 +381,15 @@
         min-height: 12rem;
         max-width: 100%;
         min-width: 0;
+        overscroll-behavior-x: contain;
     }
     body.sw-recipients-page .sw-workers-layout .sw-sheet-wrap {
         min-height: 0;
     }
+    /* Как во вкладке «Таблица» планирования визитов: ширина по содержимому — горизонтальный скролл + sticky «Действия» */
     body.sw-recipients-page .sw-sheet {
-        max-width: 100%;
+        width: max-content;
+        min-width: 100%;
     }
     .sw-sheet {
         width: 100%;
@@ -424,6 +428,40 @@
     }
     .sw-sheet tbody tr.data-row:hover {
         background: #f0edff !important;
+    }
+    /* Колонка «Действия»: sticky справа при горизонтальной прокрутке (как планирование визитов) */
+    body.sw-recipients-page .sw-sheet thead th.vp-actions-th {
+        position: sticky;
+        right: 0;
+        top: 0;
+        z-index: 25;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        box-shadow: -4px 0 10px rgba(0, 0, 0, 0.07);
+    }
+    body.sw-recipients-page .sw-sheet tbody td.vp-actions-cell {
+        position: sticky;
+        right: 0;
+        z-index: 15;
+        vertical-align: middle;
+        box-shadow: -3px 0 8px rgba(0, 0, 0, 0.06);
+        isolation: isolate;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:nth-child(odd) td.vp-actions-cell {
+        background: #fafbfc;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:nth-child(even) td.vp-actions-cell {
+        background: #fff;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:hover td.vp-actions-cell {
+        background: #f0edff !important;
+    }
+    body.sw-recipients-page .sw-sheet td.vp-actions-cell .sw-actions-cell {
+        position: relative;
+        z-index: 1;
+    }
+    body.sw-recipients-page .sw-sheet td.vp-actions-cell .sw-actions-cell a {
+        position: relative;
+        z-index: 2;
     }
     .sw-sheet .col-text-left {
         text-align: left !important;
@@ -604,6 +642,171 @@
     .sw-workers-layout .sw-table-card .pagination-wrap {
         flex-shrink: 0;
     }
+    /* Справка — как «Прохождение медосмотра», палитра панели */
+    body.sw-recipients-page .sw-recipients-page-guide {
+        flex-shrink: 0;
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-page-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 243, 255, 0.72) 42%, rgba(237, 233, 254, 0.55) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        box-shadow:
+            0 4px 6px -1px rgba(45, 38, 82, 0.06),
+            0 12px 28px -8px rgba(102, 126, 234, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-page-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #a5b4fc 0%, #667eea 48%, #5b21b6 100%);
+        opacity: 0.95;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #5b21b6;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 233, 254, 0.9) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #3d2f5c;
+        margin: 0;
+        line-height: 1.3;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        background: rgba(102, 126, 234, 0.14);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle:hover {
+        background: rgba(102, 126, 234, 0.22);
+        border-color: rgba(79, 70, 229, 0.45);
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.4);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(91, 33, 182, 0.12);
+        border-color: rgba(91, 33, 182, 0.4);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 243, 255, 0.65) 50%, rgba(237, 233, 254, 0.5) 100%);
+        border: 1px solid rgba(199, 210, 254, 0.65);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 4px 20px rgba(45, 38, 82, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    body.sw-recipients-page #swRecipientsGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(102, 126, 234, 0.75);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__lead strong {
+        color: #3d2f5c;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #667eea, #7c3aed);
+        box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.6);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #4c1d95;
+    }
 {% endblock %}
 
 {% block content %}
@@ -630,11 +833,39 @@
     </div>
 </div>
 
+<div class="sw-filter-dash mb-0 sw-services-guide sw-recipients-page-guide">
+    <div class="sw-filter-dash-inner sw-services-guide__inner">
+        <div class="sw-services-guide__top">
+            <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+            <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="sw-services-guide__title">Справка по разделу «Получатели услуг»</span>
+                <button type="button" id="swRecipientsGuideToggle" class="sw-services-guide__toggle"
+                        data-bs-toggle="collapse" data-bs-target="#swRecipientsGuideCollapse"
+                        aria-expanded="false" aria-controls="swRecipientsGuideCollapse">
+                    Подсказка
+                    <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse" id="swRecipientsGuideCollapse">
+            <div class="sw-services-guide__panel">
+                <p class="sw-services-guide__lead">
+                    Список получателей с адресом, контактами и закреплением за соцработниками. Настройте поиск, фильтры и сортировку, затем нажмите <strong>«Найти»</strong>.
+                </p>
+                <ul class="sw-services-guide__list">
+                    <li><strong>PDF и CSV</strong> — выгрузка по текущим условиям отбора или только по отмеченным строкам.</li>
+                    <li><strong>Карточка</strong> — откройте ФИО для просмотра и изменения данных подопечного.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="sw-filter-dash mb-0">
     <div class="sw-filter-dash-inner">
         <h2 class="sw-page-title sw-filter-panel-heading mb-0">
             <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
-            <span class="sw-page-title__label">Поиск и фильтры</span>
+            <span class="sw-page-title__label">Поиск, фильтр и сортировка</span>
         </h2>
         <form method="get" class="row g-3 align-items-end">
             {% if workload_return %}
@@ -647,19 +878,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control sw-search-input" id="search" name="search"
-                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер, адрес…">
-                </div>
-            </div>
-            <div class="col-12 col-lg-3">
-                <label for="disability" class="sw-filter-label d-block">Группа инвалидности</label>
-                <div class="sw-select-wrap">
-                    <select class="form-select sw-status-select sw-select-native" id="disability" name="disability">
-                        <option value="">Все группы</option>
-                        {% for value, label in disability_choices %}
-                            <option value="{{ value }}" {% if disability_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер, адрес, телефон…">
                 </div>
             </div>
             <div class="col-12 col-lg-3">
@@ -674,6 +893,19 @@
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
+            <div class="col-12 col-lg-3">
+                <label for="rec_sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="rec_sort" name="rec_sort"
+                            title="При смене варианта список обновится"
+                            onchange="this.form.submit()">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
             <div class="col-12 col-lg-2">
                 <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
                     <i class="bi bi-search"></i> Найти
@@ -684,14 +916,14 @@
                 <a href="{% url 'accounts:recipients_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                     <i class="bi bi-x-lg"></i> Показать всех подопечных
                 </a>
-                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск и фильтры</span>
+                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск, фильтр по категории и сортировку</span>
             </div>
             {% endif %}
         </form>
     </div>
 </div>
 
-<div class="card sw-table-card">
+<div class="card sw-table-card" id="recipients-panel-export-table">
     <div class="card-body p-0">
         {% if page_obj %}
             <div class="sw-sheet-wrap">
@@ -716,7 +948,7 @@
                             <th class="col-narrow">АПИ</th>
                             <th class="col-text-left">Примечания</th>
                             <th class="col-text-left">Соц. работник</th>
-                            <th class="text-center col-narrow">Действия</th>
+                            <th class="text-center col-narrow vp-actions-th">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -749,7 +981,7 @@
                                         <span class="text-muted">—</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="vp-actions-cell">
                                     <div class="sw-actions-cell">
                                         <a href="{% url 'accounts:recipient_detail' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Смотреть">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
@@ -777,12 +1009,12 @@
                         <ul class="pagination pagination-sm justify-content-center mb-0">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
@@ -792,12 +1024,12 @@
                             </li>
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-right"></i>
                                     </a>
                                 </li>
@@ -913,6 +1145,29 @@
 (function () {
     const selectAll = document.getElementById('recipientSelectAll');
     const pdfConfirm = document.getElementById('recipientsPdfConfirm');
+    const tableAnchor = document.getElementById('recipients-panel-export-table');
+
+    function scrollToExportTable() {
+        if (tableAnchor) {
+            tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    document.querySelectorAll('input[name="rec_pdf_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+    document.querySelectorAll('input[name="rec_csv_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+
     if (selectAll) {
         selectAll.addEventListener('change', function () {
             document.querySelectorAll('.recipient-select').forEach(function (cb) {
@@ -932,7 +1187,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.recipient-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного получателя в таблице или выберите «Весь список получателей».');
+                    var pdfModal = document.getElementById('recipientsPdfModal');
+                    var pdfInst = pdfModal && window.bootstrap ? bootstrap.Modal.getInstance(pdfModal) : null;
+                    if (pdfInst) {
+                        pdfInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного получателя в таблице ниже или выберите «Весь список получателей».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {
@@ -959,7 +1222,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.recipient-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного получателя в таблице или выберите «Весь список получателей».');
+                    var csvModal = document.getElementById('recipientsCsvModal');
+                    var csvInst = csvModal && window.bootstrap ? bootstrap.Modal.getInstance(csvModal) : null;
+                    if (csvInst) {
+                        csvInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного получателя в таблице ниже или выберите «Весь список получателей».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {

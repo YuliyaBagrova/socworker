@@ -583,7 +583,7 @@
                    href="{% url 'accounts:services_panel' %}">
                     <i class="bi bi-briefcase-fill"></i> Услуги
                 </a>
-                <a class="nav-pill {% if request.resolver_match.url_name == 'visit_planning' %}active{% endif %}"
+                <a class="nav-pill {% if 'visit_planning' in request.resolver_match.url_name or 'planned_visit' in request.resolver_match.url_name %}active{% endif %}"
                    href="{% url 'accounts:visit_planning' %}">
                     <i class="bi bi-calendar-week"></i> Планирование визитов
                 </a>
@@ -656,6 +656,16 @@
                 <button type="button" class="btn-close" id="homeReturnStripClose" aria-label="Закрыть подсказку"></button>
             </div>
         </div>
+        <div id="visitPlanningReturnStrip" class="home-return-strip" hidden role="region" aria-label="Возврат к планированию визитов">
+            <div class="home-return-text">
+                <i class="bi bi-calendar-week flex-shrink-0" style="color:#fdba74;" aria-hidden="true"></i>
+                <span class="text-truncate">Перешли с <strong>Планирования визитов</strong>? Вернитесь кнопкой или закройте подсказку крестиком.</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <a class="btn btn-sm btn-light rounded-pill px-3 fw-semibold" id="visitPlanningReturnLink" href="{% url 'accounts:visit_planning' %}">К планированию</a>
+                <button type="button" class="btn-close" id="visitPlanningReturnStripClose" aria-label="Закрыть подсказку"></button>
+            </div>
+        </div>
         {% if messages %}
             {% for message in messages %}
                 <div class="home-return-strip home-return-strip--flash home-return-strip--{{ message.level_tag|default:'info' }}" role="alert">
@@ -695,8 +705,16 @@
     <script>
     (function () {
         var KEY = 'socworkerFromHome';
+        var KEY_VP = 'socworkerFromVisitPlanning';
+        var KEY_VP_URL = 'socworkerVisitPlanningReturnUrl';
         function isDashboardPath() {
             return /\/accounts\/dashboard\/?$/.test(window.location.pathname);
+        }
+        function isVisitPlanningPath() {
+            return /\/accounts\/visits\/?$/.test(window.location.pathname);
+        }
+        function isRecipientSectionPath() {
+            return /\/accounts\/recipients(\/|$)/.test(window.location.pathname);
         }
         function syncBelowNavStackHeight() {
             var stack = document.getElementById('belowNavStack');
@@ -717,13 +735,54 @@
             try { sessionStorage.removeItem(KEY); } catch (e) {}
             syncBelowNavStackHeight();
         }
+        function showVisitPlanningReturnStrip() {
+            var el = document.getElementById('visitPlanningReturnStrip');
+            var link = document.getElementById('visitPlanningReturnLink');
+            if (!el) return;
+            try {
+                var back = sessionStorage.getItem(KEY_VP_URL);
+                if (link && back && back.charAt(0) === '/' && back.indexOf('//') === -1) {
+                    link.setAttribute('href', back);
+                }
+            } catch (e) {}
+            el.removeAttribute('hidden');
+            syncBelowNavStackHeight();
+        }
+        function hideVisitPlanningReturnStrip() {
+            var el = document.getElementById('visitPlanningReturnStrip');
+            if (!el) return;
+            el.setAttribute('hidden', 'hidden');
+            var link = document.getElementById('visitPlanningReturnLink');
+            if (link) {
+                link.setAttribute('href', '{% url "accounts:visit_planning" %}');
+            }
+            try {
+                sessionStorage.removeItem(KEY_VP);
+                sessionStorage.removeItem(KEY_VP_URL);
+            } catch (e) {}
+            syncBelowNavStackHeight();
+        }
         document.addEventListener('DOMContentLoaded', function () {
             if (isDashboardPath()) {
                 try { sessionStorage.removeItem(KEY); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP_URL); } catch (e) {}
                 hideHomeReturnStrip();
-            } else {
+                hideVisitPlanningReturnStrip();
+            } else if (isVisitPlanningPath()) {
+                try { sessionStorage.removeItem(KEY_VP); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP_URL); } catch (e) {}
+                hideVisitPlanningReturnStrip();
                 try {
                     if (sessionStorage.getItem(KEY) === '1') {
+                        showHomeReturnStrip();
+                    }
+                } catch (e) {}
+            } else {
+                try {
+                    if (isRecipientSectionPath() && sessionStorage.getItem(KEY_VP) === '1') {
+                        showVisitPlanningReturnStrip();
+                    } else if (sessionStorage.getItem(KEY) === '1') {
                         showHomeReturnStrip();
                     }
                 } catch (e) {}
@@ -731,6 +790,10 @@
             var closeBtn = document.getElementById('homeReturnStripClose');
             if (closeBtn) {
                 closeBtn.addEventListener('click', hideHomeReturnStrip);
+            }
+            var closeVp = document.getElementById('visitPlanningReturnStripClose');
+            if (closeVp) {
+                closeVp.addEventListener('click', hideVisitPlanningReturnStrip);
             }
             var stack = document.getElementById('belowNavStack');
             if (stack) {

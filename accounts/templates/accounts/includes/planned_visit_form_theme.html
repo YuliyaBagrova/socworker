@@ -1,0 +1,241 @@
+{# «Запланировать / Изменить визит» — структура как «Изменить медосмотр», палитра панели «Планирование визитов». #}
+    body.vp-planning-page.vp-planned-visit-form-page {
+        min-height: 100vh;
+        background-color: #fff7ed;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(254, 243, 199, 0.42) 45%, rgba(217, 249, 157, 0.32) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(251, 191, 36, 0.42), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(163, 230, 53, 0.3), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(251, 146, 60, 0.2), transparent 58%),
+            linear-gradient(118deg, rgba(254, 215, 170, 0.45) 0%, rgba(217, 249, 157, 0.18) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(255, 250, 235, 0.4) 0%, rgba(190, 242, 100, 0.14) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(234, 179, 8, 0.06) 100%);
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .main-content {
+        background: transparent;
+        max-width: 920px;
+        min-width: 0;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        box-sizing: border-box;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-page-title__icon {
+        flex-shrink: 0;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 38%, #a3e635 72%, #65a30d 100%);
+        box-shadow:
+            0 6px 22px rgba(234, 88, 12, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-page-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(
+            105deg,
+            #7c2d12 0%,
+            #c2410c 18%,
+            #ea580c 34%,
+            #ca8a04 50%,
+            #65a30d 68%,
+            #84cc16 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.vp-planning-page.vp-planned-visit-form-page .vp-pv-page-title__label {
+            color: #9a3412;
+            background: none;
+        }
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #c2410c;
+        border: 1.5px solid rgba(251, 146, 60, 0.55);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 247, 237, 0.92) 100%);
+        box-shadow:
+            0 4px 18px rgba(251, 146, 60, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-back-btn:hover {
+        color: #9a3412;
+        border-color: rgba(234, 88, 12, 0.65);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(251, 146, 60, 0.28);
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-back-btn i {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card {
+        border: 1px solid rgba(251, 146, 60, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 20px 56px rgba(154, 52, 18, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .card-body {
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #9a3412;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #f97316;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(255, 247, 237, 0.95) 0%, rgba(254, 243, 199, 0.35) 72%, transparent 100%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .section-title i {
+        color: #ea580c;
+        font-size: 1.05rem;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .section-lead {
+        font-size: 0.8125rem;
+        color: #78716c;
+        margin: -0.35rem 0 1rem;
+        line-height: 1.45;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-label {
+        color: #57534e;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-control,
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-select,
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card textarea.form-control {
+        border-color: rgba(251, 146, 60, 0.4);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-control:focus,
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-select:focus,
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card textarea.form-control:focus {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.25);
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .form-control[readonly] {
+        background: rgba(255, 247, 237, 0.75);
+        color: #44403c;
+    }
+    /* type=date/time: ISO value + светлая схема — иначе в Chrome при тёмной ОС текст даты бывает не виден */
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card input.form-control[type="date"],
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card input.form-control[type="time"] {
+        color: #292524;
+        color-scheme: light;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-assign-vpw-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(254, 243, 199, 0.9) 0%, rgba(217, 249, 157, 0.5) 100%);
+        border: 1px solid rgba(234, 179, 8, 0.35);
+        font-size: 0.9rem;
+        color: #713f12;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-assign-vpw-pill strong {
+        font-size: 1.15rem;
+        color: #9a3412;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-assign-consistency-box {
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        border: 1px solid rgba(231, 229, 228, 0.9);
+        background: rgba(250, 250, 249, 0.9);
+        min-height: 3rem;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-assign-consistency-box.is-ok {
+        border-color: rgba(132, 204, 22, 0.45);
+        background: rgba(236, 253, 245, 0.65);
+        color: #14532d;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-assign-consistency-box.is-warn {
+        border-color: rgba(251, 191, 36, 0.55);
+        background: rgba(254, 243, 199, 0.45);
+        color: #713f12;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card .border-top {
+        border-color: rgba(251, 146, 60, 0.22) !important;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.15rem;
+        border-color: rgba(251, 146, 60, 0.45);
+        color: #57534e;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-btn-cancel:hover {
+        background: rgba(255, 247, 237, 0.95);
+        border-color: #fb923c;
+        color: #9a3412;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-btn-save {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow: 0 4px 18px rgba(102, 126, 234, 0.4);
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-btn-save:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 6px 22px rgba(118, 75, 162, 0.38);
+        color: #fff;
+    }
+    body.vp-planning-page.vp-planned-visit-form-page .vp-pv-form-card:hover {
+        box-shadow:
+            0 22px 60px rgba(154, 52, 18, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }

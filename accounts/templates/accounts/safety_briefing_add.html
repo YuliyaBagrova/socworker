@@ -1,0 +1,127 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Новая запись об инструктаже — SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-safety-briefing-assign-page"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/safety_briefing_assign_form_theme.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header sw-entity-form-header">
+    <h1 class="safety-briefing-assign-page-title mb-0">
+        <span class="safety-briefing-assign-page-title__icon" aria-hidden="true"><i class="bi bi-shield-plus"></i></span>
+        <span class="safety-briefing-assign-page-title__label">Новая запись об инструктаже</span>
+    </h1>
+    <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:safety_briefing_panel' %}{% endif %}" class="safety-briefing-assign-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели техники безопасности
+    </a>
+</div>
+
+{% if not briefing_form.fields.social_worker.queryset.count %}
+<div class="alert alert-warning border-0 rounded-3 shadow-sm" style="border-left: 4px solid #f59e0b !important;">
+    <p class="mb-0">Нет сотрудников в справочнике. Добавьте соцработника в разделе «Соц. работники», затем создайте запись инструктажа.</p>
+</div>
+{% else %}
+<div class="card safety-briefing-assign-form-card">
+    <div class="card-body p-4">
+        <form method="post" novalidate action="{% url 'accounts:safety_briefing_add' %}">
+            {% csrf_token %}
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+
+            <div class="section-title"><i class="bi bi-person-plus"></i> Сотрудник</div>
+            <div class="mb-3">
+                <label class="form-label" for="id_social_worker_select">Сотрудник</label>
+                <select name="social_worker" id="id_social_worker_select" class="form-select" required>
+                    <option value="">Выберите…</option>
+                    {% for sw in briefing_form.fields.social_worker.queryset %}
+                    <option value="{{ sw.pk }}"
+                            data-emp="{{ sw.employee_id|default:'' }}"
+                            data-fullname="{{ sw.get_full_name|escape }}"
+                            {% if briefing_form.social_worker.value|stringformat:"s" == sw.pk|stringformat:"s" %}selected{% endif %}>{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                    {% endfor %}
+                </select>
+                {% if briefing_form.social_worker.errors %}
+                <div class="text-danger small mt-1">{{ briefing_form.social_worker.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="safety_assign_worker_emp_id">Табельный номер</label>
+                    <input type="text" class="form-control" id="safety_assign_worker_emp_id" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="safety_assign_worker_name">ФИО</label>
+                    <input type="text" class="form-control" id="safety_assign_worker_name" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-shield-check"></i> Инструктаж</div>
+            <div class="mb-3">
+                <label for="{{ briefing_form.briefing_title.id_for_label }}" class="form-label">{{ briefing_form.briefing_title.label }}</label>
+                {{ briefing_form.briefing_title }}
+                {% if briefing_form.briefing_title.errors %}<div class="text-danger small mt-1">{{ briefing_form.briefing_title.errors }}</div>{% endif %}
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ briefing_form.briefing_date.id_for_label }}" class="form-label">{{ briefing_form.briefing_date.label }}</label>
+                    {{ briefing_form.briefing_date }}
+                    {% if briefing_form.briefing_date.errors %}<div class="text-danger small mt-1">{{ briefing_form.briefing_date.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check mb-0 pb-1 w-100">
+                        {{ briefing_form.passed }}
+                        <label class="form-check-label" for="{{ briefing_form.passed.id_for_label }}">{{ briefing_form.passed.label }}</label>
+                        {% if briefing_form.passed.errors %}<div class="text-danger small mt-1">{{ briefing_form.passed.errors }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="{{ briefing_form.notes.id_for_label }}" class="form-label">{{ briefing_form.notes.label }}</label>
+                {{ briefing_form.notes }}
+                {% if briefing_form.notes.errors %}<div class="text-danger small mt-1">{{ briefing_form.notes.errors }}</div>{% endif %}
+            </div>
+
+            {% if briefing_form.non_field_errors %}
+            <div class="alert alert-danger">{{ briefing_form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:safety_briefing_panel' %}{% endif %}" class="btn btn-outline-secondary safety-briefing-btn-cancel">Отмена</a>
+                <button type="submit" class="btn btn-primary safety-briefing-btn-save"><i class="bi bi-check-circle"></i> Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if briefing_form.fields.social_worker.queryset.count %}
+<script>
+(function () {
+    const select = document.getElementById('id_social_worker_select');
+    const emp = document.getElementById('safety_assign_worker_emp_id');
+    const name = document.getElementById('safety_assign_worker_name');
+    function sync() {
+        if (!select || !emp || !name) return;
+        const opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) {
+            emp.value = '';
+            name.value = '';
+            return;
+        }
+        emp.value = opt.getAttribute('data-emp') || '';
+        name.value = opt.getAttribute('data-fullname') || '';
+    }
+    if (select) {
+        select.addEventListener('change', sync);
+        sync();
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

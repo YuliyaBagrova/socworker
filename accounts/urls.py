@@ -45,6 +45,12 @@ urlpatterns = [
     path('medical-checkup/mark-passed/', views.medical_checkup_mark_passed, name='medical_checkup_mark_passed'),
     path('medical-checkup/clear-mark/', views.medical_checkup_clear_mark, name='medical_checkup_clear_mark'),
     path('medical-checkup/assign/', views.medical_checkup_assign, name='medical_checkup_assign'),
+    path(
+        'medical-checkup/<int:pk>/remove-from-panel/',
+        views.medical_checkup_remove_from_panel,
+        name='medical_checkup_remove_from_panel',
+    ),
+    path('medical-checkup/<int:pk>/edit/', views.medical_checkup_edit, name='medical_checkup_edit'),
     path('safety-briefing/', views.safety_briefing_panel, name='safety_briefing_panel'),
     path('safety-briefing/panel.pdf', views.safety_briefing_panel_pdf, name='safety_briefing_panel_pdf'),
     path('safety-briefing/panel.csv', views.safety_briefing_panel_csv, name='safety_briefing_panel_csv'),
@@ -52,6 +58,7 @@ urlpatterns = [
     path('safety-briefing/<int:pk>/delete/', views.safety_briefing_delete, name='safety_briefing_delete'),
     path('safety-briefing/<int:pk>/mark-passed/', views.safety_briefing_mark_passed, name='safety_briefing_mark_passed'),
     path('safety-briefing/<int:pk>/clear-passed/', views.safety_briefing_clear_passed, name='safety_briefing_clear_passed'),
+    path('safety-briefing/<int:pk>/edit/', views.safety_briefing_edit, name='safety_briefing_edit'),
 
     # Получатели услуг
     path('recipients/', views.recipients_list, name='recipients_list'),
@@ -64,6 +71,12 @@ urlpatterns = [
     path('visits/panel.pdf', views.visit_planning_pdf, name='visit_planning_pdf'),
     path('visits/panel.csv', views.visit_planning_csv, name='visit_planning_csv'),
     path('visits/planned/create/', views.planned_visit_create, name='planned_visit_create'),
+    path('visits/planned/assign/', views.planned_visit_assign, name='planned_visit_assign'),
+    path(
+        'visits/panel/remove/<int:pk>/',
+        views.visit_planning_remove_from_panel,
+        name='visit_planning_remove_from_panel',
+    ),
     path('visits/planned/<int:pk>/edit/', views.planned_visit_edit, name='planned_visit_edit'),
     path('visits/reminders/create/', views.visit_task_reminder_create, name='visit_task_reminder_create'),
     path('visits/reminders/<int:pk>/delete/', views.visit_task_reminder_delete, name='visit_task_reminder_delete'),

@@ -141,6 +141,11 @@
         border-color: #ea580c;
         box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.22);
     }
+    body.sw-entity-edit-page .sw-edit-form-card input.form-control[type="date"],
+    body.sw-entity-edit-page .sw-edit-form-card input.form-control[type="time"] {
+        color: #292524;
+        color-scheme: light;
+    }
     body.sw-entity-edit-page .sw-edit-form-card .border-top {
         border-color: rgba(251, 146, 60, 0.22) !important;
     }
@@ -170,6 +175,182 @@
     body.sw-entity-edit-page .sw-edit-form-card:hover {
         box-shadow:
             0 14px 38px rgba(154, 52, 18, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+{% else %}
+    /* Добавление работника — та же структура, что «Редактировать», палитра как панель «Социальные работники» */
+    body.sw-entity-create-page {
+        background-color: #cfd6eb;
+        background-image:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(118, 75, 162, 0.42), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(102, 126, 234, 0.38), transparent 54%),
+            radial-gradient(ellipse 50% 38% at 72% 88%, rgba(236, 72, 153, 0.12), transparent 58%),
+            radial-gradient(ellipse 48% 36% at 18% 12%, rgba(34, 211, 238, 0.1), transparent 55%),
+            linear-gradient(175deg, #e8ecf9 0%, #d8dff5 26%, #ddd5f5 52%, #cfd8ef 78%, #c5cde8 100%);
+    }
+    body.sw-entity-create-page .main-content {
+        background: transparent;
+        max-width: 920px;
+    }
+    body.sw-entity-create-page .sw-entity-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    body.sw-entity-create-page .sw-create-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.sw-entity-create-page .sw-create-page-title__icon {
+        flex-shrink: 0;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        box-shadow:
+            0 6px 22px rgba(102, 126, 234, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-entity-create-page .sw-create-page-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(108deg, #1f1a36 0%, #3d2f5c 28%, #5a4a8c 52%, #667eea 78%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-entity-create-page .sw-create-page-title__label {
+            color: #2d2652;
+            background: none;
+        }
+    }
+    body.sw-entity-create-page .sw-create-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #4338ca;
+        border: 1.5px solid rgba(102, 126, 234, 0.45);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 243, 255, 0.92) 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-entity-create-page .sw-create-back-btn:hover {
+        color: #312e81;
+        border-color: rgba(102, 126, 234, 0.65);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.28);
+    }
+    body.sw-entity-create-page .sw-create-back-btn i {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    body.sw-entity-create-page .sw-create-form-card {
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.86);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(45, 38, 82, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-entity-create-page .sw-create-form-card .card-body {
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    body.sw-entity-create-page .sw-create-form-card .section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #4338ca;
+        border-bottom: none;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #667eea;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(238, 242, 255, 0.85) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-entity-create-page .sw-create-form-card .section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.sw-entity-create-page .sw-create-form-card .section-title i {
+        color: #6366f1;
+        font-size: 1.05rem;
+    }
+    body.sw-entity-create-page .sw-create-form-card .form-label {
+        color: #3730a3;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-entity-create-page .sw-create-form-card .form-control,
+    body.sw-entity-create-page .sw-create-form-card .form-select,
+    body.sw-entity-create-page .sw-create-form-card textarea.form-control {
+        border-color: rgba(102, 126, 234, 0.32);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-entity-create-page .sw-create-form-card .form-control:focus,
+    body.sw-entity-create-page .sw-create-form-card .form-select:focus,
+    body.sw-entity-create-page .sw-create-form-card textarea.form-control:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.22);
+    }
+    body.sw-entity-create-page .sw-create-form-card .border-top {
+        border-color: rgba(102, 126, 234, 0.22) !important;
+    }
+    body.sw-entity-create-page .sw-create-form-card .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(102, 126, 234, 0.35);
+        color: #4b5563;
+    }
+    body.sw-entity-create-page .sw-create-form-card .btn-outline-secondary:hover {
+        background: rgba(238, 242, 255, 0.95);
+        border-color: #818cf8;
+        color: #312e81;
+    }
+    body.sw-entity-create-page .sw-create-form-card .btn-primary {
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow: 0 4px 18px rgba(102, 126, 234, 0.4);
+    }
+    body.sw-entity-create-page .sw-create-form-card .btn-primary:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #5b21b6 100%);
+        box-shadow: 0 6px 22px rgba(102, 126, 234, 0.45);
+        transform: translateY(-1px);
+    }
+    body.sw-entity-create-page .sw-create-form-card:hover {
+        box-shadow:
+            0 14px 38px rgba(45, 38, 82, 0.14),
             inset 0 1px 0 rgba(255, 255, 255, 0.95);
     }
 {% endif %}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модель базы данных веб-приложения</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                fontSize: '17px',
+                fontFamily: 'sans-serif'
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 28px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 98vw;
+            max-width: 1650px;
+            overflow-x: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 28px;
+        }
+        p {
+            text-align: center;
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+        .mermaid svg {
+            width: 100% !important;
+            height: auto !important;
+            min-width: 1100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Модель базы данных приложения</h2>
+        <p>Версия без панелей «Нагрузка и визиты» и «Инвентаризация», с акцентом на «Услуги».</p>
+        <div class="mermaid">
+erDiagram
+    USER {
+        int id PK
+        string username
+        string first_name
+        string last_name
+        string email
+        string password
+    }
+
+    USER_PROFILE {
+        int id PK
+        int user_id FK
+        string avatar
+        datetime updated_at
+    }
+
+    SOCIAL_WORKER {
+        int id PK
+        int user_id FK
+        string employee_id UK
+        string first_name
+        string last_name
+        string middle_name
+        string phone
+        text address
+        string status
+        string medical_checkup
+        date last_medical_checkup_date
+        date medical_checkup_planned_date
+        text medical_notes
+        boolean medical_panel_registered
+        date hire_date
+        date birth_date
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    SERVICE_LOCATION {
+        int id PK
+        string name
+        string location_type
+    }
+
+    SERVICE_RECIPIENT {
+        int id PK
+        string employee_id UK
+        string first_name
+        string last_name
+        string middle_name
+        date birth_date
+        string phone
+        text address
+        string disability_group
+        int payment_percent
+        string living_status
+        date admission_date
+        int fire_detector_count
+        string housing_type
+        int social_worker_id FK
+        int location_id FK
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    SAFETY_BRIEFING_RECORD {
+        int id PK
+        int social_worker_id FK
+        string briefing_title
+        date briefing_date
+        boolean passed
+        text notes
+        datetime created_at
+    }
+
+    USER ||--o| USER_PROFILE : "имеет профиль"
+    USER ||--o| SOCIAL_WORKER : "может быть связан с соцработником"
+    SOCIAL_WORKER ||--o{ SERVICE_RECIPIENT : "обслуживает"
+    SERVICE_LOCATION ||--o{ SERVICE_RECIPIENT : "место оказания услуг"
+    SOCIAL_WORKER ||--o{ SAFETY_BRIEFING_RECORD : "имеет записи инструктажа"
+        </div>
+    </div>
+</body>
+</html>

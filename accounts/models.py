@@ -151,6 +151,17 @@ class SocialWorker(models.Model):
         blank=True,
         help_text='Запланированная дата прохождения осмотра.',
     )
+    medical_notes = models.TextField(
+        verbose_name='Примечания по медосмотру',
+        blank=True,
+        null=True,
+        help_text='Сведения о здоровье и медосмотре (раздел «Прохождение медосмотра»).',
+    )
+    medical_panel_registered = models.BooleanField(
+        default=False,
+        verbose_name='Учёт в панели «Прохождение медосмотра»',
+        help_text='Сотрудник появляется в таблице после «Назначить медосмотр».',
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -279,6 +290,11 @@ class ServiceRecipient(models.Model):
         ('boarding', 'Интернат'),
         ('other', 'Другое'),
     ]
+
+    HOUSING_TYPE_CHOICES = [
+        ('house', 'Дом'),
+        ('apartment', 'Квартира'),
+    ]
     
     VISIT_FREQUENCY_CHOICES = [
         ('1', '1 раз в неделю'),
@@ -400,6 +416,11 @@ class ServiceRecipient(models.Model):
         null=True,
         blank=True
     )
+    visit_planning_panel_registered = models.BooleanField(
+        default=False,
+        verbose_name='Учитывается в панели планирования визитов',
+        help_text='Подопечный отображается в таблице панели после добавления через «Запланировать визит».',
+    )
     location = models.ForeignKey(
         ServiceLocation,
         on_delete=models.SET_NULL,
@@ -407,6 +428,13 @@ class ServiceRecipient(models.Model):
         verbose_name='Населённый пункт',
         null=True,
         blank=True
+    )
+    housing_type = models.CharField(
+        max_length=20,
+        choices=HOUSING_TYPE_CHOICES,
+        default='apartment',
+        verbose_name='Тип жилья (дом / квартира)',
+        help_text='В «Расчёте нагрузки» сначала подставляется по тексту в «Адрес», иначе это поле.',
     )
     
     notes = models.TextField(

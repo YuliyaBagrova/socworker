@@ -7,7 +7,13 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import DepartmentForm, InventoryStaffForm, InventoryUnitForm
-from .models import Department, InventoryProfile, InventoryUnit
+from .inv_user_sql import (
+    inv_department_id_for_user,
+    responsible_row_for_csv,
+    staff_rows_for_template,
+    user_ids_in_department_or_self,
+)
+from .models import Department, InventoryUnit
 from .permissions import (
     can_create_inventory_unit,
     can_manage_inventory,
@@ -28,20 +34,16 @@ def inventory_access_required(view_func):
 
 
 def _units_for_user(user):
-    qs = InventoryUnit.objects.select_related(
-        'responsible',
-        'responsible__inventory_profile',
-        'responsible__inventory_profile__department',
-    ).order_by('inventory_number')
+    qs = InventoryUnit.objects.select_related('responsible').order_by('inventory_number')
     role = inventory_role(user)
     if role == 'warehouse_keeper':
         return qs
     if role == 'department_head':
-        prof = getattr(user, 'inventory_profile', None)
-        dept_id = prof.department_id if prof else None
+        dept_id = inv_department_id_for_user(user.pk)
         if not dept_id:
             return qs.none()
-        return qs.filter(responsible__inventory_profile__department_id=dept_id)
+        ids = user_ids_in_department_or_self(dept_id, user.pk)
+        return qs.filter(responsible_id__in=ids)
     return qs.filter(responsible=user)
 
 
@@ -153,14 +155,14 @@ def report_csv(request):
         'Отделение ответственного',
     ])
     for u in units:
-        prof = getattr(u.responsible, 'inventory_profile', None)
+        name, dept = responsible_row_for_csv(u.responsible_id)
         w.writerow([
             u.inventory_number,
             u.name,
             str(u.cost),
             u.responsible.username,
-            prof.full_name if prof else '',
-            prof.department.name if prof and prof.department_id else '',
+            name,
+            dept,
         ])
     return response
 
@@ -170,7 +172,7 @@ def department_list(request):
     if not can_manage_inventory(request.user):
         messages.error(request, 'Управление отделениями доступно только завхозу.')
         return redirect('inventory:panel')
-    departments = Department.objects.select_related('head', 'head__inventory_profile').order_by('name')
+    departments = Department.objects.select_related('head').order_by('name')
     return render(request, 'inventory/department_list.html', {'departments': departments})
 
 
@@ -210,8 +212,8 @@ def staff_list(request):
     if not can_manage_inventory(request.user):
         messages.error(request, 'Список учётных записей инвентаризации доступен только завхозу.')
         return redirect('inventory:panel')
-    profiles = InventoryProfile.objects.select_related('user', 'department').order_by('full_name')
-    return render(request, 'inventory/staff_list.html', {'profiles': profiles})
+    staff_rows = staff_rows_for_template()
+    return render(request, 'inventory/staff_list.html', {'staff_rows': staff_rows})
 
 
 @inventory_access_required

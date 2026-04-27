@@ -1,0 +1,183 @@
+{# Тема страницы «Изменить информацию о медосмотре» — по структуре как sw_edit_form_theme (редактирование соцработника), палитра медосмотра. #}
+body.sw-medical-edit-page {
+    background-color: #ecfccb;
+    background-image:
+        radial-gradient(ellipse 88% 55% at 96% 4%, rgba(34, 197, 94, 0.28), transparent 54%),
+        radial-gradient(ellipse 72% 48% at 2% 96%, rgba(21, 128, 61, 0.18), transparent 52%),
+        radial-gradient(ellipse 45% 35% at 48% 72%, rgba(134, 239, 172, 0.35), transparent 60%),
+        linear-gradient(168deg, #f7fee7 0%, #ecfccb 32%, #d9f99d 62%, #bbf7d0 100%);
+}
+body.sw-medical-edit-page .main-content {
+    background: transparent;
+    max-width: 920px;
+}
+body.sw-medical-edit-page .sw-entity-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+body.sw-medical-edit-page .sw-edit-page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    line-height: 1.2;
+}
+body.sw-medical-edit-page .sw-edit-page-title__icon {
+    flex-shrink: 0;
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #fff;
+    background: linear-gradient(145deg, #86efac 0%, #4ade80 38%, #22c55e 78%, #15803d 100%);
+    box-shadow:
+        0 6px 22px rgba(22, 163, 74, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+body.sw-medical-edit-page .sw-edit-page-title__label {
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(
+        108deg,
+        #0f2918 0%,
+        #14532d 18%,
+        #166534 34%,
+        #15803d 50%,
+        #22c55e 68%,
+        #4ade80 84%,
+        #86efac 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+@supports not (background-clip: text) {
+    body.sw-medical-edit-page .sw-edit-page-title__label {
+        color: #14532d;
+        background: none;
+    }
+}
+body.sw-medical-edit-page .sw-edit-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.48rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: #14532d;
+    border: 1.5px solid rgba(22, 163, 74, 0.45);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(236, 253, 245, 0.92) 100%);
+    box-shadow:
+        0 4px 18px rgba(22, 163, 74, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+body.sw-medical-edit-page .sw-edit-back-btn:hover {
+    color: #0f3d26;
+    border-color: rgba(21, 128, 61, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(22, 101, 52, 0.2);
+}
+body.sw-medical-edit-page .sw-edit-back-btn i {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+body.sw-medical-edit-page .sw-edit-form-card {
+    border: 1px solid rgba(34, 197, 94, 0.38);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.82);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow:
+        0 12px 40px rgba(20, 83, 45, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    overflow: hidden;
+}
+body.sw-medical-edit-page .sw-edit-form-card .card-body {
+    padding: 1.75rem 1.75rem 1.5rem;
+}
+body.sw-medical-edit-page .sw-edit-form-card .section-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #14532d;
+    border-bottom: none;
+    padding-bottom: 0.5rem;
+    margin-top: 1.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-left: 4px solid #22c55e;
+    padding-left: 0.75rem;
+    margin-left: 0;
+    background: linear-gradient(90deg, rgba(220, 252, 231, 0.75) 0%, transparent 88%);
+    border-radius: 0 10px 10px 0;
+}
+body.sw-medical-edit-page .sw-edit-form-card .section-title:first-of-type {
+    margin-top: 0;
+}
+body.sw-medical-edit-page .sw-edit-form-card .section-title i {
+    color: #16a34a;
+    font-size: 1.05rem;
+}
+body.sw-medical-edit-page .sw-edit-form-card .form-label {
+    color: #14532d;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+body.sw-medical-edit-page .sw-edit-form-card .form-control,
+body.sw-medical-edit-page .sw-edit-form-card .form-select,
+body.sw-medical-edit-page .sw-edit-form-card textarea.form-control {
+    border-color: rgba(34, 197, 94, 0.35);
+    border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+body.sw-medical-edit-page .sw-edit-form-card .form-control:focus,
+body.sw-medical-edit-page .sw-edit-form-card .form-select:focus,
+body.sw-medical-edit-page .sw-edit-form-card textarea.form-control:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+}
+body.sw-medical-edit-page .sw-edit-form-card .border-top {
+    border-color: rgba(34, 197, 94, 0.22) !important;
+}
+body.sw-medical-edit-page .sw-edit-form-card .btn-outline-secondary {
+    border-radius: 10px;
+    font-weight: 600;
+    border-color: rgba(100, 116, 139, 0.35);
+    color: #57534e;
+}
+body.sw-medical-edit-page .sw-edit-form-card .btn-outline-secondary:hover {
+    background: rgba(236, 253, 245, 0.95);
+    border-color: #86efac;
+    color: #14532d;
+}
+body.sw-medical-edit-page .sw-edit-form-card .btn-primary {
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 45%, #15803d 100%);
+    box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
+}
+body.sw-medical-edit-page .sw-edit-form-card .btn-primary:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #166534 100%);
+    box-shadow: 0 6px 20px rgba(21, 128, 61, 0.38);
+    transform: translateY(-1px);
+}
+body.sw-medical-edit-page .sw-edit-form-card:hover {
+    box-shadow:
+        0 14px 38px rgba(20, 83, 45, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}

@@ -1,20 +1,18 @@
 from django.contrib import admin
 
-from .models import Department, InventoryProfile, InventoryUnit
+from .models import Department, InvRole, InventoryUnit
+
+
+@admin.register(InvRole)
+class InvRoleAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name')
+    search_fields = ('code', 'name')
 
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'head')
     search_fields = ('name',)
-
-
-@admin.register(InventoryProfile)
-class InventoryProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'user', 'role', 'department', 'position', 'phone')
-    list_filter = ('role', 'department')
-    search_fields = ('full_name', 'user__username', 'phone')
-    autocomplete_fields = ('user', 'department')
 
 
 @admin.register(InventoryUnit)

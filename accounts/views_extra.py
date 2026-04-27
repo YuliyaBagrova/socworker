@@ -17,6 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.html import strip_tags
 from django.core.paginator import Paginator
 
 from reportlab.lib import colors
@@ -29,6 +30,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
 
 from .forms import WorkloadRecordForm
 from .models import (
+    PlannedVisit,
     SafetyBriefingRecord,
     ServiceLocation,
     ServiceRecipient,
@@ -37,10 +39,26 @@ from .models import (
     WORKLOAD_LOAD_COEF_REFERENCE_HOURS,
     workload_rate_from_load,
 )
-from .visit_schedule import visits_per_week_from_frequency
+from .visit_schedule import (
+    validate_visit_frequency_and_days,
+    visits_per_week_from_frequency,
+)
+from .workload_address_prefill import resolve_workload_prefill_for_recipient
 from .workload_sync import sync_service_recipient_from_workload
 
 MEDICAL_CHECKUP_VALID_DAYS = 365
+
+
+def _export_plain_text(value, max_len=500):
+    if not value:
+        return '—'
+    t = strip_tags(str(value)).strip()
+    if not t:
+        return '—'
+    t = ' '.join(t.split())
+    if len(t) > max_len:
+        return t[: max_len - 1] + '…'
+    return t
 
 
 def _register_pdf_font():
@@ -90,6 +108,35 @@ def _workload_wl_context(year: int, month: int, worker_s: str) -> dict:
         'wl_month': month,
         'wl_worker': worker_s or '',
     }
+
+
+def _workload_recipients_by_worker_map() -> dict:
+    """JSON: подопечные с пунктом и типом жилья по «Адрес» (и при отсутствии — по полям карточки)."""
+    all_locations = list(ServiceLocation.objects.all())
+    out: dict[str, list[dict]] = {}
+    for r in (
+        ServiceRecipient.objects.filter(social_worker__isnull=False)
+        .select_related('location', 'social_worker')
+        .order_by('last_name', 'first_name')
+    ):
+        k = str(r.social_worker_id)
+        loc_id, housing_type, label = resolve_workload_prefill_for_recipient(r, all_locations)
+        vpw_n = visits_per_week_from_frequency(r.visit_frequency or '')
+        try:
+            vpw = float(vpw_n) if vpw_n is not None else 0.0
+        except (TypeError, ValueError):
+            vpw = 0.0
+        out.setdefault(k, []).append(
+            {
+                'id': r.pk,
+                'name': r.get_full_name(),
+                'location_id': loc_id,
+                'location_label': label,
+                'housing_type': housing_type,
+                'visits_per_week': vpw,
+            }
+        )
+    return out
 
 
 def _build_workload_groups(year: int, month: int, worker_pk: str | None):
@@ -259,22 +306,22 @@ def report_csv(request, report_type):
             workers = list(workers_qs.order_by('last_name', 'first_name'))
 
         header = [
-            '№', 'ФИО', 'Год рожд.', 'Адрес', 'Телефон', 'Мед. осмотр',
-            'Посл. осм.', 'Назн.', 'Статус', 'Дата приёма',
+            '№', 'Таб. №', 'ФИО', 'Год рожд.', 'Адрес', 'Телефон', 'Мед. осмотр',
+            'Дата приёма на работу', 'Примечания', 'Статус',
         ]
         rows = []
         for i, w in enumerate(workers, 1):
             rows.append([
                 i,
+                w.employee_id or '—',
                 w.get_full_name(),
                 w.birth_date.strftime('%Y') if w.birth_date else '—',
                 w.address or '—',
                 w.phone or '—',
                 w.get_medical_checkup_display(),
-                w.last_medical_checkup_date.strftime('%d.%m.%Y') if w.last_medical_checkup_date else '—',
-                w.medical_checkup_planned_date.strftime('%d.%m.%Y') if w.medical_checkup_planned_date else '—',
-                w.get_status_display(),
                 w.hire_date.strftime('%d.%m.%Y') if w.hire_date else '—',
+                _export_plain_text(w.notes, max_len=2000),
+                w.get_status_display(),
             ])
         return _csv_response(filename, header, rows)
 
@@ -307,15 +354,17 @@ def report_csv(request, report_type):
             recipients = list(recipients_qs.order_by('last_name', 'first_name'))
 
         header = [
-            '№', 'ФИО', 'Год рожд.', 'Адрес', 'Гр. инвал.', 'Оплата %', 'Кратность',
+            '№', 'Таб. №', 'ФИО', 'Год рожд.', 'Телефон', 'Адрес', 'Гр. инвал.', 'Оплата', 'Кратность',
             'Категория', 'Дата приёма', 'Дни посещ.', 'АПИ', 'Примечания', 'Соц. работник',
         ]
         rows = []
         for i, r in enumerate(recipients, 1):
             rows.append([
                 i,
+                r.employee_id or '—',
                 r.get_full_name(),
                 r.birth_date.strftime('%Y') if r.birth_date else '—',
+                r.phone or '—',
                 r.address or '—',
                 r.get_disability_group_display(),
                 f'{r.payment_percent}%',
@@ -324,7 +373,7 @@ def report_csv(request, report_type):
                 r.admission_date.strftime('%d.%m.%Y') if r.admission_date else '—',
                 r.visit_days or '—',
                 r.fire_detector_count,
-                r.notes or '—',
+                _export_plain_text(r.notes, max_len=2000),
                 r.social_worker.get_full_name() if r.social_worker else '—',
             ])
         return _csv_response(filename, header, rows)
@@ -461,13 +510,14 @@ def report_csv(request, report_type):
             messages.warning(request, 'Нет данных для выбранной связки.')
             return redirect('accounts:services_detail', worker_pk=worker_pk, location_pk=location_pk)
         header = [
-            '№', 'Ф.И.О.', 'Год рожд.', 'Адрес', 'Гр. инвал.', 'Оплата %', 'Кратность',
-            'Прожив.', 'Дата приёма', 'Дни посещ.', 'АПИ',
+            '№', 'Таб. №', 'Ф.И.О.', 'Год рожд.', 'Адрес проживания', 'Гр. инвал.', 'Оплата', 'Кратность',
+            'Категория', 'Дата приёма', 'Дни посещ.', 'АПИ',
         ]
         rows = []
         for i, r in enumerate(recipients, 1):
             rows.append([
                 i,
+                r.employee_id or '—',
                 r.get_full_name(),
                 r.birth_date.strftime('%Y') if r.birth_date else '—',
                 r.address or '—',
@@ -495,7 +545,7 @@ def report_csv(request, report_type):
             .select_related('location')
             .order_by('last_name', 'first_name')
         )
-        header = ['№', 'Социальный работник', 'Населённый пункт', 'Подопечных']
+        header = ['№', 'Социальный работник', 'Населённый пункт', 'Записей']
         rows = []
         i = 0
         for w in workers:
@@ -516,7 +566,7 @@ def report_csv(request, report_type):
 
 
 def _medical_workers_queryset(worker, status):
-    qs = SocialWorker.objects.all()
+    qs = SocialWorker.objects.filter(medical_panel_registered=True)
     if worker and str(worker).isdigit():
         qs = qs.filter(pk=int(worker))
     if status:
@@ -525,23 +575,33 @@ def _medical_workers_queryset(worker, status):
 
 
 def _medical_worker_row(w: SocialWorker, today: date):
-    if w.last_medical_checkup_date:
-        valid_until = w.last_medical_checkup_date + timedelta(days=MEDICAL_CHECKUP_VALID_DAYS)
-        mc_valid = valid_until.strftime('%d.%m.%Y')
-        overdue = 'да' if valid_until < today else 'нет'
+    """Столбцы как в таблице панели медосмотра (без чекбокса и действий)."""
+    raw_notes = (w.medical_notes or '').replace('\r', ' ').replace('\n', ' ').strip()
+    notes_short = raw_notes[:120] + ('…' if len(raw_notes) > 120 else '')
+    last = w.last_medical_checkup_date
+    if last:
+        valid_until = last + timedelta(days=MEDICAL_CHECKUP_VALID_DAYS)
+        goden = valid_until.strftime('%d.%m.%Y')
+        if valid_until < today:
+            days_ov = (today - valid_until).days
+            goden = f'{goden} (просрочено +{days_ov} дн.)'
+            akt12 = f'Нет (+{days_ov} дн.)'
+        else:
+            akt12 = 'Да'
+        last_s = last.strftime('%d.%m.%Y')
     else:
-        valid_until = None
-        mc_valid = '—'
-        overdue = '—'
+        goden = '—'
+        akt12 = 'Нет данных'
+        last_s = '—'
     return [
         w.employee_id or '—',
         w.get_full_name(),
         w.get_medical_checkup_display(),
-        w.last_medical_checkup_date.strftime('%d.%m.%Y') if w.last_medical_checkup_date else '—',
-        mc_valid,
-        'да' if (valid_until and valid_until >= today) else 'нет',
+        last_s,
+        goden,
+        akt12,
         w.medical_checkup_planned_date.strftime('%d.%m.%Y') if w.medical_checkup_planned_date else '—',
-        overdue,
+        notes_short or '—',
     ]
 
 
@@ -567,7 +627,7 @@ def medical_checkup_panel_pdf(request):
 
     headers = [
         'Таб. №', 'ФИО', 'Поле в системе', 'Дата последнего осмотра',
-        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Просрочено',
+        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Примечания',
     ]
     rows = [_medical_worker_row(w, today) for w in workers]
     return _pdf_table_response(
@@ -600,7 +660,7 @@ def medical_checkup_panel_csv(request):
 
     header = [
         'Таб. №', 'ФИО', 'Поле в системе', 'Дата последнего осмотра',
-        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Просрочено',
+        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Примечания',
     ]
     rows = [_medical_worker_row(w, today) for w in workers]
     return _csv_response('medical_checkup_panel.csv', header, rows)
@@ -637,18 +697,20 @@ def safety_briefing_panel_pdf(request):
     else:
         records = list(qs)
 
+    # Как в таблице панели ТБ + дата в конце (в таблице скрыта, в выгрузке сохраняется)
     headers = [
-        'Дата', 'Таб. №', 'Соц. работник', 'Название', 'Примечание', 'Прохождение',
+        'Таб. №', 'ФИО', 'Название инструктажа', 'Прохождение', 'Примечание',
+        'Дата инструктажа (план / факт)',
     ]
     rows = []
     for rec in records:
         rows.append([
-            rec.briefing_date.strftime('%d.%m.%Y'),
             rec.social_worker.employee_id or '—',
             rec.social_worker.get_full_name(),
             rec.briefing_title,
-            (rec.notes or '—').replace('\r', ' ').replace('\n', ' ')[:500],
             'Прошёл' if rec.passed else 'Не пройден',
+            (rec.notes or '—').replace('\r', ' ').replace('\n', ' ')[:500],
+            rec.briefing_date.strftime('%d.%m.%Y'),
         ])
     return _pdf_table_response('Техника безопасности', 'safety_briefing_panel.pdf', headers, rows)
 
@@ -673,17 +735,18 @@ def safety_briefing_panel_csv(request):
         records = list(qs)
 
     header = [
-        'Дата', 'Таб. №', 'Соц. работник', 'Название', 'Примечание', 'Прохождение',
+        'Таб. №', 'ФИО', 'Название инструктажа', 'Прохождение', 'Примечание',
+        'Дата инструктажа (план / факт)',
     ]
     rows = []
     for rec in records:
         rows.append([
-            rec.briefing_date.strftime('%d.%m.%Y'),
             rec.social_worker.employee_id or '—',
             rec.social_worker.get_full_name(),
             rec.briefing_title,
-            rec.notes or '—',
             'Прошёл' if rec.passed else 'Не пройден',
+            rec.notes or '—',
+            rec.briefing_date.strftime('%d.%m.%Y'),
         ])
     return _csv_response('safety_briefing_panel.csv', header, rows)
 
@@ -694,6 +757,7 @@ def safety_briefing_panel_csv(request):
 def _visit_planning_recipients(data):
     recipients = ServiceRecipient.objects.filter(
         social_worker__isnull=False,
+        visit_planning_panel_registered=True,
     ).select_related('social_worker')
     wid = data.get('worker')
     if wid and str(wid).isdigit():
@@ -713,6 +777,42 @@ def _visit_planning_recipients(data):
     ))
 
 
+def _visit_planning_upcoming_by_recipient(rec_list):
+    """Запланированные визиты с сегодняшнего дня: recipient_id -> список PlannedVisit."""
+    if not rec_list:
+        return {}
+    ids = [r.pk for r in rec_list]
+    today = date.today()
+    by_rec = defaultdict(list)
+    for pv in PlannedVisit.objects.filter(
+        recipient_id__in=ids,
+        visit_date__gte=today,
+    ).order_by('visit_date', 'visit_time', 'pk'):
+        by_rec[pv.recipient_id].append(pv)
+    return by_rec
+
+
+def _visit_planning_upcoming_export_cell(by_rec, recipient_id):
+    pvs = by_rec.get(recipient_id, ())
+    if not pvs:
+        return '—'
+    parts = []
+    for pv in pvs:
+        s = pv.visit_date.strftime('%d.%m.%Y')
+        if pv.visit_time:
+            s += ' ' + pv.visit_time.strftime('%H:%M')
+        parts.append(s)
+    return '; '.join(parts)
+
+
+def _visit_planning_consistency_cell(r: ServiceRecipient) -> str:
+    """Как колонка «Согласованность» в таблице планирования визитов."""
+    mismatch = validate_visit_frequency_and_days(r.visit_frequency, r.visit_days)
+    if mismatch is None:
+        return 'Да'
+    return f'Несовпадение: {_export_plain_text(mismatch, 220)}'
+
+
 @login_required
 def visit_planning_pdf(request):
     if request.method != 'POST':
@@ -729,19 +829,23 @@ def visit_planning_pdf(request):
         id_set = set(pks)
         rec_list = [r for r in rec_list if r.pk in id_set]
 
+    upcoming_map = _visit_planning_upcoming_by_recipient(rec_list)
     headers = [
-        'ФИО', 'Соц. работник', 'Адрес', 'Кратность', 'Дни посещ.', 'Визитов/нед',
+        'Таб. №', 'Подопечный', 'Соц. работник', 'Кратность', 'Дни посещений', 'Виз./нед.',
+        'Запланированные визиты', 'Согласованность',
     ]
     rows = []
     for r in rec_list:
         n = visits_per_week_from_frequency(r.visit_frequency)
         rows.append([
+            r.employee_id or '—',
             r.get_full_name(),
             r.social_worker.get_full_name() if r.social_worker else '—',
-            r.address or '—',
             r.get_visit_frequency_display(),
-            r.visit_days or '—',
+            (r.visit_days or '').strip() or '—',
             str(n),
+            _visit_planning_upcoming_export_cell(upcoming_map, r.pk),
+            _visit_planning_consistency_cell(r),
         ])
     return _pdf_table_response('Планирование визитов', 'visit_planning.pdf', headers, rows)
 
@@ -762,19 +866,23 @@ def visit_planning_csv(request):
         id_set = set(pks)
         rec_list = [r for r in rec_list if r.pk in id_set]
 
+    upcoming_map = _visit_planning_upcoming_by_recipient(rec_list)
     header = [
-        'ФИО', 'Соц. работник', 'Адрес', 'Кратность', 'Дни посещ.', 'Визитов/нед',
+        'Таб. №', 'Подопечный', 'Соц. работник', 'Кратность', 'Дни посещений', 'Виз./нед.',
+        'Запланированные визиты', 'Согласованность',
     ]
     rows = []
     for r in rec_list:
         n = visits_per_week_from_frequency(r.visit_frequency)
         rows.append([
+            r.employee_id or '—',
             r.get_full_name(),
             r.social_worker.get_full_name() if r.social_worker else '—',
-            r.address or '—',
             r.get_visit_frequency_display(),
-            r.visit_days or '—',
+            (r.visit_days or '').strip() or '—',
             str(n),
+            _visit_planning_upcoming_export_cell(upcoming_map, r.pk),
+            _visit_planning_consistency_cell(r),
         ])
     return _csv_response('visit_planning.csv', header, rows)
 
@@ -854,6 +962,7 @@ def workload_record_create(request):
     initial = {}
     y = request.GET.get('year')
     m = request.GET.get('month')
+    wk = request.GET.get('worker', '').strip()
     if y and str(y).isdigit():
         initial['period_year'] = int(y)
     if m and str(m).isdigit():
@@ -862,6 +971,8 @@ def workload_record_create(request):
         initial['period_year'] = today.year
     if not initial.get('period_month'):
         initial['period_month'] = today.month
+    if wk.isdigit():
+        initial['social_worker'] = int(wk)
 
     if request.method == 'POST':
         form = WorkloadRecordForm(request.POST)
@@ -874,15 +985,18 @@ def workload_record_create(request):
     else:
         form = WorkloadRecordForm(initial=initial)
 
+    py = initial.get('period_year', today.year)
+    pm = initial.get('period_month', today.month)
     ctx = {
         'form': form,
         'is_edit': False,
         'record': None,
-        **_workload_wl_context(
-            initial.get('period_year', today.year),
-            initial.get('period_month', today.month),
-            request.GET.get('worker', '') or '',
-        ),
+        'workload_recipients_by_worker': _workload_recipients_by_worker_map(),
+        'workload_default_year': py,
+        'workload_default_month': pm,
+        'wl_edit_recipient_id': None,
+        'wl_edit_recipient_name': '',
+        **_workload_wl_context(py, pm, wk or ''),
     }
     return render(request, 'accounts/workload_record_form.html', ctx)
 
@@ -909,6 +1023,11 @@ def workload_record_edit(request, pk):
         'form': form,
         'is_edit': True,
         'record': record,
+        'workload_recipients_by_worker': _workload_recipients_by_worker_map(),
+        'workload_default_year': record.period_year,
+        'workload_default_month': record.period_month,
+        'wl_edit_recipient_id': record.recipient_id,
+        'wl_edit_recipient_name': record.recipient.get_full_name() if record.recipient_id else '',
         **_workload_wl_context(
             record.period_year,
             record.period_month,
@@ -1045,6 +1164,7 @@ def _workload_pdf_csv_rows(
             str(r.worked_hours_month),
             str(r.work_time_norm_hours),
             str(r.load_coefficient),
+            str(r.rate),
         ])
     return rows
 
@@ -1069,8 +1189,8 @@ def workload_panel_pdf(request):
         return redirect('accounts:workload_panel')
 
     headers = [
-        'ФИО', 'Пункт', 'Тип', 'Кратн./нед', 'Кратн./мес', 'Мин 1 визит',
-        'Мин/мес', 'Час/мес', 'Норма ч', 'Коэф.',
+        'ФИО соцработника / подопечного', 'Населённый пункт', 'Тип', 'Кратн. (нед)', 'Кратн. (мес)',
+        'Мин 1 визит', 'Мин/мес', 'Час/мес', 'Норма ч', 'Коэф.', 'Ставка',
     ]
     return _pdf_table_response(
         f'Учёт нагрузки {month:02d}.{year}',
@@ -1100,7 +1220,7 @@ def workload_panel_csv(request):
         return redirect('accounts:workload_panel')
 
     header = [
-        'ФИО', 'Пункт', 'Тип', 'Кратн./нед', 'Кратн./мес', 'Мин 1 визит',
-        'Мин/мес', 'Час/мес', 'Норма ч', 'Коэф.',
+        'ФИО соцработника / подопечного', 'Населённый пункт', 'Тип', 'Кратн. (нед)', 'Кратн. (мес)',
+        'Мин 1 визит', 'Мин/мес', 'Час/мес', 'Норма ч', 'Коэф.', 'Ставка',
     ]
     return _csv_response(f'workload_{year}_{month:02d}.csv', header, rows)

@@ -61,8 +61,9 @@ class SocialWorkerAdmin(admin.ModelAdmin):
         }),
         ('Рабочая информация', {
             'fields': (
-                'employee_id', 'medical_checkup', 'last_medical_checkup_date',
-                'medical_checkup_planned_date', 'status', 'hire_date', 'user',
+                'employee_id', 'medical_panel_registered', 'medical_checkup',
+                'last_medical_checkup_date', 'medical_checkup_planned_date', 'medical_notes',
+                'status', 'hire_date', 'user',
             )
         }),
         ('Дополнительно', {
@@ -101,7 +102,7 @@ class ServiceRecipientAdmin(admin.ModelAdmin):
             )
         }),
         ('Назначение', {
-            'fields': ('social_worker', 'location')
+            'fields': ('social_worker', 'location', 'housing_type', 'visit_planning_panel_registered')
         }),
         ('Дополнительно', {
             'fields': ('notes',)

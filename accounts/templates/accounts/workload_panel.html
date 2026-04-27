@@ -1,8 +1,438 @@
 {% extends 'accounts/base_dashboard.html' %}
 
-{% block title %}Нагрузка на соцработников - SocWorker{% endblock %}
+{% block title %}Расчёт нагрузки - SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-workload-page"{% endblock %}
 
 {% block inline_css %}
+    /* Фон: та же схема слоёв, что панель «Планирование визитов» (visit_planning), палитра голубая */
+    body.sw-workload-page {
+        min-height: 100vh;
+        background-color: #f0f9ff;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(224, 242, 254, 0.42) 45%, rgba(186, 230, 253, 0.32) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(56, 189, 248, 0.42), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(96, 165, 250, 0.3), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(14, 165, 233, 0.2), transparent 58%),
+            linear-gradient(118deg, rgba(191, 219, 254, 0.45) 0%, rgba(165, 243, 252, 0.18) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(239, 246, 255, 0.4) 0%, rgba(186, 230, 253, 0.14) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+    }
+    body.sw-workload-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-workload-layout {
+        --wl-glass: rgba(255, 255, 255, 0.78);
+        --wl-glass-border: rgba(255, 255, 255, 0.95);
+        --wl-ink: #1e1b4b;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .sw-workload-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--wl-glass-border);
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+    }
+    .sw-workload-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, rgba(15, 23, 42, 0.42) 0%, rgba(49, 46, 129, 0.28) 50%, rgba(15, 23, 42, 0.12) 100%);
+        pointer-events: none;
+    }
+    .sw-workload-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.2rem 1.45rem 1.15rem;
+        margin-bottom: 0 !important;
+    }
+    .sw-workload-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-workload-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 35%, #2563eb 75%, #1d4ed8 100%);
+        box-shadow:
+            0 6px 22px rgba(37, 99, 235, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    .sw-workload-dash .sw-page-title__label {
+        font-size: clamp(1.3rem, 2.3vw, 1.65rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            108deg,
+            #ffffff 0%,
+            #e0e7ff 20%,
+            #c7d2fe 38%,
+            #a5b4fc 56%,
+            #93c5fd 74%,
+            #7dd3fc 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.2));
+    }
+    @supports not (background-clip: text) {
+        .sw-workload-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #e0e7ff;
+            background: none;
+            filter: none;
+        }
+    }
+    /* Тулбар — как панель «Техника безопасности»: PDF/CSV btn-sm, основная без sm, ::before при наведении */
+    .sw-workload-page .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-workload-page .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-workload-page .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-workload-page .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-workload-page .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-workload-page .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-sm {
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        font-size: 0.8125rem;
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-secondary,
+    .sw-workload-page .sw-toolbar-btn.btn-outline-primary {
+        color: #334155;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%);
+        border-color: rgba(100, 116, 139, 0.28);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-primary {
+        color: #1e40af;
+        border-color: rgba(99, 102, 241, 0.35);
+        border-left: 3px solid #6366f1;
+    }
+    .sw-wl-filter-card {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 242, 255, 0.75) 100%);
+        -webkit-backdrop-filter: blur(18px);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        box-shadow:
+            0 6px 28px rgba(30, 27, 75, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    .sw-wl-filter-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 18px 0 0 18px;
+        background: linear-gradient(180deg, #38bdf8 0%, #6366f1 50%, #4f46e5 100%);
+        opacity: 0.9;
+    }
+    .sw-wl-filter-card .card-body {
+        padding: 1rem 1.1rem 1.05rem 1.35rem;
+    }
+    .sw-wl-filter-card .form-label {
+        color: #3730a3;
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .sw-wl-filter-card .form-control,
+    .sw-wl-filter-card .form-select {
+        border-radius: 10px;
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    .sw-wl-filter-card .form-control:focus,
+    .sw-wl-filter-card .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .sw-wl-filter-card .btn-primary {
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 0.45rem 1.15rem;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #1d4ed8 100%);
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.28);
+    }
+    /* Справка — структура как планирование визитов, голубая гамма панели нагрузки */
+    .sw-filter-dash.sw-wl-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.6) 38%, rgba(199, 210, 254, 0.48) 72%, rgba(191, 219, 254, 0.38) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        box-shadow:
+            0 4px 6px -1px rgba(30, 64, 175, 0.08),
+            0 12px 28px -8px rgba(37, 99, 235, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .sw-filter-dash.sw-wl-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #7dd3fc 0%, #3b82f6 40%, #6366f1 100%);
+        opacity: 0.95;
+    }
+    .sw-filter-dash-inner.sw-wl-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .sw-wl-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    .sw-wl-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #1d4ed8;
+        background: linear-gradient(145deg, rgba(240, 249, 255, 0.98) 0%, rgba(186, 230, 253, 0.85) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    }
+    .sw-wl-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #1e3a8a;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .sw-wl-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #1d4ed8;
+        background: rgba(96, 165, 250, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0;
+        cursor: pointer;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.2s ease;
+    }
+    .sw-wl-guide__toggle:hover {
+        background: rgba(96, 165, 250, 0.32);
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 2px 12px rgba(37, 99, 235, 0.18);
+    }
+    .sw-wl-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    }
+    .sw-wl-guide__toggle[aria-expanded="true"] {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: rgba(67, 56, 202, 0.45);
+    }
+    .sw-wl-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.9;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-wl-guide__toggle[aria-expanded="true"] .sw-wl-guide__chev {
+        transform: rotate(180deg);
+    }
+    .sw-wl-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-wl-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(224, 242, 254, 0.5) 45%, rgba(199, 210, 254, 0.55) 100%);
+        border: 1px solid rgba(147, 197, 253, 0.55);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.92),
+            0 4px 20px rgba(30, 64, 175, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    #workloadInfoCollapse.collapse.show .sw-wl-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .sw-wl-guide__lead {
+        margin: 0;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(37, 99, 235, 0.75);
+    }
+    .sw-wl-guide__lead strong {
+        color: #1e40af;
+    }
+    .sw-wl-matrix-card {
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(238, 242, 255, 0.92) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        box-shadow:
+            0 10px 36px rgba(30, 27, 75, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+    }
+    .sw-wl-matrix-card__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.85rem 1.1rem;
+        border-bottom: 1px solid rgba(199, 210, 254, 0.55);
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+    }
+    .sw-wl-matrix-card__head h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #312e81;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+    .sw-wl-matrix-card__head h2 i {
+        color: #4f46e5;
+        font-size: 1.1rem;
+    }
+    .sw-wl-matrix-card__hint {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+    }
     .workload-sheet-wrap {
         overflow-x: auto;
         border-radius: 0 0 14px 14px;
@@ -14,13 +444,13 @@
         margin: 0;
     }
     .workload-sheet thead th {
-        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
-        color: #3c4043;
+        background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #1e1b4b;
         font-weight: 600;
         text-align: center;
         vertical-align: middle;
         padding: 0.55rem 0.4rem;
-        border: 1px solid #cdd1d6;
+        border: 1px solid rgba(99, 102, 241, 0.22);
         white-space: normal;
         text-transform: none;
         letter-spacing: 0;
@@ -33,188 +463,274 @@
         line-height: 1.25;
     }
     .workload-sheet tbody td {
-        border: 1px solid #e0e3e7;
+        border: 1px solid rgba(199, 210, 254, 0.65);
         padding: 0.45rem 0.4rem;
         vertical-align: middle;
         text-align: center;
     }
     .workload-sheet tbody tr.data-row:nth-child(odd) {
-        background: #fafbfc;
+        background: #f8fafc;
     }
     .workload-sheet tbody tr.data-row:nth-child(even) {
         background: #fff;
     }
+    .workload-sheet tbody tr.data-row:hover {
+        background: #eef2ff !important;
+    }
     .workload-sheet .workload-total-row td {
-        background: #fdebd0 !important;
+        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%) !important;
         font-weight: 600;
-        border-color: #e8d4b8;
+        border-color: #fde68a;
+        color: #78350f;
     }
     .workload-sheet .col-text-left {
         text-align: left !important;
         max-width: 220px;
     }
-    .workload-subnav .btn {
-        border-radius: 6px;
+    .sw-workload-page .workload-sheet .btn-outline-primary {
+        border-color: rgba(99, 102, 241, 0.45);
+        color: #4338ca;
+        border-radius: 8px;
+    }
+    .sw-workload-page .workload-sheet .btn-outline-primary:hover {
+        background: #eef2ff;
+    }
+    .sw-wl-about-card {
+        border-radius: 18px;
+        border: 1px solid rgba(199, 210, 254, 0.6);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(224, 231, 255, 0.45) 100%);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 28px rgba(30, 27, 75, 0.07);
+        overflow: hidden;
+    }
+    .sw-wl-about-card .card-header {
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.9) 0%, rgba(255, 255, 255, 0.75) 100%);
+        border-bottom: 1px solid rgba(199, 210, 254, 0.5);
+        padding: 0.85rem 1.1rem;
+    }
+    .sw-wl-about-card .card-header h5 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #312e81;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .sw-wl-about-card .card-header h5 .bi {
+        color: #4f46e5;
+    }
+    .sw-wl-rate-badge {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+        color: #422006 !important;
+    }
+    .sw-wl-about-card .card-body {
+        color: #475569;
+        line-height: 1.55;
+    }
+    .sw-modal-workload .modal-content {
+        border-radius: 16px;
+        border: 1px solid rgba(99, 102, 241, 0.18);
+        box-shadow: 0 20px 50px rgba(30, 27, 75, 0.18);
+    }
+    .sw-modal-workload .form-check {
+        border-color: rgba(199, 210, 254, 0.85) !important;
+        background: rgba(248, 250, 252, 0.65);
     }
 {% endblock %}
 
 {% block content %}
-{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+<div class="sw-workload-layout">
+    <section class="sw-workload-dash" aria-label="Панель расчёта нагрузки">
+        <div class="page-header sw-workload-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-calculator"></i></span>
+                <span class="sw-page-title__label">Расчёт нагрузки</span>
+            </h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 ms-md-auto">
+                <div class="sw-toolbar-group">
+                    <button type="button" class="btn btn-outline-danger btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadPdfModal">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
+                        <i class="bi bi-filetype-csv"></i> CSV
+                    </button>
+                    <a href="{% url 'accounts:workload_record_create' %}" class="btn btn-primary sw-toolbar-btn">
+                        <i class="bi bi-plus-circle"></i> Добавить строку
+                    </a>
+                </div>
+                <div class="sw-toolbar-group">
+                    <a href="{% url 'accounts:workload_records_list' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm sw-toolbar-btn">
+                        <i class="bi bi-list-ul"></i> Плоский список
+                    </a>
+                    <a href="{% url 'accounts:workload_summary' %}?year={{ year }}&month={{ month }}" class="btn btn-outline-primary btn-sm sw-toolbar-btn">
+                        <i class="bi bi-people"></i> Сводка
+                    </a>
+                    <a href="{% url 'accounts:workload_export_csv' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm sw-toolbar-btn" title="Плоский список полей журнала">
+                        <i class="bi bi-list-columns-reverse"></i> Журнал CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="page-header flex-wrap">
-    <h2 class="mb-0"><i class="bi bi-calculator"></i> Учёт рабочего времени</h2>
-    <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#workloadPdfModal">
-            <i class="bi bi-file-pdf"></i> PDF
-        </button>
-        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
-            <i class="bi bi-filetype-csv"></i> CSV
-        </button>
-        <a href="{% url 'accounts:workload_record_create' %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> Добавить строку
-        </a>
-        <a href="{% url 'accounts:workload_records_list' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-list-ul"></i> Плоский список
-        </a>
-        <a href="{% url 'accounts:workload_summary' %}?year={{ year }}&month={{ month }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-people"></i> Сводка
-        </a>
-        <a href="{% url 'accounts:workload_export_csv' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm" title="Плоский список полей журнала">
-            <i class="bi bi-list-columns-reverse"></i> Журнал CSV
-        </a>
-    </div>
-</div>
-
-<form method="get" class="card mb-3">
-    <div class="card-body py-3">
-        <div class="row g-2 align-items-end flex-wrap">
-            <div class="col-6 col-md-2">
-                <label class="form-label mb-0 small">Год</label>
-                <input type="number" name="year" class="form-control form-control-sm" value="{{ year }}" min="2000" max="2100">
+    <div class="sw-filter-dash mb-0 sw-wl-guide">
+        <div class="sw-filter-dash-inner sw-wl-guide__inner">
+            <div class="sw-wl-guide__top">
+                <span class="sw-wl-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+                <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span class="sw-wl-guide__title">Справка по разделу «Расчёт нагрузки»</span>
+                    <button type="button" id="workloadInfoToggle" class="sw-wl-guide__toggle"
+                            data-bs-toggle="collapse" data-bs-target="#workloadInfoCollapse"
+                            aria-expanded="false" aria-controls="workloadInfoCollapse">
+                        Подсказка
+                        <i class="bi bi-chevron-down sw-wl-guide__chev" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
-            <div class="col-6 col-md-2">
-                <label class="form-label mb-0 small">Месяц</label>
-                <input type="number" name="month" class="form-control form-control-sm" value="{{ month }}" min="1" max="12">
-            </div>
-            <div class="col-12 col-md-4">
-                <label class="form-label mb-0 small">Работник</label>
-                <select name="worker" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for w in workers %}
-                        <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary btn-sm">Показать</button>
+            <div class="collapse" id="workloadInfoCollapse">
+                <div class="sw-wl-guide__panel">
+                    <p class="sw-wl-guide__lead">
+                        Данные из справочников: социальные работники и подопечные — из общей базы; в строке указывается работник и при необходимости подопечный (ФИО в первом столбце).
+                        Кратность за месяц при пустом поле = за неделю × 4. Коэффициент нагрузки (как на типовой таблице):
+                        <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong>. В строке «ИТОГО» коэффициенты по строкам суммируются; ставка — по суммарной нагрузке.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-</form>
 
-<div class="card mb-3">
-    <div class="card-body py-2 px-3">
-        <p class="small text-muted mb-0">
-            Данные из справочников: социальные работники и подопечные — из общей базы; в строке указывается работник и при необходимости подопечный (ФИО в первом столбце).
-            Кратность за месяц при пустом поле = за неделю × 4. Коэффициент нагрузки (как на типовой таблице):
-            <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong>. В строке «ИТОГО» коэффициенты по строкам суммируются; ставка — по суммарной нагрузке.
-        </p>
-    </div>
-</div>
+    <form method="get" class="sw-wl-filter-card">
+        <div class="card-body">
+            <div class="row g-2 g-md-3 align-items-end flex-wrap">
+                <div class="col-6 col-sm-auto">
+                    <label class="form-label mb-1">Год</label>
+                    <input type="number" name="year" class="form-control form-control-sm" value="{{ year }}" min="2000" max="2100">
+                </div>
+                <div class="col-6 col-sm-auto">
+                    <label class="form-label mb-1">Месяц</label>
+                    <input type="number" name="month" class="form-control form-control-sm" value="{{ month }}" min="1" max="12">
+                </div>
+                <div class="col-12 col-md">
+                    <label class="form-label mb-1">Работник</label>
+                    <select name="worker" class="form-select form-select-sm">
+                        <option value="">Все</option>
+                        {% for w in workers %}
+                            <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                        <i class="bi bi-funnel me-1"></i>Показать
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
 
-<div class="card">
-    <div class="card-body p-0 workload-sheet-wrap">
-        <table class="workload-sheet">
-            <thead>
-                <tr>
-                    <th rowspan="2" class="text-center align-middle" style="width:2.2rem;" title="Для выгрузки в PDF и CSV">
-                        <input type="checkbox" class="form-check-input" id="workloadSelectAll" aria-label="Отметить все строки">
-                    </th>
-                    <th rowspan="2">№</th>
-                    <th rowspan="2">ФИО соцработника / подопечного</th>
-                    <th rowspan="2">Населённый пункт</th>
-                    <th rowspan="2">Тип</th>
-                    <th rowspan="2">Кратность<br>(раз в неделю)</th>
-                    <th rowspan="2">Кратность<br>(раз в месяц)</th>
-                    <th rowspan="2">Время 1 посещения<br>(минут)</th>
-                    <th colspan="2" class="workload-cat-total-month">Всего отработано за месяц</th>
-                    <th rowspan="2">Норма рабочего<br>времени (часов)</th>
-                    <th rowspan="2">Коэф-т<br>нагрузки</th>
-                    <th rowspan="2">Ставка</th>
-                    <th rowspan="2"></th>
-                </tr>
-                <tr class="workload-head-sub">
-                    <th>Всего отработано за месяц (минут)</th>
-                    <th>Всего отработано за месяц (часов)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for g in workload_groups %}
-                    {% for row in g.rows %}
-                        {% with r=row.record %}
-                        <tr class="data-row">
-                            <td class="text-center align-middle">
-                                <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="Строка {{ row.num }}">
-                            </td>
-                            <td>{{ row.num }}</td>
-                            <td class="col-text-left">
-                                {% if r.recipient %}
-                                    {{ r.recipient.get_full_name }}
-                                {% else %}
-                                    <span class="text-muted">{{ r.social_worker.get_full_name }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="col-text-left">
-                                {% if r.location %}
-                                    {{ r.location.get_location_type_display }} {{ r.location.name }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </td>
-                            <td>{{ r.get_housing_type_display }}</td>
-                            <td>{{ r.visits_per_week }}</td>
-                            <td>{{ r.visits_per_month }}</td>
-                            <td>{{ r.visit_duration_minutes }}</td>
-                            <td>{{ r.worked_minutes_month }}</td>
-                            <td>{{ r.worked_hours_month }}</td>
-                            <td>{{ r.work_time_norm_hours }}</td>
-                            <td>{{ r.load_coefficient }}</td>
+    <div class="sw-wl-matrix-card">
+        <div class="sw-wl-matrix-card__head">
+            <h2><i class="bi bi-table" aria-hidden="true"></i> Журнал за {{ month }}.{{ year }}</h2>
+            <p class="sw-wl-matrix-card__hint d-none d-md-block mb-0">Отметьте строки в первом столбце для выгрузки PDF/CSV</p>
+        </div>
+        <div class="p-0 workload-sheet-wrap">
+            <table class="workload-sheet">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="text-center align-middle" style="width:2.2rem;" title="Для выгрузки в PDF и CSV">
+                            <input type="checkbox" class="form-check-input" id="workloadSelectAll" aria-label="Отметить все строки">
+                        </th>
+                        <th rowspan="2">№</th>
+                        <th rowspan="2">ФИО соцработника / подопечного</th>
+                        <th rowspan="2">Населённый пункт</th>
+                        <th rowspan="2">Тип</th>
+                        <th rowspan="2">Кратность<br>(раз в неделю)</th>
+                        <th rowspan="2">Кратность<br>(раз в месяц)</th>
+                        <th rowspan="2">Время 1 посещения<br>(минут)</th>
+                        <th colspan="2" class="workload-cat-total-month">Всего отработано за месяц</th>
+                        <th rowspan="2">Норма рабочего<br>времени (часов)</th>
+                        <th rowspan="2">Коэф-т<br>нагрузки</th>
+                        <th rowspan="2">Ставка</th>
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr class="workload-head-sub">
+                        <th>Всего отработано за месяц (минут)</th>
+                        <th>Всего отработано за месяц (часов)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in workload_groups %}
+                        {% for row in g.rows %}
+                            {% with r=row.record %}
+                            <tr class="data-row">
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="Строка {{ row.num }}">
+                                </td>
+                                <td>{{ row.num }}</td>
+                                <td class="col-text-left">
+                                    {% if r.recipient %}
+                                        {{ r.recipient.get_full_name }}
+                                    {% else %}
+                                        <span class="text-muted">{{ r.social_worker.get_full_name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="col-text-left">
+                                    {% if r.location %}
+                                        {{ r.location.get_location_type_display }} {{ r.location.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.get_housing_type_display }}</td>
+                                <td>{{ r.visits_per_week }}</td>
+                                <td>{{ r.visits_per_month }}</td>
+                                <td>{{ r.visit_duration_minutes }}</td>
+                                <td>{{ r.worked_minutes_month }}</td>
+                                <td>{{ r.worked_hours_month }}</td>
+                                <td>{{ r.work_time_norm_hours }}</td>
+                                <td>{{ r.load_coefficient }}</td>
+                                <td></td>
+                                <td class="text-nowrap">
+                                    <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm btn-outline-primary py-0 px-1" title="Изменить">изм.</a>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                        <tr class="workload-total-row">
                             <td></td>
-                            <td class="text-nowrap">
-                                <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm btn-outline-primary py-0 px-1" title="Изменить">изм.</a>
+                            <td></td>
+                            <td class="col-text-left" colspan="6">ИТОГО по {{ g.worker.get_full_name }}</td>
+                            <td>{{ g.total_minutes }}</td>
+                            <td>{{ g.total_hours }}</td>
+                            <td>—</td>
+                            <td>{{ g.load_sum }}</td>
+                            <td><span class="badge rounded-pill sw-wl-rate-badge">{{ g.rate }}</span></td>
+                            <td></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="14" class="text-center py-5" style="color: #64748b;">
+                                <i class="bi bi-inbox d-block fs-1 mb-2 opacity-50"></i>
+                                Нет записей за выбранный период.
+                                <a href="{% url 'accounts:workload_record_create' %}" class="fw-semibold">Добавить строку</a>
                             </td>
                         </tr>
-                        {% endwith %}
                     {% endfor %}
-                    <tr class="workload-total-row">
-                        <td></td>
-                        <td></td>
-                        <td class="col-text-left" colspan="6">ИТОГО по {{ g.worker.get_full_name }}</td>
-                        <td>{{ g.total_minutes }}</td>
-                        <td>{{ g.total_hours }}</td>
-                        <td>—</td>
-                        <td>{{ g.load_sum }}</td>
-                        <td><span class="badge rounded-pill bg-warning text-dark">{{ g.rate }}</span></td>
-                        <td></td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="14" class="text-center text-muted py-5">
-                            Нет записей за выбранный период.
-                            <a href="{% url 'accounts:workload_record_create' %}">Добавить строку</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<div id="workload-about" class="card mt-4">
-    <div class="card-header"><h5 class="mb-0">О расчёте нагрузки</h5></div>
-    <div class="card-body small text-muted">
-        <p class="mb-2">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
-        <p class="mb-0">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
+    <div id="workload-about" class="card sw-wl-about-card mt-1">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-journal-text" aria-hidden="true"></i> О расчёте нагрузки</h5>
+        </div>
+        <div class="card-body small">
+            <p class="mb-2">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
+            <p class="mb-0">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
+        </div>
     </div>
 </div>
 
@@ -236,7 +752,7 @@
     <span id="workloadCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-modal-workload" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:14px;">
             <div class="modal-header border-0 pb-0">
@@ -270,7 +786,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-modal-workload" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:14px;">
             <div class="modal-header border-0 pb-0">

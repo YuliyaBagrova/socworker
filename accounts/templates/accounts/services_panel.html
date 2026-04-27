@@ -718,7 +718,7 @@
             <div class="sw-services-guide__top">
                 <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
                 <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <span class="sw-services-guide__title">Как пользоваться панелью</span>
+                    <span class="sw-services-guide__title">Справка по разделу «Услуги»</span>
                     <button type="button" id="servicesGuideToggle" class="sw-services-guide__toggle"
                             data-bs-toggle="collapse" data-bs-target="#servicesGuideCollapse"
                             aria-expanded="false" aria-controls="servicesGuideCollapse">
@@ -741,7 +741,7 @@
         </div>
     </div>
 
-    <div class="row g-3 align-items-stretch">
+    <div class="row g-3 align-items-stretch" id="services-panel-work">
         <div class="col-lg-5">
             <div class="sw-sel-card h-100">
                 <div class="sw-sel-card__head">
@@ -845,7 +845,7 @@
     </div>
 
     {% if service_links %}
-    <div class="sw-matrix-card mt-1">
+    <div class="sw-matrix-card mt-1" id="services-panel-matrix">
         <div class="sw-matrix-card__head">
             <h2><i class="bi bi-grid-3x3-gap"></i> Все связки «работник — населённый пункт»</h2>
         </div>
@@ -977,5 +977,18 @@
             }
         }
     }
+
+    (function () {
+        var h = window.location.hash;
+        if (h === '#services-panel-work' || h === '#services-panel-matrix') {
+            var id = h.slice(1);
+            var el = document.getElementById(id);
+            if (el) {
+                setTimeout(function () {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 80);
+            }
+        }
+    })();
 </script>
 {% endblock %}

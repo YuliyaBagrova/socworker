@@ -1,0 +1,39 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Убрать из панели планирования — SocWorker{% endblock %}
+
+{% block body_attrs %} class="vp-planning-page"{% endblock %}
+
+{% block content %}
+<div class="del-confirm-wrap" style="max-width: 28rem; margin: 0 auto; padding: 0.5rem 0 2rem;">
+    <div class="card border-0 rounded-4 shadow-lg" style="overflow: hidden; background: rgba(255,255,255,0.92);">
+        <div class="text-white text-center p-4" style="background: linear-gradient(125deg, #fb923c 0%, #ea580c 45%, #c2410c 100%);">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 3.25rem; height: 3.25rem; background: rgba(255,255,255,0.2); font-size: 1.5rem;">
+                <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+            </div>
+            <h2 class="h5 fw-bold mb-1">Убрать из панели</h2>
+            <p class="small mb-0 opacity-90">Подопечный исчезнет из таблицы и календаря планирования. Карточка и запланированные визиты в системе сохраняются.</p>
+        </div>
+        <div class="p-4">
+            <div class="rounded-3 p-3 mb-3" style="background: linear-gradient(165deg, rgba(255, 247, 237, 0.9) 0%, rgba(254, 243, 199, 0.55) 100%); border: 1px solid rgba(251, 146, 60, 0.35);">
+                <strong class="d-block">{{ recipient.get_full_name }}</strong>
+                <small class="text-muted">Таб. № {{ recipient.employee_id }}</small>
+            </div>
+            <p class="small text-danger fw-semibold d-flex gap-2 align-items-start mb-4">
+                <i class="bi bi-exclamation-octagon-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
+                <span>Снова показать подопечного в панели можно через кнопку «Запланировать визит» в шапке раздела.</span>
+            </p>
+            <form method="post" class="d-flex flex-wrap gap-2 justify-content-center">
+                {% csrf_token %}
+                {% if next_url %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+                {% endif %}
+                <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:visit_planning' %}{% endif %}" class="btn btn-outline-secondary rounded-pill px-4">Отмена</a>
+                <button type="submit" class="btn text-white rounded-pill px-4 fw-semibold border-0" style="background: linear-gradient(145deg, #f97316 0%, #ea580c 100%); box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);">
+                    <i class="bi bi-trash me-1" aria-hidden="true"></i>Да, убрать из панели
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

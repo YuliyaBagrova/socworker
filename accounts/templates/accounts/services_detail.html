@@ -236,6 +236,12 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.92);
         overflow: hidden;
     }
+    /* Без записей: не растягивать «стеклянную» карточку на всю ширину — только чуть шире блока с текстом */
+    .sw-srv-table-card--empty {
+        align-self: center;
+        width: fit-content;
+        max-width: 100%;
+    }
     .sw-srv-table-wrap {
         overflow-x: auto;
         overflow-y: visible;
@@ -459,7 +465,7 @@
         </div>
     </div>
 
-    <div class="sw-srv-table-card">
+    <div class="sw-srv-table-card{% if not recipients %} sw-srv-table-card--empty{% endif %}">
         <div class="card-body p-0">
             {% if recipients %}
                 <div class="sw-srv-table-wrap">

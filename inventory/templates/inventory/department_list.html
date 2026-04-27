@@ -22,7 +22,7 @@
                 {% for d in departments %}
                     <tr>
                         <td>{{ d.name }}</td>
-                        <td>{% if d.head %}{% if d.head.inventory_profile %}{{ d.head.inventory_profile.full_name }}{% else %}{{ d.head.username }}{% endif %}{% else %}—{% endif %}</td>
+                        <td>{% if d.head %}{% if d.head.last_name or d.head.first_name %}{{ d.head.last_name }} {{ d.head.first_name }}{% else %}{{ d.head.username }}{% endif %}{% else %}—{% endif %}</td>
                         <td><a href="{% url 'inventory:department_edit' d.pk %}" class="btn btn-sm btn-outline-primary py-0 px-2">Изм.</a></td>
                     </tr>
                 {% empty %}

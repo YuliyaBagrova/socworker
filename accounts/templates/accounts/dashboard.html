@@ -328,7 +328,7 @@
         line-height: 1;
     }
     .dash-plan-today-badge.badge-lit {
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.35);
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.4);
     }
     .dash-reminder-line {
         display: block;
@@ -539,7 +539,7 @@
                                 </div>
                                 <h3 class="mb-0">Планирование визитов</h3>
                             </div>
-                            <span class="dash-plan-today-badge badge rounded-pill {% if planning_today_count %}bg-primary text-white badge-lit{% else %}bg-light text-secondary border{% endif %}"
+                            <span class="dash-plan-today-badge badge rounded-pill {% if planning_today_count %}bg-danger text-white badge-lit{% else %}bg-light text-secondary border{% endif %}"
                                   title="Запланированные визиты и задачи на сегодня">Сегодня: {{ planning_today_count }}</span>
                         </div>
                         <p class="text-muted mb-3">
@@ -576,7 +576,7 @@
                             <i class="bi bi-calendar3 flex-shrink-0"></i>
                             <span class="text-truncate">Календарь и планирование</span>
                         </span>
-                        <span class="dash-plan-today-badge badge rounded-pill {% if planning_today_count %}bg-primary text-white badge-lit{% else %}bg-light text-secondary border{% endif %}">{{ planning_today_count }}</span>
+                        <span class="dash-plan-today-badge badge rounded-pill {% if planning_today_count %}bg-danger text-white badge-lit{% else %}bg-light text-secondary border{% endif %}">{{ planning_today_count }}</span>
                     </a>
                     <a class="dash-side-link" href="{% url 'accounts:recipients_list' %}">
                         <i class="bi bi-person-lines-fill"></i> Подопечные
@@ -623,16 +623,16 @@
                 {% endif %}
             </div>
             <div class="dash-glass p-3 p-md-4 mb-4">
-                <div class="dash-side-title">Ближайшие визиты</div>
+                <div class="dash-side-title">Запланированные визиты</div>
                 {% if upcoming_visits %}
                     {% for v in upcoming_visits %}
-                        <a class="dash-visit-line" href="{% url 'accounts:visit_planning' %}">
+                        <a class="dash-visit-line" href="{% url 'accounts:visit_planning' %}?tab=calendar&amp;cal=day&amp;ref={{ v.visit_date|date:'Y-m-d' }}">
                             <span class="when">{{ v.visit_date|date:"d.m" }}</span>
                             — {{ v.recipient.get_full_name }}
                             <span class="text-muted">({{ v.social_worker.get_short_name }})</span>
                         </a>
                     {% endfor %}
-                    <div class="small text-muted pt-2 mb-0">Нажмите строку, чтобы перейти в календарь.</div>
+                    <div class="small text-muted pt-2 mb-0">Нажмите строку, чтобы открыть день в календаре.</div>
                 {% else %}
                     <p class="small text-muted mb-0">Запланированных визитов с сегодняшней даты пока нет — добавьте их в разделе планирования.</p>
                 {% endif %}
@@ -693,6 +693,8 @@
         if (u.origin !== window.location.origin) return;
         if (/\/accounts\/dashboard\/?$/.test(u.pathname)) return;
         try {
+            sessionStorage.removeItem('socworkerFromVisitPlanning');
+            sessionStorage.removeItem('socworkerVisitPlanningReturnUrl');
             sessionStorage.setItem(KEY, '1');
         } catch (err) {}
     });

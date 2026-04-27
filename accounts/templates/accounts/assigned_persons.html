@@ -283,47 +283,57 @@
         border-color: rgba(102, 126, 234, 0.4);
         color: #2d2652;
     }
-    .assign-sort-tabs {
-        display: flex;
-        gap: 0.45rem;
-        flex-wrap: wrap;
+    /* Сортировка — как на панели «Социальные работники» */
+    .sw-select-wrap {
+        position: relative;
     }
-    .assign-sort-tabs .stab {
-        font-size: 0.8125rem;
-        padding: 0.45rem 1rem;
-        border-radius: 999px;
+    .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: var(--dash-violet-light);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #4f46e5;
+    }
+    .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #4f46e5;
+        transform: translateY(-50%) scale(1);
+    }
+    .sw-filter-dash .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        font-size: 0.875rem;
         font-weight: 600;
-        text-decoration: none;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        color: #4a4668;
-        background: rgba(255, 255, 255, 0.65);
-        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
+        color: #2d2652;
+        background: rgba(255, 255, 255, 0.92);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(45, 38, 82, 0.05);
     }
-    .assign-sort-tabs .stab:hover {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(102, 126, 234, 0.35);
-        transform: translateY(-1px);
-    }
-    .assign-sort-tabs .stab.active-all {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
-    }
-    .assign-sort-tabs .stab.active-red {
-        background: linear-gradient(135deg, #e74c5e 0%, #c0392b 100%);
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 4px 14px rgba(231, 76, 94, 0.35);
-    }
-    .assign-sort-tabs .stab.active-blue {
-        background: linear-gradient(135deg, #5a7eea 0%, #4060c8 100%);
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 4px 14px rgba(90, 126, 234, 0.35);
+    .sw-filter-dash .form-select.sw-status-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        background: #fff;
     }
     .sw-filter-dash .input-group {
         border-radius: 12px;
@@ -503,24 +513,46 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.3),
             0 8px 18px rgba(239, 68, 68, 0.3);
     }
-    /* Поле поиска и «Найти» в одной строке (input-group) */
+    /* Поле поиска и «Найти» — высота как у списка «Сортировка» (form-select) */
     .assign-search-form .assign-search-input-group {
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+        align-items: stretch;
     }
     .assign-search-form .assign-search-input-group > .input-group-text {
         border-radius: 12px 0 0 12px;
+        padding: 0.35rem 0.65rem;
+        display: flex;
+        align-items: center;
+        min-height: 2.375rem;
     }
     .assign-search-form .assign-search-input-group > .form-control.sw-search-input {
         border-radius: 0;
         border-left: none;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1.45;
+        min-height: 2.375rem;
     }
-    .assign-search-form .assign-search-input-group > .btn.sw-filter-submit {
+    .sw-filter-dash .assign-search-form .assign-search-input-group > .btn.sw-filter-submit {
         border-radius: 0 12px 12px 0;
-        padding-left: 1rem;
-        padding-right: 1.1rem;
+        padding: 0.35rem 0.85rem !important;
         white-space: nowrap;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.45;
+        min-height: 2.375rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .sw-filter-dash .assign-search-form .assign-search-input-group > .btn.sw-filter-submit:hover {
+        transform: translateY(-1px);
+    }
+    .sw-filter-dash .assign-search-form .assign-search-input-group > .btn.sw-filter-submit:active {
+        transform: translateY(0);
     }
     .assign-search-form .assign-search-reset-row {
         margin-top: 0.45rem;
@@ -568,50 +600,46 @@
         <div class="sw-filter-dash-inner">
             <h2 class="sw-page-title sw-filter-panel-heading mb-0">
                 <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
-                <span class="sw-page-title__label">Вид таблицы и поиск</span>
+                <span class="sw-page-title__label">Поиск и сортировка</span>
             </h2>
-            <div class="row g-3 align-items-end">
-                <div class="col-12 col-lg-8 col-xl-7">
-                    <label class="sw-filter-label d-block">Вид таблицы</label>
-                    <div class="assign-sort-tabs">
-                        <a href="?sort=all{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'all' %}active-all{% endif %}">
-                            <i class="bi bi-list-ul"></i> Весь список
-                        </a>
-                        <a href="?sort=worker{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'worker' %}active-red{% endif %}">
-                            <i class="bi bi-people-fill"></i> По соц. работникам
-                        </a>
-                        <a href="?sort=recipient{% if search %}&search={{ search|urlencode }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="stab {% if sort == 'recipient' %}active-blue{% endif %}">
-                            <i class="bi bi-person-heart"></i> По подопечным
-                        </a>
+            <form method="get" class="row g-3 align-items-start assign-search-form">
+                {% if workload_return %}
+                    {% for k, v in workload_return.items %}
+                        <input type="hidden" name="{{ k }}" value="{{ v }}">
+                    {% endfor %}
+                {% endif %}
+                <div class="col-12 col-lg-6">
+                    <label for="assignSearchInput" class="sw-filter-label d-block">Поиск</label>
+                    <div class="input-group assign-search-input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control sw-search-input" id="assignSearchInput" name="search" value="{{ search }}"
+                               placeholder="{% if sort == 'worker' %}ФИО или телефон работника…{% elif sort == 'recipient' %}ФИО, телефон или адрес подопечного…{% else %}Работник или подопечный: ФИО, телефон, адрес…{% endif %}">
+                        <button type="submit" class="btn btn-primary sw-filter-submit">
+                            <i class="bi bi-search"></i> Найти
+                        </button>
                     </div>
                 </div>
-                <div class="col-12 col-lg-4 col-xl-5">
-                    <form method="get" class="assign-search-form">
-                        {% if workload_return %}
-                            {% for k, v in workload_return.items %}
-                                <input type="hidden" name="{{ k }}" value="{{ v }}">
-                            {% endfor %}
-                        {% endif %}
-                        <input type="hidden" name="sort" value="{{ sort }}">
-                        <label for="assignSearchInput" class="sw-filter-label d-block">Поиск</label>
-                        <div class="input-group assign-search-input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control sw-search-input" id="assignSearchInput" name="search" value="{{ search }}"
-                                   placeholder="{% if sort == 'worker' %}ФИО или телефон работника…{% elif sort == 'recipient' %}ФИО, телефон или адрес подопечного…{% else %}Работник или подопечный: ФИО, телефон, адрес…{% endif %}">
-                            <button type="submit" class="btn btn-primary sw-filter-submit">
-                                <i class="bi bi-search"></i> Найти
-                            </button>
-                        </div>
-                        {% if search %}
-                            <div class="assign-search-reset-row">
-                                <a href="?sort={{ sort }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="btn btn-sm btn-outline-secondary sw-assign-reset" title="Сбросить поиск">
-                                    <i class="bi bi-x-lg me-1"></i>Сбросить поиск
-                                </a>
-                            </div>
-                        {% endif %}
-                    </form>
+                <div class="col-12 col-lg-6">
+                    <label for="assignSortSelect" class="sw-filter-label d-block">Сортировка</label>
+                    <div class="sw-select-wrap">
+                        <select class="form-select sw-status-select sw-select-native" id="assignSortSelect" name="sort"
+                                title="При смене варианта список обновится"
+                                onchange="this.form.submit()">
+                            <option value="all" {% if sort == 'all' %}selected{% endif %}>Весь список</option>
+                            <option value="worker" {% if sort == 'worker' %}selected{% endif %}>По соц. работникам</option>
+                            <option value="recipient" {% if sort == 'recipient' %}selected{% endif %}>По подопечным</option>
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
                 </div>
-            </div>
+                {% if search %}
+                <div class="col-12 pt-1">
+                    <a href="?sort={{ sort }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}" class="btn btn-sm btn-outline-secondary sw-assign-reset" title="Сбросить поиск">
+                        <i class="bi bi-x-lg me-1"></i>Сбросить поиск
+                    </a>
+                </div>
+                {% endif %}
+            </form>
         </div>
     </div>
 

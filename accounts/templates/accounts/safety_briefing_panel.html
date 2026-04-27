@@ -2,186 +2,1155 @@
 
 {% block title %}Техника безопасности - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-safety-page"{% endblock %}
+
+{% block inline_css %}
+    /* Панель «Техника безопасности»: сланец + янтарь/оранж/индиго/фиолет — более насыщенный «живой» фон */
+    body.sw-safety-page {
+        min-height: 100vh;
+        background-color: #0c1222;
+        background-image:
+            linear-gradient(180deg, rgba(8, 12, 24, 0.55) 0%, rgba(15, 23, 42, 0.72) 42%, rgba(30, 27, 75, 0.45) 78%, rgba(15, 23, 42, 0.88) 100%),
+            radial-gradient(ellipse 85% 70% at 8% 12%, rgba(251, 191, 36, 0.42), transparent 58%),
+            radial-gradient(ellipse 75% 65% at 95% 8%, rgba(167, 139, 250, 0.32), transparent 55%),
+            radial-gradient(ellipse 90% 55% at 78% 88%, rgba(249, 115, 22, 0.38), transparent 60%),
+            radial-gradient(ellipse 70% 50% at 18% 92%, rgba(59, 130, 246, 0.28), transparent 58%),
+            radial-gradient(ellipse 55% 45% at 50% 48%, rgba(244, 63, 94, 0.12), transparent 62%),
+            linear-gradient(118deg, rgba(67, 56, 202, 0.45) 0%, transparent 38%),
+            linear-gradient(232deg, rgba(217, 119, 6, 0.22) 0%, transparent 45%),
+            linear-gradient(12deg, rgba(30, 58, 138, 0.35) 20%, rgba(88, 28, 135, 0.2) 55%, transparent 80%),
+            repeating-linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.018) 0px,
+                rgba(255, 255, 255, 0.018) 1px,
+                transparent 1px,
+                transparent 5px
+            );
+        background-attachment: fixed;
+    }
+    body.sw-safety-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-safety-layout {
+        --safety-ink: #1e293b;
+        --safety-amber: #d97706;
+        --safety-amber-soft: rgba(245, 158, 11, 0.22);
+        --safety-slate: #334155;
+        --dash-glass-border: rgba(255, 255, 255, 0.88);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: calc(100vh - var(--navbar-height) - 2.5rem);
+    }
+    .sw-safety-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--dash-glass-border);
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.35);
+    }
+    .sw-safety-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            108deg,
+            rgba(15, 23, 42, 0.55) 0%,
+            rgba(30, 58, 138, 0.28) 48%,
+            rgba(120, 53, 15, 0.18) 100%
+        );
+        pointer-events: none;
+    }
+    .sw-safety-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0 !important;
+    }
+    .sw-safety-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-safety-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fbbf24 0%, #f59e0b 32%, #ea580c 68%, #c2410c 100%);
+        box-shadow:
+            0 6px 22px rgba(234, 88, 12, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .sw-safety-dash .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            105deg,
+            #ffffff 0%,
+            #fef3c7 22%,
+            #fde68a 42%,
+            #fcd34d 58%,
+            #e2e8f0 78%,
+            #cbd5e1 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.35));
+    }
+    @supports not (background-clip: text) {
+        .sw-safety-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #fef3c7;
+            background: none;
+            filter: none;
+            text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+        }
+    }
+    /* Тулбар — те же размеры и стили, что PDF / CSV / «Запланировать визит» на панели планирования */
+    .sw-safety-page .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-safety-page .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-safety-page .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-safety-page .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-safety-page .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-safety-page .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-safety-page .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    /* Справка — тёплая гамма панели «Техника безопасности»; заголовок/иконка как «Поиск и фильтр» */
+    .sw-safety-page .sw-filter-dash.sw-safety-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 251, 235, 0.88) 42%, rgba(254, 243, 199, 0.72) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(253, 230, 138, 0.65);
+        box-shadow:
+            0 4px 6px -1px rgba(120, 53, 15, 0.06),
+            0 12px 28px -8px rgba(234, 88, 12, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .sw-safety-page .sw-filter-dash.sw-safety-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 40%, #ea580c 100%);
+        opacity: 0.95;
+    }
+    .sw-safety-page .sw-filter-dash-inner.sw-safety-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .sw-safety-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    /* Иконка — янтарь / оранж; размер клетки как на медосмотре (2.25rem) */
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fbbf24 0%, #f59e0b 32%, #ea580c 68%, #c2410c 100%);
+        border: none;
+        box-shadow:
+            0 6px 20px rgba(234, 88, 12, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    /* Заголовок справки — типографика как «Справка по разделу …» на медосмотре; цвет прежний #312e5c */
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #312e5c;
+        margin: 0;
+        line-height: 1.3;
+    }
+    /* «Подсказка» — размер как на медосмотре; оранжевая гамма панели безопасности */
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #7c2d12;
+        background: linear-gradient(145deg, #fde68a 0%, #fcd34d 35%, #fbbf24 70%, #f59e0b 100%);
+        border: 1px solid rgba(234, 88, 12, 0.55);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        box-shadow:
+            0 4px 14px rgba(234, 88, 12, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.55);
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.2s ease,
+            filter 0.2s ease;
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__toggle:hover {
+        color: #431407;
+        border-color: rgba(194, 65, 12, 0.65);
+        filter: brightness(1.06);
+        box-shadow:
+            0 8px 22px rgba(234, 88, 12, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.55);
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__toggle[aria-expanded="true"] {
+        color: #431407;
+        background: linear-gradient(145deg, #fcd34d 0%, #f59e0b 45%, #ea580c 100%);
+        border-color: rgba(194, 65, 12, 0.7);
+        box-shadow:
+            0 4px 16px rgba(234, 88, 12, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .sw-safety-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-safety-guide__toggle[aria-expanded="true"] .sw-safety-guide__chev {
+        transform: rotate(180deg);
+    }
+    .sw-safety-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 251, 235, 0.92) 50%, rgba(254, 243, 199, 0.75) 100%);
+        border: 1px solid rgba(251, 191, 36, 0.5);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.95),
+            0 4px 20px rgba(120, 53, 15, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    #safetyGuideCollapse.collapse.show .sw-safety-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__lead {
+        margin: 0;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(245, 158, 11, 0.95);
+    }
+    .sw-safety-page .sw-safety-guide .sw-safety-guide__lead strong {
+        color: #312e5c;
+        font-weight: 700;
+    }
+    /* Фильтры — как блок «Поиск и сортировка» (соцработники): шапка + pill-поля + градиент-кнопка */
+    .sw-safety-page .sw-filter-dash.sw-safety-filter-dash {
+        background: #ffffff;
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.98);
+        border-radius: 22px;
+        box-shadow:
+            0 10px 40px rgba(15, 23, 42, 0.14),
+            0 2px 8px rgba(15, 23, 42, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+        transition: box-shadow 0.25s ease;
+    }
+    .sw-safety-page .sw-filter-dash.sw-safety-filter-dash:hover {
+        box-shadow:
+            0 14px 44px rgba(99, 102, 241, 0.12),
+            0 4px 12px rgba(15, 23, 42, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.25rem;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.16);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+    /* Иконка «Поиск и фильтр» — та же палитра, что у заголовка «Техника безопасности» (янтарь / оранж) */
+    .sw-safety-page .sw-safety-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.12rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fbbf24 0%, #f59e0b 32%, #ea580c 68%, #c2410c 100%);
+        box-shadow:
+            0 6px 20px rgba(234, 88, 12, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #312e5c;
+        margin: 0;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #4a3f6f;
+        margin-bottom: 0.4rem;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap {
+        position: relative;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: #667eea;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap:hover .sw-select-chevron,
+    .sw-safety-page .sw-safety-filter-dash .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #4f46e5;
+    }
+    .sw-safety-page .sw-safety-filter-dash .form-select.sw-status-select {
+        border-radius: 999px;
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2d2652;
+        background: rgba(255, 255, 255, 0.96);
+        padding-top: 0.52rem;
+        padding-bottom: 0.52rem;
+        padding-left: 1rem;
+        box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+    }
+    .sw-safety-page .sw-safety-filter-dash .form-select.sw-status-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.14);
+        background: #fff;
+    }
+    .sw-safety-page .sw-safety-filter-dash .input-group {
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(45, 38, 82, 0.06);
+    }
+    .sw-safety-page .sw-safety-filter-dash .input-group-text {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-right: none;
+        color: #667eea;
+        font-size: 1rem;
+        padding-left: 1rem;
+    }
+    .sw-safety-page .sw-safety-filter-dash .form-control.sw-search-input {
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-left: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a1a2e;
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 0 999px 999px 0;
+        padding-top: 0.52rem;
+        padding-bottom: 0.52rem;
+    }
+    .sw-safety-page .sw-safety-filter-dash .form-control.sw-search-input::placeholder {
+        color: #7a7694;
+        font-weight: 400;
+    }
+    .sw-safety-page .sw-safety-filter-dash .form-control.sw-search-input:focus {
+        border-color: #667eea;
+        box-shadow: none;
+        background: #fff;
+    }
+    /* «Найти» — как на панели «Получатели услуг» (recipients_list) */
+    .sw-safety-page .sw-safety-filter-dash .btn.btn-primary.sw-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        padding: 0.62rem 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        box-shadow:
+            0 4px 18px rgba(99, 102, 241, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page .sw-safety-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow:
+            0 10px 28px rgba(102, 126, 234, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .sw-safety-page .sw-safety-filter-dash .btn.btn-primary.sw-filter-submit:active {
+        transform: translateY(0);
+    }
+    /* Таблица — как панель «Прохождение медосмотра» (.sw-table-card / .sw-sheet) */
+    .sw-safety-layout .sw-table-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        margin-bottom: 0 !important;
+        border-radius: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 18px rgba(26, 26, 46, 0.08);
+        overflow: hidden;
+    }
+    .sw-safety-layout .sw-table-card > .card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+    }
+    .sw-safety-page .sw-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 14px 14px;
+        flex: 1 1 auto;
+        min-height: 12rem;
+    }
+    .sw-safety-page .sw-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .sw-safety-page .sw-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    .sw-safety-page .sw-sheet thead th.col-text-left {
+        text-align: left !important;
+    }
+    .sw-safety-page .sw-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #3c4043;
+    }
+    .sw-safety-page .sw-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .sw-safety-page .sw-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    .sw-safety-page .sw-sheet tbody tr.data-row:hover {
+        background: #f0edff !important;
+    }
+    .sw-safety-page .sw-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 14rem;
+        white-space: normal;
+    }
+    .sw-safety-page .sw-sheet .col-narrow {
+        white-space: nowrap;
+    }
+    .sw-safety-page .sw-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .sw-safety-page .sw-sheet a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+    }
+    .sw-safety-pass {
+        color: #b45309 !important;
+        font-weight: 600;
+    }
+    .sw-safety-fail {
+        color: #b91c1c !important;
+        font-weight: 600;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell .sw-action-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 0 !important;
+        line-height: 1;
+        flex-shrink: 0;
+        vertical-align: middle;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell .sw-action-btn i {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.2em;
+        height: 1.2em;
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+        font-size: 1.05rem;
+    }
+    /* «Прошёл» — зелёный градиент как кнопка галочки на панели медосмотра */
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-pass {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #6ee7b7 0%, #34d399 38%, #10b981 82%, #059669 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 2px 6px rgba(5, 150, 105, 0.22),
+            0 8px 18px rgba(16, 185, 129, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-pass:hover {
+        color: #fff;
+        filter: brightness(1.06);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(5, 150, 105, 0.28),
+            0 12px 26px rgba(16, 185, 129, 0.32);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-pass:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(110, 231, 183, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 8px 18px rgba(16, 185, 129, 0.3);
+    }
+    /* Снять — как «снять» на медосмотре */
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.38) 0%, transparent 52%),
+            linear-gradient(155deg, #cbd5e1 0%, #94a3b8 40%, #64748b 85%, #475569 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.28),
+            0 2px 6px rgba(71, 85, 105, 0.22),
+            0 8px 18px rgba(100, 116, 139, 0.26);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear:hover {
+        color: #fff;
+        filter: brightness(1.06);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.34),
+            0 4px 10px rgba(71, 85, 105, 0.26),
+            0 12px 26px rgba(100, 116, 139, 0.32);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(148, 163, 184, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28),
+            0 8px 18px rgba(100, 116, 139, 0.28);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear-inactive,
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear-inactive:hover,
+    .sw-safety-page .sw-action-btn.sw-action-btn--safety-clear-inactive:focus-visible {
+        opacity: 0.42;
+        filter: none;
+        transform: none;
+        cursor: not-allowed;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.22),
+            0 2px 4px rgba(71, 85, 105, 0.12);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--edit {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page a.sw-action-btn.sw-action-btn--edit:visited {
+        color: #fff;
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--edit:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--edit:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell button.sw-action-btn {
+        color: #fff;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell button.sw-action-btn:hover {
+        color: #fff;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell a.sw-action-btn {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-safety-page .sw-sheet .sw-actions-cell a.sw-action-btn:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--destructive:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .sw-safety-page .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    .sw-safety-layout .sw-table-card > .card-body > .empty-state {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 16rem;
+        padding: 2.5rem 1rem;
+    }
+    .sw-safety-layout .sw-table-card .pagination-wrap {
+        flex-shrink: 0;
+    }
+    .sw-safety-layout .sw-table-card .page-link {
+        border-radius: 8px;
+    }
+    .sw-safety-modal .modal-content {
+        border-radius: 16px;
+        border: 1px solid rgba(99, 102, 241, 0.12);
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+    }
+    /* «Снять отметку» — та же палитра и разметка, что на панели «Прохождение медосмотра» (.mc-clear-modal) */
+    .sw-safety-page .mc-clear-modal .modal-content {
+        border-radius: 18px;
+        border: 1px solid #fcd34d;
+        background: linear-gradient(165deg, #ffffff 0%, #f0fdf4 52%, #fffbeb 100%);
+        box-shadow: 0 24px 56px rgba(20, 83, 45, 0.18);
+        overflow: hidden;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+    .sw-safety-page .mc-clear-modal .modal-header {
+        padding: 1.15rem 1.25rem 0.65rem;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__icon {
+        flex-shrink: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #fff;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.38) 0%, transparent 52%),
+            linear-gradient(155deg, #cbd5e1 0%, #94a3b8 40%, #64748b 85%, #475569 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.28),
+            0 2px 6px rgba(71, 85, 105, 0.22),
+            0 8px 18px rgba(100, 116, 139, 0.26);
+    }
+    .sw-safety-page .mc-clear-modal .modal-title {
+        font-weight: 800;
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+        color: #14532d;
+        margin: 0;
+        line-height: 1.25;
+    }
+    .sw-safety-page .mc-clear-modal .modal-body {
+        padding: 0.35rem 1.25rem 1.1rem;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__worker {
+        font-size: 0.95rem;
+        color: #166534;
+        padding: 0.65rem 0.85rem;
+        border-radius: 12px;
+        background: #ecfdf5;
+        border: 1px solid #86efac;
+        margin-bottom: 0.85rem;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__worker strong {
+        color: #0f2918;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__hint {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #57534e;
+        margin: 0;
+        padding-left: 0.35rem;
+        border-left: 3px solid rgba(234, 179, 8, 0.65);
+    }
+    .sw-safety-page .mc-clear-modal .modal-footer {
+        padding: 0.65rem 1.25rem 1.15rem;
+        gap: 0.5rem;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.45rem 1rem;
+        border-color: rgba(120, 113, 108, 0.35);
+        color: #44403c;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__btn-cancel:hover {
+        background: #f5f5f4;
+        border-color: #a8a29e;
+        color: #292524;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__btn-confirm {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 0.45rem 1.1rem;
+        border: none;
+        color: #fff;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-safety-page .mc-clear-modal .mc-clear-modal__btn-confirm:hover {
+        filter: brightness(1.08);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+{% endblock %}
+
 {% block content %}
-<div class="page-header flex-wrap">
-    <h2><i class="bi bi-shield-check"></i> Техника безопасности</h2>
-    <div class="d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#safetyPdfModal">
-            <i class="bi bi-file-pdf"></i> PDF
-        </button>
-        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#safetyCsvModal">
-            <i class="bi bi-filetype-csv"></i> CSV
-        </button>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#safetyBriefingModal">
-            <i class="bi bi-plus-circle"></i> Добавить инструктаж
-        </button>
-    </div>
-</div>
-
-<p class="text-muted small mb-3">
-    Учёт инструктажей по охране труда и технике безопасности. В колонке <strong>«Прохождение»</strong> видно, отмечен ли инструктаж как пройденный;
-    при снятой галочке при добавлении записи или кнопке «Снять» статус — <strong>не пройден</strong>, подтвердите прохождение кнопкой «Прошёл» (как на панели медосмотра).
-</p>
-
-<div class="card mb-4">
-    <div class="card-body py-3">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-5">
-                <label for="filter_worker" class="form-label">Социальный работник</label>
-                <select class="form-select form-select-sm" id="filter_worker" name="worker">
-                    <option value="">Все</option>
-                    {% for sw in all_workers %}
-                        <option value="{{ sw.pk }}" {% if filter_worker == sw.pk|stringformat:"s" %}selected{% endif %}>{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-5">
-                <label for="title" class="form-label">Название инструктажа (поиск)</label>
-                <input type="text" class="form-control form-control-sm" id="title" name="title"
-                       value="{{ filter_title }}" placeholder="Часть названия…">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label d-none d-md-block">&nbsp;</label>
-                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Применить</button>
-            </div>
-            {% if has_active_filters %}
-            <div class="col-12 mt-2">
-                <a href="{% url 'accounts:safety_briefing_panel' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-x-lg"></i> Сбросить фильтры
+<div class="sw-safety-layout">
+    <section class="sw-safety-dash" aria-label="Панель Техника безопасности">
+        <div class="page-header sw-safety-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+                <span class="sw-page-title__label">Техника безопасности</span>
+            </h1>
+            <div class="sw-toolbar-group">
+                <button type="button" class="btn btn-outline-danger btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#safetyPdfModal">
+                    <i class="bi bi-file-pdf"></i> PDF
+                </button>
+                <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#safetyCsvModal">
+                    <i class="bi bi-filetype-csv"></i> CSV
+                </button>
+                <a href="{% url 'accounts:safety_briefing_add' %}?next={{ safety_panel_back_quoted }}" class="btn btn-primary sw-toolbar-btn">
+                    <i class="bi bi-plus-circle"></i> Добавить инструктаж
                 </a>
             </div>
-            {% endif %}
-        </form>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-body p-0">
-        {% if page_obj %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
-                            <input type="checkbox" class="form-check-input" id="safetySelectAll" aria-label="Отметить все на странице">
-                        </th>
-                        <th>Дата инструктажа</th>
-                        <th>Таб. №</th>
-                        <th>Социальный работник</th>
-                        <th>Название инструктажа</th>
-                        <th>Примечание</th>
-                        <th class="text-center">Прохождение</th>
-                        <th class="text-end" style="min-width: 260px;">Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for rec in page_obj %}
-                    <tr>
-                        <td class="text-center align-middle">
-                            <input type="checkbox" class="form-check-input safety-record-select" value="{{ rec.pk }}" aria-label="Запись {{ rec.briefing_date|date:'d.m.Y' }}">
-                        </td>
-                        <td>{{ rec.briefing_date|date:"d.m.Y" }}</td>
-                        <td>{{ rec.social_worker.employee_id }}</td>
-                        <td><a href="{% url 'accounts:social_worker_detail' rec.social_worker.pk %}">{{ rec.social_worker.get_full_name }}</a></td>
-                        <td class="text-break fw-medium">{{ rec.briefing_title }}</td>
-                        <td class="small text-muted text-break">{{ rec.notes|default:"—" }}</td>
-                        <td class="text-center">
-                            {% if rec.passed %}
-                                <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill"></i> Прошёл</span>
-                            {% else %}
-                                <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill"></i> Не пройден</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-end">
-                            <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
-                                {% if not rec.passed %}
-                                <form method="post" action="{% url 'accounts:safety_briefing_mark_passed' rec.pk %}" class="d-flex flex-wrap gap-1 align-items-center">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{{ panel_back }}">
-                                    <input type="date" name="briefing_date" value="{{ rec.briefing_date|date:'Y-m-d' }}" class="form-control form-control-sm" style="width: 9.5rem;" title="Дата прохождения">
-                                    <button type="submit" class="btn btn-sm btn-success">Прошёл</button>
-                                </form>
-                                {% endif %}
-                                {% if rec.passed %}
-                                <form method="post" action="{% url 'accounts:safety_briefing_clear_passed' rec.pk %}" class="d-inline"
-                                      onsubmit="return confirm('Снять отметку о прохождении инструктажа?');">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{{ panel_back }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Снять отметку">Снять</button>
-                                </form>
-                                {% endif %}
-                                <form method="post" action="{% url 'accounts:safety_briefing_delete' rec.pk %}" class="d-inline"
-                                      onsubmit="return confirm('Удалить эту запись об инструктаже?');">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{{ panel_back }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="8" class="text-muted p-4 text-center">Нет записей. Добавьте инструктаж кнопкой выше.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
-        {% else %}
-        <div class="empty-state p-4"><p class="text-muted mb-0">Нет данных для отображения.</p></div>
-        {% endif %}
-    </div>
-    {% if page_obj.has_other_pages %}
-    <div class="card-footer py-2">
-        <nav aria-label="Страницы">
-            <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
-                {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Назад</a></li>
-                {% endif %}
-                <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Вперёд</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
-    {% endif %}
-</div>
+    </section>
 
-<div class="modal fade" id="safetyBriefingModal" tabindex="-1" aria-labelledby="safetyBriefingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'accounts:safety_briefing_add' %}">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ panel_back }}">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="safetyBriefingModalLabel">Новая запись об инструктаже</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+    <div class="sw-filter-dash mb-0 sw-safety-guide">
+        <div class="sw-filter-dash-inner sw-safety-guide__inner">
+            <div class="sw-safety-guide__top">
+                <span class="sw-safety-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+                <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span class="sw-safety-guide__title">Справка по разделу «Техника безопасности»</span>
+                    <button type="button" id="safetyGuideToggle" class="sw-safety-guide__toggle"
+                            data-bs-toggle="collapse" data-bs-target="#safetyGuideCollapse"
+                            aria-expanded="false" aria-controls="safetyGuideCollapse">
+                        Подсказка
+                        <i class="bi bi-chevron-down sw-safety-guide__chev" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <div class="modal-body">
-                    {% if briefing_form.non_field_errors %}
-                        <div class="alert alert-danger">{{ briefing_form.non_field_errors }}</div>
-                    {% endif %}
-                    {% for field in briefing_form.visible_fields %}
-                        {% if field.name == 'passed' %}
-                        <div class="form-check mb-3">
-                            {{ field }}
-                            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
-                        </div>
-                        {% endif %}
-                    {% endfor %}
+            </div>
+            <div class="collapse" id="safetyGuideCollapse">
+                <div class="sw-safety-guide__panel">
+                    <p class="sw-safety-guide__lead">
+                        Учёт инструктажей по охране труда и технике безопасности. Новую строку журнала добавляют кнопкой <strong>«Добавить инструктаж»</strong> — открывается отдельная страница (как «Назначить медосмотр»). В колонке <strong>«Прохождение»</strong> видно статус. Кнопки в колонке «Действия» — в том же порядке, что на панели медосмотра: <strong>снять</strong> отметку (крестик всегда на месте; если отметки нет — кнопка неактивна), <strong>редактировать</strong> дату и статус на отдельной странице (карандаш), <strong>подтвердить прохождение</strong> (зелёная галочка, дата — сегодня), <strong>удалить</strong> запись. Дату инструктажа можно изменить только через «Редактировать».
+                    </p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sw-filter-dash sw-safety-filter-dash mb-0">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+                <span class="sw-page-title__label">Поиск и фильтр</span>
+            </h2>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-12 col-lg-5">
+                    <label for="filter_worker" class="sw-filter-label d-block">ФИО</label>
+                    <div class="sw-select-wrap">
+                        <select class="form-select sw-status-select sw-select-native" id="filter_worker" name="worker">
+                            <option value="">Все</option>
+                            {% for sw in all_workers %}
+                                <option value="{{ sw.pk }}" {% if filter_worker == sw.pk|stringformat:"s" %}selected{% endif %}>{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                            {% endfor %}
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
                 </div>
+                <div class="col-12 col-lg-5">
+                    <label for="title" class="sw-filter-label d-block">Название инструктажа (поиск)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control sw-search-input" id="title" name="title"
+                               value="{{ filter_title }}" placeholder="Часть названия…" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </div>
+                {% if has_active_filters %}
+                <div class="col-12 pt-1">
+                    <a href="{% url 'accounts:safety_briefing_panel' %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-x-lg"></i> Сбросить фильтры
+                    </a>
+                    <span class="text-muted small ms-2 d-none d-md-inline" style="font-size: 0.8125rem;">Сбросить поиск и выбор работника</span>
+                </div>
+                {% endif %}
             </form>
         </div>
+    </div>
+
+    <div class="card sw-table-card" id="safety-panel-table">
+        <div class="card-body p-0">
+            {% if page_obj %}
+            <div class="sw-sheet-wrap">
+                <table class="sw-sheet mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                                <input type="checkbox" class="form-check-input" id="safetySelectAll" aria-label="Отметить все на странице">
+                            </th>
+                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-text-left">ФИО</th>
+                            <th class="col-text-left">Название инструктажа</th>
+                            <th class="text-center col-narrow">Прохождение</th>
+                            <th class="col-text-left" style="max-width: 11rem;">Примечание</th>
+                            <th class="text-center" style="min-width: 280px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in page_obj %}
+                        <tr class="data-row">
+                            <td class="text-center align-middle">
+                                <input type="checkbox" class="form-check-input safety-record-select" value="{{ rec.pk }}" aria-label="Запись {{ rec.briefing_date|date:'d.m.Y' }}, {{ rec.social_worker.get_full_name }}">
+                            </td>
+                            <td class="col-narrow"><span class="fw-semibold">{{ rec.social_worker.employee_id }}</span></td>
+                            <td class="col-text-left"><a href="{% url 'accounts:social_worker_detail' rec.social_worker.pk %}">{{ rec.social_worker.get_full_name }}</a></td>
+                            <td class="col-text-left fw-medium">{{ rec.briefing_title }}</td>
+                            <td class="text-center col-narrow">
+                                {% if rec.passed %}
+                                    <span class="sw-safety-pass"><i class="bi bi-check-circle-fill"></i> Прошёл</span>
+                                {% else %}
+                                    <span class="sw-safety-fail"><i class="bi bi-x-circle-fill"></i> Не пройден</span>
+                                {% endif %}
+                            </td>
+                            <td class="col-text-left small text-muted">
+                                {% if rec.notes %}<span title="{{ rec.notes }}">{{ rec.notes|truncatechars:56 }}</span>{% else %}<span class="text-muted">—</span>{% endif %}
+                            </td>
+                            <td>
+                                <div class="sw-actions-cell">
+                                    {% if rec.passed %}
+                                    <form method="post" action="{% url 'accounts:safety_briefing_clear_passed' rec.pk %}" class="d-inline" id="safety-clear-form-{{ rec.pk }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ panel_back }}">
+                                        <button type="button" class="sw-action-btn sw-action-btn--safety-clear js-safety-clear-open" title="Снять отметку о прохождении"
+                                                data-safety-clear-form="safety-clear-form-{{ rec.pk }}"
+                                                data-worker-name="{{ rec.social_worker.get_full_name|escape }}"
+                                                data-briefing-title="{{ rec.briefing_title|escape }}">
+                                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Снять</span>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <button type="button" class="sw-action-btn sw-action-btn--safety-clear sw-action-btn--safety-clear-inactive" disabled title="Нет отметки о прохождении — снять нечего">
+                                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Снять (недоступно)</span>
+                                    </button>
+                                    {% endif %}
+                                    <a href="{% url 'accounts:safety_briefing_edit' rec.pk %}?next={{ safety_panel_back_quoted }}" class="sw-action-btn sw-action-btn--edit" title="Изменить запись инструктажа (дата, статус, примечание)">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Редактировать</span>
+                                    </a>
+                                    <form method="post" action="{% url 'accounts:safety_briefing_mark_passed' rec.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ panel_back }}">
+                                        <button type="submit" class="sw-action-btn sw-action-btn--safety-pass" title="Отметить прохождение инструктажа (дата подтверждения — сегодня)">
+                                            <i class="bi bi-check-lg" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Прошёл</span>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'accounts:safety_briefing_delete' rec.pk %}" class="d-inline"
+                                          onsubmit="return confirm('Удалить эту запись об инструктаже?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ panel_back }}">
+                                        <button type="submit" class="sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Удалить</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr class="data-row"><td colspan="7" class="text-muted p-4 text-center">Нет записей. Добавьте инструктаж кнопкой «Добавить инструктаж».</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><p class="text-muted mb-0 text-center px-3">Нет данных для отображения.</p></div>
+            {% endif %}
+        </div>
+        {% if page_obj.has_other_pages %}
+        <div class="card-body border-top py-2 pagination-wrap">
+            <nav aria-label="Страницы">
+                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Назад</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Вперёд</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -201,7 +1170,7 @@
     <span id="safetyCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="safetyPdfModal" tabindex="-1" aria-labelledby="safetyPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-safety-modal" id="safetyPdfModal" tabindex="-1" aria-labelledby="safetyPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:14px;">
             <div class="modal-header border-0 pb-0">
@@ -226,8 +1195,8 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="safetyPdfConfirm">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="safetyPdfConfirm">
                     <i class="bi bi-download"></i> Сформировать PDF
                 </button>
             </div>
@@ -235,7 +1204,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="safetyCsvModal" tabindex="-1" aria-labelledby="safetyCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-safety-modal" id="safetyCsvModal" tabindex="-1" aria-labelledby="safetyCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:14px;">
             <div class="modal-header border-0 pb-0">
@@ -268,17 +1237,38 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade mc-clear-modal" id="safetyClearPassedModal" tabindex="-1" aria-labelledby="safetyClearPassedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="mc-clear-modal__title-wrap">
+                    <span class="mc-clear-modal__icon" aria-hidden="true"><i class="bi bi-x-lg"></i></span>
+                    <h5 class="modal-title" id="safetyClearPassedModalLabel">Снять отметку о прохождении инструктажа?</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mc-clear-modal__worker">
+                    <div class="mb-2">Сотрудник: <strong id="safetyClearWorkerName"></strong></div>
+                    <div class="mb-0">Инструктаж: <strong id="safetyClearBriefingTitle"></strong></div>
+                </div>
+                <p class="mc-clear-modal__hint mb-0">
+                    Статус в колонке «Прохождение» станет «Не пройден». Позже можно снова отметить прохождение или изменить запись через «Редактировать».
+                </p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary mc-clear-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn mc-clear-modal__btn-confirm" id="safetyClearPassedConfirm">
+                    <i class="bi bi-check-lg me-1"></i>Снять отметку
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-{% if briefing_form.errors %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var el = document.getElementById('safetyBriefingModal');
-    if (el && window.bootstrap) { new bootstrap.Modal(el).show(); }
-});
-</script>
-{% endif %}
 <script>
 (function () {
     const selectAll = document.getElementById('safetySelectAll');
@@ -341,6 +1331,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             form.submit();
+        });
+    }
+
+    const safetyClearModalEl = document.getElementById('safetyClearPassedModal');
+    const safetyClearWorkerEl = document.getElementById('safetyClearWorkerName');
+    const safetyClearTitleEl = document.getElementById('safetyClearBriefingTitle');
+    const safetyClearConfirmBtn = document.getElementById('safetyClearPassedConfirm');
+    let safetyClearPendingForm = null;
+    if (safetyClearModalEl && safetyClearConfirmBtn) {
+        document.querySelectorAll('.js-safety-clear-open').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const fid = btn.getAttribute('data-safety-clear-form');
+                safetyClearPendingForm = fid ? document.getElementById(fid) : null;
+                if (safetyClearWorkerEl) {
+                    safetyClearWorkerEl.textContent = btn.getAttribute('data-worker-name') || '—';
+                }
+                if (safetyClearTitleEl) {
+                    safetyClearTitleEl.textContent = btn.getAttribute('data-briefing-title') || '—';
+                }
+                const m = bootstrap.Modal.getOrCreateInstance(safetyClearModalEl);
+                m.show();
+            });
+        });
+        safetyClearConfirmBtn.addEventListener('click', function () {
+            if (safetyClearPendingForm) {
+                safetyClearPendingForm.submit();
+            }
+        });
+        safetyClearModalEl.addEventListener('hidden.bs.modal', function () {
+            safetyClearPendingForm = null;
         });
     }
 })();

@@ -11,8 +11,10 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import IntegerField, Q
+from django.db.models.functions import Cast
 from django.http import HttpResponse
+from django.utils.html import strip_tags
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
@@ -26,6 +28,7 @@ from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     SocialWorkerForm,
+    MedicalCheckupEditForm,
     ServiceRecipientForm,
     ServiceLocationForm,
     PlannedVisitForm,
@@ -39,6 +42,8 @@ from .models import (
     PlannedVisit,
     VisitTaskReminder,
     SafetyBriefingRecord,
+    UserProfile,
+    WorkloadRecord,
 )
 from .visit_schedule import (
     RU_MONTHS,
@@ -53,7 +58,36 @@ from .visit_schedule import (
     week_start_monday,
 )
 
+MEDICAL_CHECKUP_VALID_DAYS = 365
 
+
+def _apply_tab_employee_sort(qs, sort_order):
+    """
+    Сортировка списков с полем employee_id: по таб. № как по числу (1,2,…,10),
+    затем фамилия и имя. Нецифровые табельные номера в MySQL дают 0 при CAST.
+    """
+    if sort_order == 'tab_asc':
+        return qs.annotate(
+            _tab_sort_num=Cast('employee_id', IntegerField()),
+        ).order_by('_tab_sort_num', 'last_name', 'first_name')
+    if sort_order == 'tab_desc':
+        return qs.annotate(
+            _tab_sort_num=Cast('employee_id', IntegerField()),
+        ).order_by('-_tab_sort_num', 'last_name', 'first_name')
+    return qs.order_by('last_name', 'first_name')
+
+
+def _export_plain_text(value, max_len=500):
+    """Текст для PDF/CSV: без HTML, одна строка по возможности."""
+    if not value:
+        return '—'
+    t = strip_tags(str(value)).strip()
+    if not t:
+        return '—'
+    t = ' '.join(t.split())
+    if len(t) > max_len:
+        return t[: max_len - 1] + '…'
+    return t
 
 
 def _register_fonts():
@@ -125,9 +159,102 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    """Главная страница после входа"""
+    """Главная страница после входа: статистика, напоминания, запланированные визиты."""
+    user = request.user
+    today = date.today()
+    dash_year = today.year
+    dash_month = today.month
+
+    def _dash_initials(u):
+        fn = (u.first_name or '').strip()
+        ln = (u.last_name or '').strip()
+        if ln and fn:
+            return (ln[0] + fn[0]).upper()
+        if ln:
+            return ln[:2].upper()
+        if fn:
+            return fn[:2].upper()
+        em = (u.email or '').strip()
+        if em:
+            return em[:2].upper()
+        return (u.username or '?')[:2].upper()
+
+    profile = UserProfile.objects.filter(user_id=user.pk).first()
+
+    worker_count = SocialWorker.objects.count()
+    worker_active_count = SocialWorker.objects.filter(status='active').count()
+    location_count = ServiceLocation.objects.count()
+    recipient_count = ServiceRecipient.objects.count()
+
+    planned_visits_month = PlannedVisit.objects.filter(
+        visit_date__year=dash_year,
+        visit_date__month=dash_month,
+    ).count()
+
+    week_end = today + timedelta(days=6)
+    tasks_week_count = VisitTaskReminder.objects.filter(
+        task_date__gte=today,
+        task_date__lte=week_end,
+    ).count()
+
+    workload_rows_month = WorkloadRecord.objects.filter(
+        period_year=dash_year,
+        period_month=dash_month,
+    ).count()
+
+    planning_today_count = (
+        PlannedVisit.objects.filter(visit_date=today).count()
+        + VisitTaskReminder.objects.filter(task_date=today).count()
+    )
+
+    med_threshold = today - timedelta(days=MEDICAL_CHECKUP_VALID_DAYS)
+    medical_overdue_count = SocialWorker.objects.filter(
+        medical_panel_registered=True,
+    ).filter(
+        Q(last_medical_checkup_date__isnull=True)
+        | Q(last_medical_checkup_date__lt=med_threshold)
+    ).count()
+
+    try:
+        from inventory.models import InventoryUnit
+
+        inventory_units_count = InventoryUnit.objects.count()
+    except Exception:
+        inventory_units_count = None
+
+    dash_reminders = _visit_planning_active_reminders(today, None, None, None)[:25]
+
+    upcoming_visits = list(
+        PlannedVisit.objects.filter(visit_date__gte=today)
+        .select_related('recipient', 'social_worker')
+        .order_by('visit_date', 'visit_time', 'pk')[:15]
+    )
+
+    recent_workload = list(
+        WorkloadRecord.objects.select_related('social_worker', 'recipient')
+        .order_by('-updated_at')[:8]
+    )
+
     return render(request, 'accounts/dashboard.html', {
-        'user': request.user
+        'user': user,
+        'dash_user_profile': profile,
+        'dash_initials': _dash_initials(user),
+        'dash_today': today,
+        'dash_year': dash_year,
+        'dash_month': dash_month,
+        'worker_count': worker_count,
+        'worker_active_count': worker_active_count,
+        'location_count': location_count,
+        'recipient_count': recipient_count,
+        'planned_visits_month': planned_visits_month,
+        'tasks_week_count': tasks_week_count,
+        'workload_rows_month': workload_rows_month,
+        'planning_today_count': planning_today_count,
+        'medical_overdue_count': medical_overdue_count,
+        'inventory_units_count': inventory_units_count,
+        'dash_reminders': dash_reminders,
+        'upcoming_visits': upcoming_visits,
+        'recent_workload': recent_workload,
     })
 
 
@@ -145,9 +272,12 @@ def social_workers_list(request):
     """Список социальных работников"""
     search_query = request.GET.get('search', '')
     status_filter = request.GET.get('status', '')
-    
+    sort_order = request.GET.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
+
     workers = SocialWorker.objects.all()
-    
+
     # Поиск
     if search_query:
         workers = workers.filter(
@@ -157,31 +287,29 @@ def social_workers_list(request):
             Q(employee_id__icontains=search_query) |
             Q(phone__icontains=search_query)
         )
-    
+
     # Фильтр по статусу
     if status_filter:
         workers = workers.filter(status=status_filter)
-    
-    # Сортировка
-    workers = workers.order_by('last_name', 'first_name')
-    
+
+    # Сортировка (как в выпадающем списке на панели)
+    workers = _apply_tab_employee_sort(workers, sort_order)
+
     # Пагинация
     paginator = Paginator(workers, 10)  # 10 работников на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'page_obj': page_obj,
         'search_query': search_query,
         'status_filter': status_filter,
+        'sort_order': sort_order,
         'has_active_filters': bool(search_query or status_filter),
         'status_choices': SocialWorker.STATUS_CHOICES,
     }
-    
+
     return render(request, 'accounts/social_workers_list.html', context)
-
-
-MEDICAL_CHECKUP_VALID_DAYS = 365
 
 
 @login_required
@@ -190,7 +318,7 @@ def medical_checkup_panel(request):
     worker_filter = request.GET.get('worker', '')
     status_filter = request.GET.get('status', '')
 
-    workers = SocialWorker.objects.all()
+    workers = SocialWorker.objects.filter(medical_panel_registered=True)
     if worker_filter and str(worker_filter).isdigit():
         workers = workers.filter(pk=int(worker_filter))
     if status_filter:
@@ -219,6 +347,10 @@ def medical_checkup_panel(request):
             doseq=True,
         )
 
+    assignable_workers = SocialWorker.objects.filter(
+        medical_panel_registered=False,
+    ).order_by('last_name', 'first_name')
+
     return render(request, 'accounts/medical_checkup_panel.html', {
         'page_obj': page_obj,
         'filter_worker': worker_filter if (worker_filter and str(worker_filter).isdigit()) else '',
@@ -227,11 +359,13 @@ def medical_checkup_panel(request):
             (worker_filter and str(worker_filter).isdigit()) or status_filter,
         ),
         'status_choices': SocialWorker.STATUS_CHOICES,
-        'today': today,
-        'today_iso': today.isoformat(),
-        'all_workers': SocialWorker.objects.order_by('last_name', 'first_name'),
+        'all_workers': SocialWorker.objects.filter(
+            medical_panel_registered=True,
+        ).order_by('last_name', 'first_name'),
+        'assignable_workers': assignable_workers,
         'page_query': query,
         'medical_panel_back': request.get_full_path(),
+        'medical_panel_back_quoted': quote(request.get_full_path(), safe='/'),
     })
 
 
@@ -244,6 +378,15 @@ def medical_checkup_mark_passed(request):
         messages.error(request, 'Не указан сотрудник.')
         return redirect('accounts:medical_checkup_panel')
     worker = get_object_or_404(SocialWorker, pk=int(pk))
+    if not worker.medical_panel_registered:
+        messages.warning(
+            request,
+            'Этот сотрудник не в таблице панели медосмотра.',
+        )
+        next_q = request.POST.get('next', '')
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
+        return redirect('accounts:medical_checkup_panel')
     passed_str = request.POST.get('passed_on', '').strip()
     try:
         passed_on = date.fromisoformat(passed_str) if passed_str else date.today()
@@ -276,6 +419,15 @@ def medical_checkup_clear_mark(request):
         messages.error(request, 'Не указан сотрудник.')
         return redirect('accounts:medical_checkup_panel')
     worker = get_object_or_404(SocialWorker, pk=int(pk))
+    if not worker.medical_panel_registered:
+        messages.warning(
+            request,
+            'Этот сотрудник не в таблице панели медосмотра.',
+        )
+        next_q = request.POST.get('next', '')
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
+        return redirect('accounts:medical_checkup_panel')
     worker.last_medical_checkup_date = None
     worker.medical_checkup = 'not_passed'
     worker.save(update_fields=[
@@ -293,36 +445,189 @@ def medical_checkup_clear_mark(request):
 
 @login_required
 def medical_checkup_assign(request):
-    if request.method != 'POST':
+    """Страница «Назначить медосмотр»: добавление сотрудника в панель (полный набор полей)."""
+    assignable_workers = SocialWorker.objects.filter(
+        medical_panel_registered=False,
+    ).order_by('last_name', 'first_name')
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if request.method == 'POST':
+        pk = request.POST.get('worker_pk', '').strip()
+        if not pk or not str(pk).isdigit():
+            messages.error(request, 'Выберите сотрудника.')
+            form = MedicalCheckupEditForm(request.POST)
+            return render(request, 'accounts/medical_checkup_assign.html', {
+                'assign_medical_form': form,
+                'assignable_workers': assignable_workers,
+                'next_url': next_q,
+            })
+        worker = get_object_or_404(SocialWorker, pk=int(pk))
+        if worker.medical_panel_registered:
+            messages.warning(
+                request,
+                f'Сотрудник {worker.get_full_name()} уже есть в таблице панели медосмотра.',
+            )
+            form = MedicalCheckupEditForm(request.POST)
+            return render(request, 'accounts/medical_checkup_assign.html', {
+                'assign_medical_form': form,
+                'assignable_workers': assignable_workers,
+                'next_url': next_q,
+            })
+        today = date.today()
+        form = MedicalCheckupEditForm(request.POST)
+        if form.is_valid():
+            _apply_medical_checkup_edit(worker, form.cleaned_data, today)
+            worker.medical_panel_registered = True
+            worker.save(update_fields=[
+                'last_medical_checkup_date', 'medical_checkup',
+                'medical_checkup_planned_date', 'medical_notes',
+                'medical_panel_registered', 'updated_at',
+            ])
+            messages.success(
+                request,
+                f'Сотрудник {worker.get_full_name()} добавлен в панель медосмотра.',
+            )
+            if next_q.startswith('/') and not next_q.startswith('//'):
+                return redirect(next_q)
+            return redirect('accounts:medical_checkup_panel')
+        messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+        return render(request, 'accounts/medical_checkup_assign.html', {
+            'assign_medical_form': form,
+            'assignable_workers': assignable_workers,
+            'next_url': next_q,
+        })
+
+    form = MedicalCheckupEditForm()
+    return render(request, 'accounts/medical_checkup_assign.html', {
+        'assign_medical_form': form,
+        'assignable_workers': assignable_workers,
+        'next_url': next_q,
+    })
+
+
+@login_required
+def medical_checkup_remove_from_panel(request, pk):
+    """Подтверждение и снятие сотрудника с учёта в панели медосмотра (без удаления карточки)."""
+    worker = get_object_or_404(SocialWorker, pk=pk)
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if not worker.medical_panel_registered:
+        messages.warning(
+            request,
+            'Этот сотрудник уже не отображается в панели медосмотра.',
+        )
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
         return redirect('accounts:medical_checkup_panel')
-    pk = request.POST.get('worker_pk')
-    planned_str = request.POST.get('planned_date', '').strip()
-    if not pk or not str(pk).isdigit():
-        messages.error(request, 'Выберите сотрудника.')
+
+    if request.method == 'POST':
+        name = worker.get_full_name()
+        worker.medical_panel_registered = False
+        worker.save(update_fields=['medical_panel_registered', 'updated_at'])
+        messages.success(
+            request,
+            f'{name} убран из панели прохождения медосмотра.',
+        )
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
         return redirect('accounts:medical_checkup_panel')
-    try:
-        planned_on = date.fromisoformat(planned_str)
-    except ValueError:
-        messages.error(request, 'Укажите корректную дату назначения.')
+
+    return render(request, 'accounts/medical_checkup_remove_confirm.html', {
+        'worker': worker,
+        'next_url': next_q,
+    })
+
+
+def _apply_medical_checkup_edit(worker, cleaned, today):
+    """Заполняет поля медосмотра из MedicalCheckupEditForm.cleaned_data."""
+    valid_days = MEDICAL_CHECKUP_VALID_DAYS
+    medical_checkup = cleaned['medical_checkup']
+    last_date = cleaned.get('last_medical_checkup_date')
+    valid_until = cleaned.get('valid_until')
+    mc_ok_12 = (cleaned.get('mc_ok_12') or '').strip()
+    planned = cleaned.get('medical_checkup_planned_date')
+    notes = cleaned.get('medical_notes')
+    if notes is not None:
+        notes = notes.strip()
+    else:
+        notes = ''
+
+    last = None
+    if valid_until:
+        last = valid_until - timedelta(days=valid_days)
+    if last is None and last_date:
+        last = last_date
+
+    if mc_ok_12 == 'yes':
+        if last is not None:
+            vu = last + timedelta(days=valid_days)
+            if vu < today:
+                last = today - timedelta(days=valid_days - 1)
+    elif mc_ok_12 == 'no':
+        if last is not None:
+            vu = last + timedelta(days=valid_days)
+            if vu >= today:
+                last = today - timedelta(days=valid_days + 1)
+
+    worker.last_medical_checkup_date = last
+    worker.medical_checkup = medical_checkup
+    worker.medical_checkup_planned_date = planned
+    worker.medical_notes = notes or None
+
+
+@login_required
+def medical_checkup_edit(request, pk):
+    """Страница «Изменить информацию о медосмотре» для выбранного сотрудника."""
+    worker = get_object_or_404(SocialWorker, pk=pk)
+    if not worker.medical_panel_registered:
+        messages.warning(
+            request,
+            'Этот сотрудник не в таблице панели медосмотра. Сначала нажмите «Назначить медосмотр».',
+        )
         return redirect('accounts:medical_checkup_panel')
-    worker = get_object_or_404(SocialWorker, pk=int(pk))
-    worker.medical_checkup_planned_date = planned_on
     today = date.today()
-    if worker.last_medical_checkup_date:
-        valid_until = worker.last_medical_checkup_date + timedelta(days=MEDICAL_CHECKUP_VALID_DAYS)
-        if valid_until < today and worker.medical_checkup == 'passed':
-            worker.medical_checkup = 'expired'
-    worker.save(update_fields=[
-        'medical_checkup_planned_date', 'medical_checkup', 'updated_at',
-    ])
-    messages.success(
-        request,
-        f'Медосмотр для {worker.get_full_name()} назначен на {planned_on.strftime("%d.%m.%Y")}.',
-    )
-    next_q = request.POST.get('next', '')
-    if next_q.startswith('/') and not next_q.startswith('//'):
-        return redirect(next_q)
-    return redirect('accounts:medical_checkup_panel')
+    next_url = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if request.method == 'POST':
+        form = MedicalCheckupEditForm(request.POST)
+        if form.is_valid():
+            _apply_medical_checkup_edit(worker, form.cleaned_data, today)
+            worker.save(update_fields=[
+                'last_medical_checkup_date', 'medical_checkup',
+                'medical_checkup_planned_date', 'medical_notes', 'updated_at',
+            ])
+            messages.success(
+                request,
+                f'Данные медосмотра сохранены: {worker.get_full_name()}.',
+            )
+            if next_url.startswith('/') and not next_url.startswith('//'):
+                return redirect(next_url)
+            return redirect('accounts:medical_checkup_panel')
+        messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+    else:
+        vu = None
+        if worker.last_medical_checkup_date:
+            vu = worker.last_medical_checkup_date + timedelta(days=MEDICAL_CHECKUP_VALID_DAYS)
+        mc_ok = ''
+        if worker.last_medical_checkup_date:
+            mc_ok = 'yes' if vu >= today else 'no'
+        initial = {
+            'medical_checkup': (
+                'passed' if worker.medical_checkup in ('passed', 'expired') else 'not_passed'
+            ),
+            'last_medical_checkup_date': worker.last_medical_checkup_date,
+            'valid_until': vu,
+            'mc_ok_12': mc_ok,
+            'medical_checkup_planned_date': worker.medical_checkup_planned_date,
+            'medical_notes': worker.medical_notes or '',
+        }
+        form = MedicalCheckupEditForm(initial=initial)
+
+    return render(request, 'accounts/medical_checkup_edit.html', {
+        'worker': worker,
+        'form': form,
+        'next_url': next_url,
+    })
 
 
 @login_required
@@ -356,38 +661,63 @@ def safety_briefing_panel(request):
             (worker_filter and str(worker_filter).isdigit()) or title_q,
         ),
         'all_workers': SocialWorker.objects.order_by('last_name', 'first_name'),
-        'briefing_form': SafetyBriefingRecordForm(),
         'page_query': query,
         'panel_back': request.get_full_path(),
+        'safety_panel_back_quoted': quote(request.get_full_path(), safe='/'),
     })
 
 
 @login_required
 def safety_briefing_add(request):
-    if request.method != 'POST':
-        return redirect('accounts:safety_briefing_panel')
-    form = SafetyBriefingRecordForm(request.POST)
-    next_url = request.POST.get('next', '')
-    if form.is_valid():
-        form.save()
-        messages.success(request, 'Запись об инструктаже добавлена.')
-        if next_url.startswith('/') and not next_url.startswith('//'):
-            return redirect(next_url)
-        return redirect('accounts:safety_briefing_panel')
-    messages.error(request, 'Исправьте ошибки в форме.')
-    records = SafetyBriefingRecord.objects.select_related('social_worker').order_by(
-        '-briefing_date', 'social_worker__last_name', 'pk',
-    )
-    page_obj = Paginator(records, 20).get_page(1)
-    return render(request, 'accounts/safety_briefing_panel.html', {
-        'page_obj': page_obj,
-        'filter_worker': '',
-        'filter_title': '',
-        'has_active_filters': False,
-        'all_workers': SocialWorker.objects.order_by('last_name', 'first_name'),
+    """Страница «Новая запись об инструктаже» — полноэкранная форма, как «Назначить медосмотр»."""
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if request.method == 'POST':
+        form = SafetyBriefingRecordForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Запись об инструктаже добавлена.')
+            if next_q.startswith('/') and not next_q.startswith('//'):
+                return redirect(next_q)
+            return redirect('accounts:safety_briefing_panel')
+        messages.error(request, 'Исправьте ошибки в форме.')
+    else:
+        form = SafetyBriefingRecordForm()
+
+    return render(request, 'accounts/safety_briefing_add.html', {
         'briefing_form': form,
-        'page_query': '',
-        'panel_back': reverse('accounts:safety_briefing_panel'),
+        'next_url': next_q,
+    })
+
+
+@login_required
+def safety_briefing_edit(request, pk):
+    """Страница редактирования записи журнала техники безопасности (дата, статус, примечание)."""
+    rec = get_object_or_404(
+        SafetyBriefingRecord.objects.select_related('social_worker'),
+        pk=pk,
+    )
+    next_url = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if request.method == 'POST':
+        form = SafetyBriefingRecordForm(request.POST, instance=rec)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                f'Запись об инструктаже сохранена: «{rec.briefing_title}» ({rec.social_worker.get_full_name()}).',
+            )
+            if next_url.startswith('/') and not next_url.startswith('//'):
+                return redirect(next_url)
+            return redirect('accounts:safety_briefing_panel')
+        messages.error(request, 'Исправьте ошибки в форме.')
+    else:
+        form = SafetyBriefingRecordForm(instance=rec)
+
+    return render(request, 'accounts/safety_briefing_edit.html', {
+        'record': rec,
+        'form': form,
+        'next_url': next_url,
     })
 
 
@@ -414,7 +744,10 @@ def safety_briefing_mark_passed(request, pk):
         try:
             rec.briefing_date = date.fromisoformat(passed_str)
         except ValueError:
-            pass
+            rec.briefing_date = date.today()
+    else:
+        # Как «Прошёл» на панели медосмотра: дата подтверждения — сегодня
+        rec.briefing_date = date.today()
     rec.passed = True
     rec.save(update_fields=['briefing_date', 'passed'])
     messages.success(
@@ -479,7 +812,7 @@ def social_worker_detail(request, pk):
 def social_worker_edit(request, pk):
     """Редактирование социального работника"""
     worker = get_object_or_404(SocialWorker, pk=pk)
-    
+
     if request.method == 'POST':
         form = SocialWorkerForm(request.POST, instance=worker)
         if form.is_valid():
@@ -490,7 +823,7 @@ def social_worker_edit(request, pk):
             messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
     else:
         form = SocialWorkerForm(instance=worker)
-    
+
     return render(request, 'accounts/social_worker_form.html', {
         'form': form,
         'worker': worker,
@@ -521,39 +854,39 @@ def social_worker_delete(request, pk):
 def recipients_list(request):
     """Список получателей услуг"""
     search_query = request.GET.get('search', '')
-    disability_filter = request.GET.get('disability', '')
     living_filter = request.GET.get('living', '')
-    
+    # rec_sort — основной параметр; sort — для совместимости со старыми ссылками
+    sort_order = request.GET.get('rec_sort') or request.GET.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
+
     recipients = ServiceRecipient.objects.select_related('social_worker').all()
-    
+
     if search_query:
         recipients = recipients.filter(
             Q(employee_id__icontains=search_query) |
             Q(first_name__icontains=search_query) |
             Q(last_name__icontains=search_query) |
             Q(middle_name__icontains=search_query) |
-            Q(address__icontains=search_query)
+            Q(address__icontains=search_query) |
+            Q(phone__icontains=search_query)
         )
-    
-    if disability_filter:
-        recipients = recipients.filter(disability_group=disability_filter)
-    
+
     if living_filter:
         recipients = recipients.filter(living_status=living_filter)
-    
-    recipients = recipients.order_by('last_name', 'first_name')
-    
+
+    recipients = _apply_tab_employee_sort(recipients, sort_order)
+
     paginator = Paginator(recipients, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'page_obj': page_obj,
         'search_query': search_query,
-        'disability_filter': disability_filter,
         'living_filter': living_filter,
-        'has_active_filters': bool(search_query or disability_filter or living_filter),
-        'disability_choices': ServiceRecipient.DISABILITY_GROUP_CHOICES,
+        'sort_order': sort_order,
+        'has_active_filters': bool(search_query or living_filter),
         'living_choices': ServiceRecipient.LIVING_STATUS_CHOICES,
     }
     return render(request, 'accounts/recipients_list.html', context)
@@ -577,10 +910,14 @@ def _visit_planning_active_reminders(today, wid, living, wstatus):
         )
     if wstatus:
         manual = manual.filter(social_worker__status=wstatus)
+    manual = manual.filter(
+        Q(recipient__isnull=True) | Q(recipient__visit_planning_panel_registered=True),
+    )
 
     planned = PlannedVisit.objects.filter(
         visit_date__gte=today,
         visit_date__lte=remind_end,
+        recipient__visit_planning_panel_registered=True,
     ).select_related('social_worker', 'recipient')
     if wid and str(wid).isdigit():
         planned = planned.filter(social_worker_id=int(wid))
@@ -622,6 +959,15 @@ def _visit_planning_active_reminders(today, wid, living, wstatus):
     return rows
 
 
+def _planned_visit_vpw_hint(form):
+    """Число «визитов в неделю» по полю кратности (для подсказки в форме)."""
+    if form.is_bound:
+        freq = form.data.get('recipient_visit_frequency') or form.fields['recipient_visit_frequency'].initial or '2'
+    else:
+        freq = form.fields['recipient_visit_frequency'].initial or '2'
+    return visits_per_week_from_frequency(str(freq))
+
+
 @login_required
 def visit_planning(request):
     """Планирование визитов: таблица, календарь, списки, таймлайн; фильтры; выходные."""
@@ -641,6 +987,7 @@ def visit_planning(request):
 
     recipients = ServiceRecipient.objects.filter(
         social_worker__isnull=False,
+        visit_planning_panel_registered=True,
     ).select_related('social_worker')
 
     wid = request.GET.get('worker')
@@ -667,12 +1014,18 @@ def visit_planning(request):
     )
     rec_list = list(recipients)
     rec_ids = [r.pk for r in rec_list]
+    today = date.today()
     planned_by_date = defaultdict(list)
+    upcoming_planned_by_recipient = defaultdict(list)
+    all_planned_by_recipient = defaultdict(list)
     if rec_ids:
         for pv in PlannedVisit.objects.filter(recipient_id__in=rec_ids).select_related(
             'recipient', 'social_worker',
-        ):
+        ).order_by('visit_date', 'visit_time', 'pk'):
             planned_by_date[pv.visit_date].append(pv)
+            all_planned_by_recipient[pv.recipient_id].append(pv)
+            if pv.visit_date >= today:
+                upcoming_planned_by_recipient[pv.recipient_id].append(pv)
 
     weekday_labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
@@ -688,6 +1041,13 @@ def visit_planning(request):
         total_visits_week += n
         day_flags = visit_weekday_flags(r.visit_days)
         mismatch = validate_visit_frequency_and_days(r.visit_frequency, r.visit_days)
+        upcoming_list = upcoming_planned_by_recipient[r.pk]
+        all_list = all_planned_by_recipient[r.pk]
+        # Для кнопок в строке: ближайший визит с сегодня и далее; иначе последний прошедший (удаление всё равно возможно)
+        if upcoming_list:
+            planned_visit_primary = upcoming_list[0]
+        else:
+            planned_visit_primary = all_list[-1] if all_list else None
         rows.append({
             'recipient': r,
             'worker': r.social_worker,
@@ -697,9 +1057,10 @@ def visit_planning(request):
             'day_flags': day_flags,
             'schedule_ok': mismatch is None,
             'schedule_warn': mismatch,
+            'planned_visits_upcoming': upcoming_list,
+            'planned_visit_primary': planned_visit_primary,
         })
 
-    today = date.today()
     tomorrow = today + timedelta(days=1)
     today_entries = day_entries(today)
     tomorrow_entries = day_entries(tomorrow)
@@ -754,7 +1115,24 @@ def visit_planning(request):
             'is_weekend': d.weekday() >= 5,
         })
 
-    all_workers = SocialWorker.objects.order_by('last_name', 'first_name')
+    all_workers = SocialWorker.objects.filter(
+        recipients__visit_planning_panel_registered=True,
+    ).distinct().order_by('last_name', 'first_name')
+
+    assignable_recipients = ServiceRecipient.objects.filter(
+        social_worker__isnull=False,
+        visit_planning_panel_registered=False,
+    ).order_by(
+        'social_worker__last_name', 'social_worker__first_name',
+        'last_name', 'first_name',
+    )
+
+    has_active_filters = bool(
+        (wid and str(wid).isdigit())
+        or (rid and str(rid).isdigit())
+        or living
+        or wstatus
+    )
 
     ctx = {
         'tab': tab,
@@ -769,13 +1147,15 @@ def visit_planning(request):
         'tomorrow': tomorrow,
         'today_entries': today_entries,
         'tomorrow_entries': tomorrow_entries,
-        'planned_visit_form': PlannedVisitForm(),
         'task_reminder_form': VisitTaskReminderForm(),
         'active_task_reminders': active_task_reminders,
         'task_reminder_count': len(active_task_reminders),
         'planning_back_url': planning_back_url,
         'planning_next_quoted': quote(request.get_full_path(), safe=''),
+        'planning_back_quoted': quote(request.get_full_path(), safe='/'),
         'all_workers': all_workers,
+        'assignable_recipients': assignable_recipients,
+        'has_active_filters': has_active_filters,
         'recipient_options': recipient_options,
         'filter_worker': wid or '',
         'filter_recipient': rid if (rid and str(rid).isdigit()) else '',
@@ -858,11 +1238,44 @@ def _safe_redirect_next(request, next_url: str):
 
 @login_required
 def planned_visit_create(request):
-    """Создание запланированного визита (модалка или отдельная страница при ошибке)."""
-    if request.method != 'POST':
-        return redirect('accounts:visit_planning')
-    next_url = request.POST.get('next', '')
-    form = PlannedVisitForm(request.POST)
+    """Новый визит для подопечного, уже учтённого в панели планирования."""
+    next_url = (request.GET.get('next') or request.POST.get('next') or '').strip()
+    panel_qs = ServiceRecipient.objects.filter(
+        social_worker__isnull=False,
+        visit_planning_panel_registered=True,
+    ).select_related('social_worker').order_by('last_name', 'first_name')
+
+    if request.method == 'GET':
+        initial = {}
+        rid = request.GET.get('recipient', '').strip()
+        if rid and rid.isdigit():
+            r = get_object_or_404(panel_qs, pk=int(rid))
+            initial = {
+                'recipient': r.pk,
+                'social_worker': r.social_worker_id,
+                'recipient_visit_frequency': r.visit_frequency,
+                'recipient_visit_days': r.visit_days or '',
+            }
+        form = PlannedVisitForm(
+            initial=initial,
+            recipient_queryset=panel_qs,
+            planning_panel_short=True,
+        )
+        return render(request, 'accounts/planned_visit_form.html', {
+            'form': form,
+            'next_url': next_url,
+            'title': 'Запланировать визит',
+            'submit_label': 'Сохранить',
+            'planned_visit': None,
+            'visits_per_week_hint': _planned_visit_vpw_hint(form),
+            'recipient_assign_meta': _visit_planning_panel_recipient_meta(),
+        })
+
+    form = PlannedVisitForm(
+        request.POST,
+        recipient_queryset=panel_qs,
+        planning_panel_short=True,
+    )
     if form.is_valid():
         form.save()
         messages.success(request, 'Визит запланирован.')
@@ -874,6 +1287,183 @@ def planned_visit_create(request):
         'title': 'Запланировать визит',
         'submit_label': 'Сохранить',
         'planned_visit': None,
+        'visits_per_week_hint': _planned_visit_vpw_hint(form),
+        'recipient_assign_meta': _visit_planning_panel_recipient_meta(),
+    })
+
+
+def _visit_planning_assignable_bundle():
+    """Один проход по БД + queryset для формы (тот же порядок сортировки)."""
+    order = (
+        'social_worker__last_name', 'social_worker__first_name',
+        'last_name', 'first_name',
+    )
+    lst = list(
+        ServiceRecipient.objects.filter(
+            social_worker__isnull=False,
+            visit_planning_panel_registered=False,
+        ).select_related('social_worker').order_by(*order),
+    )
+    meta = {
+        str(r.pk): {
+            'employee_id': r.employee_id or '',
+            'full_name': r.get_full_name(),
+            'worker_pk': str(r.social_worker_id) if r.social_worker_id else '',
+            'worker_name': (
+                r.social_worker.get_full_name() if r.social_worker else ''
+            ),
+        }
+        for r in lst
+    }
+    if not lst:
+        qs = ServiceRecipient.objects.none()
+    else:
+        qs = ServiceRecipient.objects.filter(
+            pk__in=[r.pk for r in lst],
+        ).select_related('social_worker').order_by(*order)
+    return qs, meta, lst
+
+
+def _visit_planning_panel_recipient_meta():
+    """Подопечные в панели планирования — для подсказок Таб. № / ФИО в форме визита."""
+    order = (
+        'social_worker__last_name', 'social_worker__first_name',
+        'last_name', 'first_name',
+    )
+    return {
+        str(r.pk): {
+            'employee_id': r.employee_id or '',
+            'full_name': r.get_full_name(),
+            'worker_pk': str(r.social_worker_id) if r.social_worker_id else '',
+            'worker_name': (
+                r.social_worker.get_full_name() if r.social_worker else ''
+            ),
+        }
+        for r in ServiceRecipient.objects.filter(
+            social_worker__isnull=False,
+            visit_planning_panel_registered=True,
+        ).select_related('social_worker').order_by(*order)
+    }
+
+
+def _recipient_meta_with_fallback(meta: dict, recipient: ServiceRecipient) -> dict:
+    """Для редактирования: текущий подопечный может быть вне панели — добавить в карту."""
+    out = dict(meta)
+    pk = str(recipient.pk)
+    if pk not in out:
+        sw = recipient.social_worker
+        out[pk] = {
+            'employee_id': recipient.employee_id or '',
+            'full_name': recipient.get_full_name(),
+            'worker_pk': str(sw.pk) if sw else '',
+            'worker_name': sw.get_full_name() if sw else '',
+        }
+    return out
+
+
+@login_required
+def planned_visit_assign(request):
+    """Страница «Запланировать визит»: внесение подопечного в панель и первая запись визита."""
+    assignable_qs, recipient_assign_meta, assignable_list = (
+        _visit_planning_assignable_bundle()
+    )
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    ctx_base = {
+        'assignable_recipients': assignable_qs,
+        'recipient_assign_meta': recipient_assign_meta,
+        'next_url': next_q,
+    }
+
+    if request.method == 'POST':
+        form = PlannedVisitForm(
+            request.POST,
+            for_panel_assign=True,
+            recipient_queryset=assignable_qs,
+        )
+        if form.is_valid():
+            recipient = form.cleaned_data['recipient']
+            if recipient.visit_planning_panel_registered:
+                messages.warning(
+                    request,
+                    f'Подопечный {recipient.get_full_name()} уже учтён в панели планирования.',
+                )
+                if next_q.startswith('/') and not next_q.startswith('//'):
+                    return redirect(next_q)
+                return redirect('accounts:visit_planning')
+            form.save()
+            recipient.visit_planning_panel_registered = True
+            recipient.save(update_fields=[
+                'visit_planning_panel_registered', 'updated_at',
+            ])
+            messages.success(
+                request,
+                f'{recipient.get_full_name()} добавлен в панель планирования визитов.',
+            )
+            if next_q.startswith('/') and not next_q.startswith('//'):
+                return redirect(next_q)
+            return redirect('accounts:visit_planning')
+        messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+        ctx = {**ctx_base, 'assign_form': form,
+               'visits_per_week_hint': _planned_visit_vpw_hint(form)}
+        return render(request, 'accounts/planned_visit_assign.html', ctx)
+
+    initial = {}
+    pre_rid = (request.GET.get('recipient') or '').strip()
+    if pre_rid.isdigit():
+        r = next(
+            (x for x in assignable_list if str(x.pk) == pre_rid),
+            None,
+        )
+        if r:
+            initial = {
+                'recipient': r.pk,
+                'social_worker': r.social_worker_id,
+                'recipient_visit_frequency': r.visit_frequency,
+                'recipient_visit_days': r.visit_days or '',
+            }
+    form = PlannedVisitForm(
+        initial=initial,
+        for_panel_assign=True,
+        recipient_queryset=assignable_qs,
+    )
+    ctx = {**ctx_base, 'assign_form': form,
+           'visits_per_week_hint': _planned_visit_vpw_hint(form)}
+    return render(request, 'accounts/planned_visit_assign.html', ctx)
+
+
+@login_required
+def visit_planning_remove_from_panel(request, pk):
+    """Убрать подопечного из панели планирования (карточка и визиты в БД сохраняются)."""
+    recipient = get_object_or_404(ServiceRecipient, pk=pk)
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if not recipient.visit_planning_panel_registered:
+        messages.warning(
+            request,
+            'Этот подопечный уже не отображается в панели планирования.',
+        )
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
+        return redirect('accounts:visit_planning')
+
+    if request.method == 'POST':
+        name = recipient.get_full_name()
+        recipient.visit_planning_panel_registered = False
+        recipient.save(update_fields=[
+            'visit_planning_panel_registered', 'updated_at',
+        ])
+        messages.success(
+            request,
+            f'{name} убран из панели планирования визитов.',
+        )
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
+        return redirect('accounts:visit_planning')
+
+    return render(request, 'accounts/visit_planning_remove_confirm.html', {
+        'recipient': recipient,
+        'next_url': next_q,
     })
 
 
@@ -885,24 +1475,30 @@ def planned_visit_edit(request, pk):
     )
     next_url = request.GET.get('next', '') or request.POST.get('next', '')
     if request.method == 'POST':
-        if 'delete' in request.POST:
-            obj.delete()
-            messages.success(request, 'Запланированный визит удалён.')
-            return _safe_redirect_next(request, next_url)
-        form = PlannedVisitForm(request.POST, instance=obj)
+        form = PlannedVisitForm(
+            request.POST,
+            instance=obj,
+            planning_panel_short=True,
+        )
         if form.is_valid():
             form.save()
             messages.success(request, 'Визит обновлён.')
             return _safe_redirect_next(request, next_url)
         messages.error(request, 'Проверьте поля формы.')
     else:
-        form = PlannedVisitForm(instance=obj)
+        form = PlannedVisitForm(instance=obj, planning_panel_short=True)
+    recipient_meta = _recipient_meta_with_fallback(
+        _visit_planning_panel_recipient_meta(),
+        obj.recipient,
+    )
     return render(request, 'accounts/planned_visit_form.html', {
         'form': form,
         'next_url': next_url,
         'title': 'Изменить запланированный визит',
         'submit_label': 'Сохранить',
         'planned_visit': obj,
+        'visits_per_week_hint': _planned_visit_vpw_hint(form),
+        'recipient_assign_meta': recipient_meta,
     })
 
 
@@ -1115,6 +1711,7 @@ def location_create(request):
     return render(request, 'accounts/location_form.html', {
         'form': form,
         'title': 'Добавить населённый пункт',
+        'button_text': 'Сохранить',
     })
 
 
@@ -1221,6 +1818,7 @@ def unassign_recipient(request, pk):
         recipient = get_object_or_404(ServiceRecipient, pk=pk)
         old_worker = recipient.social_worker
         recipient.social_worker = None
+        recipient.visit_planning_panel_registered = False
         recipient.save()
         messages.success(request, f'{recipient.get_full_name()} откреплён от {old_worker.get_full_name() if old_worker else "работника"}')
     return redirect('accounts:assigned_persons')
@@ -1319,29 +1917,27 @@ def report_pdf(request, report_type):
         )
 
         headers = [
-            PH('№'), PH('ФИО'), PH('Год рожд.'),
+            PH('№'), PH('Таб. №'), PH('ФИО'), PH('Год рожд.'),
             PH('Адрес'), PH('Телефон'), PH('Мед. осмотр'),
-            PH('Посл. осм.'), PH('Назн.'),
-            PH('Статус'),
-            PH('Дата приёма'),
+            PH('Дата приёма на работу'), PH('Примечания'), PH('Статус'),
         ]
 
         data = [headers]
         for i, w in enumerate(workers, 1):
             data.append([
                 P(i),
+                P(w.employee_id or '—'),
                 P(w.get_full_name()),
                 P(w.birth_date.strftime('%Y') if w.birth_date else '—'),
                 P(w.address or '—'),
                 P(w.phone or '—'),
                 P(w.get_medical_checkup_display()),
-                P(w.last_medical_checkup_date.strftime('%d.%m.%Y') if w.last_medical_checkup_date else '—'),
-                P(w.medical_checkup_planned_date.strftime('%d.%m.%Y') if w.medical_checkup_planned_date else '—'),
-                P(w.get_status_display()),
                 P(w.hire_date.strftime('%d.%m.%Y') if w.hire_date else '—'),
+                P(_export_plain_text(w.notes, max_len=400)),
+                P(w.get_status_display()),
             ])
 
-        col_widths = [26, 108, 38, 100, 58, 56, 48, 48, 52, 52, 52]
+        col_widths = [28, 34, 102, 34, 94, 54, 54, 54, 92, 88]
 
     elif report_type == 'recipients':
         recipients_qs = ServiceRecipient.objects.select_related('social_worker').all()
@@ -1382,8 +1978,8 @@ def report_pdf(request, report_type):
         )
 
         headers = [
-            PH('№'), PH('ФИО'), PH('Год рожд.'), PH('Адрес'),
-            PH('Гр. инвал.'), PH('Оплата %'), PH('Кратность'),
+            PH('№'), PH('Таб. №'), PH('ФИО'), PH('Год рожд.'), PH('Телефон'), PH('Адрес'),
+            PH('Гр. инвал.'), PH('Оплата'), PH('Кратность'),
             PH('Категория'), PH('Дата приёма'), PH('Дни посещ.'),
             PH('АПИ'), PH('Примечания'), PH('Соц. работник'),
         ]
@@ -1392,8 +1988,10 @@ def report_pdf(request, report_type):
         for i, r in enumerate(recipients, 1):
             data.append([
                 P(i),
+                P(r.employee_id or '—'),
                 P(r.get_full_name()),
                 P(r.birth_date.strftime('%Y') if r.birth_date else '—'),
+                P(r.phone or '—'),
                 P(r.address or '—'),
                 P(r.get_disability_group_display()),
                 P(f'{r.payment_percent}%'),
@@ -1402,11 +2000,11 @@ def report_pdf(request, report_type):
                 P(r.admission_date.strftime('%d.%m.%Y') if r.admission_date else '—'),
                 P(r.visit_days or '—'),
                 P(r.fire_detector_count),
-                P(r.notes or '—'),
+                P(_export_plain_text(r.notes, max_len=400)),
                 P(r.social_worker.get_full_name() if r.social_worker else '—'),
             ])
 
-        col_widths = [20, 76, 32, 68, 38, 32, 48, 40, 46, 40, 22, 52, 62]
+        col_widths = [22, 28, 88, 30, 50, 72, 34, 30, 44, 44, 46, 44, 24, 58, 68]
 
     elif report_type == 'assigned':
         filename = 'assigned_persons_report.pdf'
@@ -1569,14 +2167,15 @@ def report_pdf(request, report_type):
         ))
 
         headers = [
-            PH('№'), PH('Ф.И.О.'), PH('Год рожд.'),
-            PH('Адрес'), PH('Гр. инвал.'), PH('Оплата %'), PH('Кратность'),
-            PH('Прожив.'), PH('Дата приёма'), PH('Дни посещ.'), PH('АПИ'),
+            PH('№'), PH('Таб. №'), PH('Ф.И.О.'), PH('Год рожд.'),
+            PH('Адрес проживания'), PH('Гр. инвал.'), PH('Оплата'), PH('Кратность'),
+            PH('Категория'), PH('Дата приёма'), PH('Дни посещ.'), PH('АПИ'),
         ]
         data = [headers]
         for i, r in enumerate(recipients, 1):
             data.append([
                 P(i),
+                P(r.employee_id or '—'),
                 P(r.get_full_name()),
                 P(r.birth_date.strftime('%Y') if r.birth_date else '—'),
                 P(r.address or '—'),
@@ -1589,7 +2188,7 @@ def report_pdf(request, report_type):
                 P(r.fire_detector_count),
             ])
 
-        col_widths = [25, 92, 34, 78, 40, 34, 50, 44, 42, 42, 26]
+        col_widths = [24, 30, 96, 32, 84, 38, 32, 50, 46, 44, 44, 30]
         safe_loc = ''.join(c for c in (location.name or 'location') if c.isalnum() or c in (' ', '-', '_')).strip() or 'location'
         safe_loc = safe_loc.replace(' ', '_')[:40]
         filename = f'services_w{worker.pk}_{safe_loc}.pdf'
@@ -1617,7 +2216,7 @@ def report_pdf(request, report_type):
 
         headers = [
             PH('№'), PH('Социальный работник'),
-            PH('Населённый пункт'), PH('Подопечных'),
+            PH('Населённый пункт'), PH('Записей'),
         ]
         data = [headers]
         for i, (w, loc, cnt) in enumerate(links_rows, 1):

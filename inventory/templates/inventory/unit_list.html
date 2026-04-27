@@ -36,8 +36,8 @@
                             <td>{{ u.name }}</td>
                             <td>{{ u.cost }}</td>
                             <td>
-                                {% if u.responsible.inventory_profile %}
-                                    {{ u.responsible.inventory_profile.full_name }} ({{ u.responsible.username }})
+                                {% if u.responsible.last_name or u.responsible.first_name %}
+                                    {{ u.responsible.last_name }} {{ u.responsible.first_name }} ({{ u.responsible.username }})
                                 {% else %}
                                     {{ u.responsible.username }}
                                 {% endif %}
