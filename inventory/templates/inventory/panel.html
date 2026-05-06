@@ -43,26 +43,82 @@
                     <button type="button" id="inventoryGuideToggle" class="sw-services-guide__toggle"
                             data-bs-toggle="collapse" data-bs-target="#inventoryGuideCollapse"
                             aria-expanded="false" aria-controls="inventoryGuideCollapse">
-                        Подсказка
+                        Как пользоваться
                         <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
             <div class="collapse" id="inventoryGuideCollapse">
                 <div class="sw-services-guide__panel">
-                    <p class="sw-services-guide__lead">
-                        Таблицу можно сузить блоком <strong>«Фильтры отображения»</strong> (ответственный, поиск по названию или инв.&nbsp;№, сортировка) и кнопкой <strong>«Применить»</strong>.
-                        <strong>PDF</strong> и <strong>CSV</strong> — либо все единицы учёта организации, либо только строки, <strong>отмеченные</strong> в первой колонке таблицы.
-                        В колонке <strong>«Фото»</strong> наведите курсор на превью и нажмите на значок камеры, чтобы <strong>загрузить или заменить</strong> изображение (до 5 МБ).
-                        При <strong>новой единице учёта</strong> в поле «Ответственный» доступны <strong>все активные пользователи</strong> системы, кроме учётных записей, созданных <strong>только через регистрацию в разделе «Инвентаризация»</strong>.
-                        Редактирование, удаление и загрузка фото для строки, <strong>созданной другим пользователем с вашей же ролью инвентаризации</strong>, недоступны; у суперпользователя это ограничение не действует.
-                        Кнопка <strong>«Смотреть»</strong> — просмотр карточки без редактирования; кнопки <strong>«Изм.»</strong> и <strong>«Удал.»</strong> — при наличии права на строку.
-                    </p>
-                    <p class="sw-services-guide__lead mb-0 mt-3 pt-3 border-top border-secondary border-opacity-25">
-                        <strong>Как устроен доступ.</strong>
-                        <strong>Ответственный при создании</strong>&nbsp;— вы или учётная запись соц.&nbsp;работника (не пользователь с той же ролью инвентаризации, что вы).
-                        <strong>Правки чужих записей «своей» роли</strong> недоступны; суперпользователь может всё.
-                    </p>
+                    <div class="sw-inv-help-intro">
+                        <div class="sw-inv-help-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                        <p class="sw-inv-help-intro__text">
+                            Модуль <strong>Инвентаризация</strong> ведёт учёт материальных ценностей организации: инвентарный номер, наименование, стоимость, ответственное лицо и фото единицы.
+                            Визуально раздел связан с основным приложением (общая шапка, «стеклянные» карточки) и выделен спокойной <strong>бирюзово-мятной</strong> палитрой.
+                        </p>
+                    </div>
+
+                    <section class="sw-inv-help-section" aria-labelledby="inv-guide-cards">
+                        <h3 id="inv-guide-cards" class="sw-inv-help-h"><i class="bi bi-speedometer2" aria-hidden="true"></i>Сводка наверху</h3>
+                        <p class="sw-inv-help-p">
+                            Карточки показывают вашу <strong>роль доступа</strong> к разделу и общее <strong>число единиц учёта</strong> в базе — для быстрой ориентации перед работой с таблицей.
+                        </p>
+                    </section>
+
+                    <section class="sw-inv-help-section" aria-labelledby="inv-guide-filters">
+                        <h3 id="inv-guide-filters" class="sw-inv-help-h"><i class="bi bi-funnel" aria-hidden="true"></i>Фильтры отображения</h3>
+                        <ol class="sw-inv-help-ol">
+                            <li><strong>Ответственный</strong> — сужение списка по закреплённому сотруднику.</li>
+                            <li><strong>Название техники (поиск)</strong> — по части наименования или инвентарного номера.</li>
+                            <li><strong>Сортировка</strong> — инв. №, название, ответственный, стоимость; применяется кнопкой <span class="sw-inv-help-kbd">Применить</span> (воронка). <span class="sw-inv-help-kbd">↺</span> сбрасывает условия.</li>
+                        </ol>
+                    </section>
+
+                    <section class="sw-inv-help-section" aria-labelledby="inv-guide-table">
+                        <h3 id="inv-guide-table" class="sw-inv-help-h"><i class="bi bi-table" aria-hidden="true"></i>Таблица учёта</h3>
+                        <div class="sw-inv-help-grid" role="list">
+                            <div class="sw-inv-help-card" role="listitem">
+                                <p class="sw-inv-help-card__title">Галочка</p>
+                                <p class="sw-inv-help-card__text">Первая колонка — для выгрузки «только отмеченные».</p>
+                            </div>
+                            <div class="sw-inv-help-card" role="listitem">
+                                <p class="sw-inv-help-card__title">Инв. № и название</p>
+                                <p class="sw-inv-help-card__text">Учётный номер и текстовое описание единицы.</p>
+                            </div>
+                            <div class="sw-inv-help-card" role="listitem">
+                                <p class="sw-inv-help-card__title">Фото</p>
+                                <p class="sw-inv-help-card__text">Миниатюра; наведите и нажмите иконку камеры, чтобы загрузить или заменить изображение (до <strong>5&nbsp;МБ</strong>, см. допустимые форматы на форме загрузки).</p>
+                            </div>
+                            <div class="sw-inv-help-card" role="listitem">
+                                <p class="sw-inv-help-card__title">Стоимость и ответственный</p>
+                                <p class="sw-inv-help-card__text">Сумма в бел. руб. и пользователь, закреплённый за записью.</p>
+                            </div>
+                            <div class="sw-inv-help-card" role="listitem">
+                                <p class="sw-inv-help-card__title">Действия</p>
+                                <p class="sw-inv-help-card__text">Просмотр карточки, правка и удаление — при наличии права на строку.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sw-inv-help-section" aria-labelledby="inv-guide-export">
+                        <h3 id="inv-guide-export" class="sw-inv-help-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>PDF и CSV</h3>
+                        <p class="sw-inv-help-p">
+                            <strong>Все единицы учёта организации</strong> — полный реестр без учёта фильтров на экране.
+                            <strong>Только отмеченные</strong> — строки с галочкой в текущей таблице.
+                        </p>
+                    </section>
+
+                    <section class="sw-inv-help-section" aria-labelledby="inv-guide-access">
+                        <h3 id="inv-guide-access" class="sw-inv-help-h"><i class="bi bi-person-lock" aria-hidden="true"></i>Права и новая запись</h3>
+                        <ul class="sw-inv-help-list-rich">
+                            <li>При создании единицы в поле «Ответственный» доступны <strong>активные пользователи</strong> системы, кроме учётных записей, созданных <strong>только через регистрацию в разделе «Инвентаризация»</strong>.</li>
+                            <li>Редактирование, удаление и загрузка фото для строки, созданной <strong>другим пользователем с той же ролью инвентаризации</strong>, недоступны; у суперпользователя ограничение не действует.</li>
+                            <li>Кнопка <strong>«Новая единица учёта»</strong> активна при наличии права на добавление.</li>
+                        </ul>
+                        <div class="sw-inv-help-tip">
+                            <strong>Совет:</strong> используйте «Смотреть» для просмотра без риска случайно изменить данные; «Изм.» и «Удал.» — при разрешении на строку.
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>

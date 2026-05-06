@@ -45,6 +45,7 @@ from .models import (
     UserProfile,
     WorkloadRecord,
 )
+from .tab_numbering import compact_service_recipient_employee_ids, compact_social_worker_employee_ids
 from .visit_schedule import (
     RU_MONTHS,
     RU_WEEKDAYS_SHORT,
@@ -550,6 +551,7 @@ def medical_checkup_remove_from_panel(request, pk):
         name = worker.get_full_name()
         worker.medical_panel_registered = False
         worker.save(update_fields=['medical_panel_registered', 'updated_at'])
+        compact_social_worker_employee_ids()
         messages.success(
             request,
             f'{name} убран из панели прохождения медосмотра.',
@@ -767,6 +769,7 @@ def safety_briefing_delete(request, pk):
         title = record.briefing_title
         name = record.social_worker.get_full_name()
         record.delete()
+        compact_social_worker_employee_ids()
         messages.success(
             request,
             f'Запись об инструктаже «{title}» ({name}) удалена.',
@@ -1503,6 +1506,7 @@ def visit_planning_remove_from_panel(request, pk):
         recipient.save(update_fields=[
             'visit_planning_panel_registered', 'updated_at',
         ])
+        compact_service_recipient_employee_ids()
         messages.success(
             request,
             f'{name} убран из панели планирования визитов.',

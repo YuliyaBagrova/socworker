@@ -332,6 +332,208 @@
         color: #14532d;
         font-weight: 700;
     }
+    /* Расширенная справка — секции и сетка, салатовая палитра медосмотра */
+    body.sw-medical-page .sw-med-help-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 254, 231, 0.88) 42%, rgba(220, 252, 231, 0.55) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        box-shadow: 0 2px 16px rgba(22, 101, 52, 0.07);
+    }
+    body.sw-medical-page .sw-med-help-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #14532d;
+        background: rgba(74, 222, 128, 0.15);
+        border: 1px solid rgba(22, 163, 74, 0.32);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-medical-page .sw-med-help-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-medical-page .sw-med-help-intro__text strong {
+        color: #14532d;
+        font-weight: 700;
+    }
+    body.sw-medical-page .sw-med-help-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(167, 243, 208, 0.65);
+    }
+    body.sw-medical-page .sw-med-help-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-medical-page .sw-med-help-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #166534;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-medical-page .sw-med-help-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #86efac 0%, #4ade80 40%, #15803d 100%);
+        box-shadow: 0 3px 10px rgba(22, 163, 74, 0.28);
+    }
+    body.sw-medical-page .sw-med-help-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-medical-page .sw-med-help-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-medical-page .sw-med-help-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-medical-page .sw-med-help-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(167, 243, 208, 0.55);
+        box-shadow: 0 2px 10px rgba(20, 83, 45, 0.04);
+    }
+    body.sw-medical-page .sw-med-help-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #15803d;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-medical-page .sw-med-help-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-medical-page .sw-med-help-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #ca8a04;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-medical-page .sw-med-help-note strong {
+        color: #854d0e;
+    }
+    body.sw-medical-page .sw-med-help-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(220, 252, 231, 0.65) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        border-left: 4px solid #22c55e;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #14532d;
+    }
+    body.sw-medical-page .sw-med-help-tip strong {
+        color: #052e16;
+    }
+    body.sw-medical-page .sw-med-help-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-medical-page .sw-med-help-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-medical-page .sw-med-help-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #4ade80, #15803d);
+        box-shadow: 0 2px 6px rgba(22, 101, 52, 0.25);
+    }
+    body.sw-medical-page .sw-med-help-list-rich > li strong {
+        color: #166534;
+        font-weight: 700;
+    }
+    body.sw-medical-page .sw-med-help-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-medical-page .sw-med-help-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-medical-page .sw-med-help-ol li::marker {
+        color: #16a34a;
+        font-weight: 700;
+    }
+    body.sw-medical-page .sw-med-help-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #14532d;
+        background: rgba(240, 253, 244, 0.98);
+        border: 1px solid rgba(74, 222, 128, 0.65);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-medical-page .sw-filter-dash.sw-medical-services-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-medical-page .sw-filter-dash.sw-medical-services-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
     /* Фильтры — структура как «Фильтры отображения» (планирование визитов), палитра медосмотра */
     .sw-medical-page .sw-filter-dash.sw-medical-filter-dash {
         --medf-accent: #059669;
@@ -991,18 +1193,80 @@
                     <button type="button" id="medicalGuideToggle" class="sw-services-guide__toggle"
                             data-bs-toggle="collapse" data-bs-target="#medicalGuideCollapse"
                             aria-expanded="false" aria-controls="medicalGuideCollapse">
-                        Подсказка
+                        Как пользоваться
                         <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
             <div class="collapse" id="medicalGuideCollapse">
                 <div class="sw-services-guide__panel">
-                    <p class="sw-services-guide__lead">
-                        Медосмотр считается <strong>актуальным 365 дней</strong> с даты последнего подтверждённого прохождения.
-                        После истечения срока отметьте новое прохождение или назначьте дату визита к врачу.
-                        Новые сотрудники из раздела «Соц. работники» появляются в таблице только после кнопки <strong>«Назначить медосмотр»</strong>.
-                    </p>
+                    <div class="sw-med-help-intro">
+                        <div class="sw-med-help-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                        <p class="sw-med-help-intro__text">
+                            Панель <strong>Прохождение медосмотра</strong> — учёт годового контроля для сотрудников, включённых в журнал: даты осмотра, срок действия, плановые визиты к врачу и статус в поле учётной системы.
+                            Фон и акценты выдержаны в «медицинской» салатово-зелёной гамме, согласованной с оформлением SocWorker.
+                        </p>
+                    </div>
+
+                    <section class="sw-med-help-section" aria-labelledby="med-guide-rules">
+                        <h3 id="med-guide-rules" class="sw-med-help-h"><i class="bi bi-heart-pulse" aria-hidden="true"></i>Срок действия и актуальность</h3>
+                        <p class="sw-med-help-p">
+                            Медосмотр считается <strong>актуальным в течение года</strong> с даты последнего подтверждённого прохождения (колонка «Актуально 12 мес.»).
+                            По истечении срока отметьте новое прохождение или задайте дату назначенного визита к врачу.
+                        </p>
+                    </section>
+
+                    <section class="sw-med-help-section" aria-labelledby="med-guide-onboard">
+                        <h3 id="med-guide-onboard" class="sw-med-help-h"><i class="bi bi-person-plus" aria-hidden="true"></i>Кто виден в таблице</h3>
+                        <p class="sw-med-help-p">
+                            Сотрудники из общего раздела «Социальные работники» появляются здесь только после действия <strong>«Назначить медосмотр»</strong> — по той же логике, что панель планирования визитов для подопученных.
+                        </p>
+                    </section>
+
+                    <section class="sw-med-help-section" aria-labelledby="med-guide-cols">
+                        <h3 id="med-guide-cols" class="sw-med-help-h"><i class="bi bi-layout-text-window-reverse" aria-hidden="true"></i>Колонки таблицы</h3>
+                        <div class="sw-med-help-grid" role="list">
+                            <div class="sw-med-help-card" role="listitem">
+                                <p class="sw-med-help-card__title">Отметка</p>
+                                <p class="sw-med-help-card__text">Галочка для выгрузки PDF/CSV «только выбранные»; в шапке — «все на странице».</p>
+                            </div>
+                            <div class="sw-med-help-card" role="listitem">
+                                <p class="sw-med-help-card__title">Таб. № и ФИО</p>
+                                <p class="sw-med-help-card__text">Порядковый номер и ссылка на карточку соцработника.</p>
+                            </div>
+                            <div class="sw-med-help-card" role="listitem">
+                                <p class="sw-med-help-card__title">Даты</p>
+                                <p class="sw-med-help-card__text">Последний осмотр, «годен до», отметка актуальности 12 мес., назначенная дата визита (бейдж).</p>
+                            </div>
+                            <div class="sw-med-help-card" role="listitem">
+                                <p class="sw-med-help-card__title">Поле и примечания</p>
+                                <p class="sw-med-help-card__text">Статус из справочника карточки (текстовое отображение) и сокращённые примечания.</p>
+                            </div>
+                            <div class="sw-med-help-card" role="listitem">
+                                <p class="sw-med-help-card__title">Действия</p>
+                                <p class="sw-med-help-card__text">Снять отметку о прохождении (если есть), редактировать сведения, отметить прохождение сегодняшней датой, убрать сотрудника с панели журнала.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sw-med-help-section" aria-labelledby="med-guide-filters">
+                        <h3 id="med-guide-filters" class="sw-med-help-h"><i class="bi bi-funnel" aria-hidden="true"></i>Фильтры и сортировка</h3>
+                        <ol class="sw-med-help-ol">
+                            <li><strong>Соц. работник</strong> и <strong>Статус работника</strong> сужают список.</li>
+                            <li><strong>Сортировка</strong> по таб. № или фамилии — после <span class="sw-med-help-kbd">Применить</span>.</li>
+                        </ol>
+                    </section>
+
+                    <section class="sw-med-help-section" aria-labelledby="med-guide-export">
+                        <h3 id="med-guide-export" class="sw-med-help-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>PDF и CSV</h3>
+                        <p class="sw-med-help-p">
+                            В выгрузку попадают те же отбор и сортировка, что заданы в форме фильтров. Доступен полный список по условиям или «только отмеченные» строки текущей страницы.
+                        </p>
+                    </section>
+
+                    <div class="sw-med-help-tip">
+                        <strong>Совет:</strong> крестик «снять отметку» всегда отображается; если отметки не было, кнопка неактивна — это защищает от случайных действий.
+                    </div>
                 </div>
             </div>
         </div>

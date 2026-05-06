@@ -798,6 +798,213 @@
         font-weight: 700;
         color: #4c1d95;
     }
+    /* Расширенная справка — секции, сетка, акценты */
+    body.sw-workers-page .sw-workers-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.85) 45%, rgba(224, 231, 255, 0.55) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.35);
+        box-shadow: 0 2px 16px rgba(67, 56, 202, 0.06);
+    }
+    body.sw-workers-page .sw-workers-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4338ca;
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-workers-page .sw-workers-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-workers-page .sw-workers-guide-intro__text strong {
+        color: #312e81;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(199, 210, 254, 0.55);
+    }
+    body.sw-workers-page .sw-workers-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-workers-page .sw-workers-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #3730a3;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-workers-page .sw-workers-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+        box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28);
+    }
+    body.sw-workers-page .sw-workers-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-workers-page .sw-workers-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-workers-page .sw-workers-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-workers-page .sw-workers-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(199, 210, 254, 0.55);
+        box-shadow: 0 2px 10px rgba(30, 27, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-workers-page .sw-workers-guide-card:hover {
+        border-color: rgba(129, 140, 248, 0.65);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    }
+    body.sw-workers-page .sw-workers-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-workers-page .sw-workers-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-workers-page .sw-workers-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #eab308;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-workers-page .sw-workers-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-workers-page .sw-workers-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.55) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.4);
+        border-left: 4px solid #6366f1;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #312e81;
+    }
+    body.sw-workers-page .sw-workers-guide-tip strong {
+        color: #1e1b4b;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399, #059669);
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li strong {
+        color: #3730a3;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-workers-page .sw-workers-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-workers-page .sw-workers-guide-ol li::marker {
+        color: #6366f1;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #4338ca;
+        background: rgba(238, 242, 255, 0.95);
+        border: 1px solid rgba(165, 180, 252, 0.75);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-workers-page .sw-workers-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-workers-page .sw-workers-page-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
 {% endblock %}
 
 {% block content %}
@@ -836,20 +1043,98 @@
                 <button type="button" id="swWorkersGuideToggle" class="sw-services-guide__toggle"
                         data-bs-toggle="collapse" data-bs-target="#swWorkersGuideCollapse"
                         aria-expanded="false" aria-controls="swWorkersGuideCollapse">
-                    Подсказка
+                    Как пользоваться
                     <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
         <div class="collapse" id="swWorkersGuideCollapse">
             <div class="sw-services-guide__panel">
-                <p class="sw-services-guide__lead">
-                    Здесь отображается список сотрудников с контактами, медосмотром и статусом. Задайте поиск и фильтр по статусу, затем нажмите <strong>«Найти»</strong>.
-                </p>
-                <ul class="sw-services-guide__list">
-                    <li><strong>PDF и CSV</strong> — выгрузка таблицы по текущим фильтрам или только по отмеченным строкам.</li>
-                    <li><strong>Карточка</strong> — нажмите на ФИО, чтобы открыть просмотр и редактирование.</li>
-                </ul>
+                <div class="sw-workers-guide-intro">
+                    <div class="sw-workers-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                    <p class="sw-workers-guide-intro__text">
+                        Панель <strong>Социальные работники</strong> — центральный реестр кадров: здесь ведётся учёт табельных номеров, контактов, статусов занятости и сведений о медосмотре.
+                        Интерфейс выполнен в едином стиле приложения: «стеклянные» карточки, фиолетово-индиго акценты и удобные фильтры, чтобы быстро находить нужного сотрудника.
+                    </p>
+                </div>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-purpose">
+                    <h3 id="sw-guide-purpose" class="sw-workers-guide-h"><i class="bi bi-bullseye" aria-hidden="true"></i>Назначение и состав данных</h3>
+                    <p class="sw-workers-guide-p">
+                        Каждая строка таблицы соответствует одному социальному работнику в базе. Карточка связана с другими разделами системы (закрепление подопечных, панель медосмотра, учёт нагрузки и отчёты), поэтому актуальность списка важна для всей учётной цепочки.
+                    </p>
+                    <div class="sw-workers-guide-grid" role="list">
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Таб. №</p>
+                            <p class="sw-workers-guide-card__text">Уникальный порядковый номер в организации. После удаления записи номера у оставшихся сотрудников пересчитываются подряд (1, 2, 3…).</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">ФИО и год рожд.</p>
+                            <p class="sw-workers-guide-card__text">Фамилия, имя, отчество и год для быстрой идентификации. Нажмите на ФИО, чтобы открыть карточку.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Контакты</p>
+                            <p class="sw-workers-guide-card__text">Телефон в формате РБ и адрес — для связи и для согласованности с подопечными и отчётами.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Мед. осмотр</p>
+                            <p class="sw-workers-guide-card__text">Сводный статус годового контроля. Подробные сроки и назначения ведутся в разделе «Прохождение медосмотра».</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Статус</p>
+                            <p class="sw-workers-guide-card__text">Активный, отпуск, больничный и др. Используйте фильтр по статусу, чтобы видеть, кто доступен для распределения нагрузки.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Действия</p>
+                            <p class="sw-workers-guide-card__text">Просмотр карточки, редактирование полей и удаление записи. Удаление необратимо для строки списка (после подтверждения).</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-filters">
+                    <h3 id="sw-guide-filters" class="sw-workers-guide-h"><i class="bi bi-sliders2" aria-hidden="true"></i>Поиск, фильтр и сортировка</h3>
+                    <ol class="sw-workers-guide-ol">
+                        <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону или фрагменту адреса.</li>
+                        <li>При необходимости выберите <strong>статус</strong> в выпадающем списке (или оставьте «Все статусы»).</li>
+                        <li>Задайте <strong>сортировку</strong>: по таб. № по возрастанию или убыванию либо по фамилии (А–Я).</li>
+                        <li>Нажмите <span class="sw-workers-guide-kbd">Найти</span> (иконка лупы) — таблица обновится с учётом условий. Кнопка <span class="sw-workers-guide-kbd">↺</span> сбрасывает поиск, статус и сортировку к умолчанию.</li>
+                    </ol>
+                    <div class="sw-workers-guide-tip">
+                        <strong>Совет:</strong> сортировка по таб. № удобна для сверки с бухгалтерскими или кадровыми журналами, где порядок номеров совпадает с порядком строк в приложении после пересчёта.
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-export">
+                    <h3 id="sw-guide-export" class="sw-workers-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>Выгрузка PDF и CSV</h3>
+                    <p class="sw-workers-guide-p">
+                        В шапке раздела доступны кнопки <strong>PDF</strong> и <strong>CSV</strong>. В модальном окне можно выбрать: выгрузить <em>весь список по текущим фильтрам</em> (все страницы выборки) или только строки, <em>отмеченные галочкой</em> на активной странице таблицы.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li><strong>PDF</strong> — компактная табличная вёрстка для печати и архива.</li>
+                        <li><strong>CSV</strong> — текстовый формат для Excel и внешней аналитики; разделители и кодировка подходят для типовой работы в РФ.</li>
+                    </ul>
+                    <div class="sw-workers-guide-note">
+                        <strong>Важно:</strong> перед выгрузкой убедитесь, что фильтры и поиск настроены так, как нужно для отчёта. Для «только отмеченные» сначала отметьте строки в первой колонке таблицы.
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-actions">
+                    <h3 id="sw-guide-actions" class="sw-workers-guide-h"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i>Работа со строкой и карточкой</h3>
+                    <p class="sw-workers-guide-p">
+                        Используйте кнопки в колонке «Действия»: глаз — просмотр карточки без переключения режимов списка, карандаш — форма редактирования всех полей работника, корзина — удаление с подтверждением на отдельной странице.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li>Добавление нового сотрудника — кнопка <strong>«Добавить работника»</strong> в шапке (откроется пошаговая форма в стиле приложения).</li>
+                        <li>Связь «кому закреплены подопечные» — раздел <strong>«Закреплённые лица»</strong> для наглядной матрицы работников и получателей услуг.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-pagination">
+                    <h3 id="sw-guide-pagination" class="sw-workers-guide-h"><i class="bi bi-layout-three-columns" aria-hidden="true"></i>Пагинация и чекбоксы</h3>
+                    <p class="sw-workers-guide-p">
+                        Таблица разбита на страницы для быстрой загрузки. Галочки в первой колонке относятся к строкам <em>текущей страницы</em>; при выгрузке «только отмеченные» перейдите по страницам и отметьте нужных сотрудников или выберите полный список в окне выгрузки.
+                    </p>
+                </section>
             </div>
         </div>
     </div>

@@ -837,6 +837,213 @@
         font-weight: 700;
         color: #4c1d95;
     }
+    /* Расширенная справка — секции, сетка (как у «Социальные работники») */
+    body.sw-recipients-page .sw-recipients-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.85) 45%, rgba(224, 231, 255, 0.55) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.35);
+        box-shadow: 0 2px 16px rgba(67, 56, 202, 0.06);
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4338ca;
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__text strong {
+        color: #312e81;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(199, 210, 254, 0.55);
+    }
+    body.sw-recipients-page .sw-recipients-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-recipients-page .sw-recipients-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #3730a3;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-recipients-page .sw-recipients-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+        box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28);
+    }
+    body.sw-recipients-page .sw-recipients-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-recipients-page .sw-recipients-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-recipients-page .sw-recipients-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(199, 210, 254, 0.55);
+        box-shadow: 0 2px 10px rgba(30, 27, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card:hover {
+        border-color: rgba(129, 140, 248, 0.65);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    }
+    body.sw-recipients-page .sw-recipients-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-recipients-page .sw-recipients-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #eab308;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-recipients-page .sw-recipients-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-recipients-page .sw-recipients-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.55) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.4);
+        border-left: 4px solid #6366f1;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #312e81;
+    }
+    body.sw-recipients-page .sw-recipients-guide-tip strong {
+        color: #1e1b4b;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399, #059669);
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li strong {
+        color: #3730a3;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol li::marker {
+        color: #6366f1;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #4338ca;
+        background: rgba(238, 242, 255, 0.95);
+        border: 1px solid rgba(165, 180, 252, 0.75);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-recipients-page .sw-recipients-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
 {% endblock %}
 
 {% block content %}
@@ -872,20 +1079,114 @@
                 <button type="button" id="swRecipientsGuideToggle" class="sw-services-guide__toggle"
                         data-bs-toggle="collapse" data-bs-target="#swRecipientsGuideCollapse"
                         aria-expanded="false" aria-controls="swRecipientsGuideCollapse">
-                    Подсказка
+                    Как пользоваться
                     <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
         <div class="collapse" id="swRecipientsGuideCollapse">
             <div class="sw-services-guide__panel">
-                <p class="sw-services-guide__lead">
-                    Список получателей с адресом, контактами и закреплением за соцработниками. Настройте поиск, фильтры и сортировку, затем нажмите <strong>«Найти»</strong>.
-                </p>
-                <ul class="sw-services-guide__list">
-                    <li><strong>PDF и CSV</strong> — выгрузка по текущим условиям отбора или только по отмеченным строкам.</li>
-                    <li><strong>Карточка</strong> — откройте ФИО для просмотра и изменения данных подопечного.</li>
-                </ul>
+                <div class="sw-recipients-guide-intro">
+                    <div class="sw-recipients-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                    <p class="sw-recipients-guide-intro__text">
+                        Панель <strong>Получатели услуг</strong> — единый реестр подопечных: табельные номера (отдельная нумерация для получателей), контакты, адрес, категория проживания и закрепление за социальным работником.
+                        Оформление совпадает с остальным приложением: «стеклянные» блоки, фиолетово-индиго акценты и понятные фильтры, чтобы быстро найти нужного человека в потоке учёта.
+                    </p>
+                </div>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-purpose">
+                    <h3 id="rec-guide-purpose" class="sw-recipients-guide-h"><i class="bi bi-bullseye" aria-hidden="true"></i>Назначение и колонки таблицы</h3>
+                    <p class="sw-recipients-guide-p">
+                        Каждая строка — один получатель услуг. Данные используются в закреплениях, панели планирования визитов, нагрузке и отчётах; актуальность карточек напрямую влияет на корректность маршрутов и выгрузок.
+                    </p>
+                    <div class="sw-recipients-guide-grid" role="list">
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Отметка</p>
+                            <p class="sw-recipients-guide-card__text">Галочка в первой колонке — для выгрузки PDF/CSV «только отмеченные» (учитываются строки текущей страницы). Заголовок колонки позволяет выбрать всех на странице.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Таб. №</p>
+                            <p class="sw-recipients-guide-card__text">Порядковый номер получателя в организации. После удаления записей номера у оставшихся подопученных пересчитываются подряд (1, 2, 3…), без «дыр».</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">ФИО и год рожд.</p>
+                            <p class="sw-recipients-guide-card__text">Клик по ФИО открывает карточку получателя. Год рождения помогает отличать однофамильцев.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Телефон и адрес</p>
+                            <p class="sw-recipients-guide-card__text">Контакт и место жительства; адрес участвует в логике раздела «Услуги» (сопоставление с населённым пунктом), если пункт в карточке не задан.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Гр. инвал., оплата, кратность</p>
+                            <p class="sw-recipients-guide-card__text">Группа инвалидности, доля оплаты (%) и регламентируемая кратность визитов — для отчётности и планирования нагрузки.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Категория</p>
+                            <p class="sw-recipients-guide-card__text">Категория проживания (то же поле, что и в фильтре ниже). Совпадает со справочником в карточке.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Дата приёма, дни посещ., АПИ</p>
+                            <p class="sw-recipients-guide-card__text">Дата оформления обслуживания, дни посещений по графику и количество автономных пожарных извещателей (АПИ), если ведётся в вашей организации.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Примечания</p>
+                            <p class="sw-recipients-guide-card__text">Краткая выжимка из текстовых примечаний; полный текст — в карточке.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Соц. работник</p>
+                            <p class="sw-recipients-guide-card__text">Закреплённый сотрудник со ссылкой на его карточку. Прочерк — получатель пока не назначен.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Действия</p>
+                            <p class="sw-recipients-guide-card__text">Просмотр, редактирование и удаление записи (удаление — с подтверждением на отдельной странице).</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-filters">
+                    <h3 id="rec-guide-filters" class="sw-recipients-guide-h"><i class="bi bi-sliders2" aria-hidden="true"></i>Поиск, фильтр и сортировка</h3>
+                    <ol class="sw-recipients-guide-ol">
+                        <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону, адресу и другим совпадениям.</li>
+                        <li>При необходимости выберите <strong>категорию проживания</strong> (или оставьте «Все»).</li>
+                        <li>Задайте <strong>сортировку</strong>: таб. № по возрастанию или убыванию либо фамилия (А–Я).</li>
+                        <li>Нажмите <span class="sw-recipients-guide-kbd">Найти</span> (иконка лупы) — таблица обновится. Кнопка <span class="sw-recipients-guide-kbd">↺</span> сбрасывает поиск, категорию и сортировку к значениям по умолчанию.</li>
+                    </ol>
+                    <div class="sw-recipients-guide-tip">
+                        <strong>Совет:</strong> фильтр на экране удобен для ежедневной работы; он не влияет на состав кнопок PDF/CSV при выборе «весь список» (см. следующий блок).
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-export">
+                    <h3 id="rec-guide-export" class="sw-recipients-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>Выгрузка PDF и CSV</h3>
+                    <p class="sw-recipients-guide-p">
+                        В шапке раздела доступны кнопки <strong>PDF</strong> и <strong>CSV</strong>. В модальном окне вы выбираете: включить в файл <strong>всех получателей из базы</strong> или только строки, <em>отмеченные галочкой</em> на активных страницах списка.
+                    </p>
+                    <ul class="sw-recipients-guide-list-rich">
+                        <li><strong>PDF</strong> — компактная таблица для печати и архива.</li>
+                        <li><strong>CSV</strong> — данные для Excel и внешней аналитики; структура колонок совпадает с таблицей на экране.</li>
+                    </ul>
+                    <div class="sw-recipients-guide-note">
+                        <strong>Важно:</strong> режим «весь список» в отчётах содержит <strong>всех</strong> получателей в базе, а не только ту выборку, которую вы видите после поиска и фильтра. Для выборочной выгрузки по людям отметьте их в таблице и выберите «только отмеченные».
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-row">
+                    <h3 id="rec-guide-row" class="sw-recipients-guide-h"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i>Карточка и связь с другими разделами</h3>
+                    <p class="sw-recipients-guide-p">
+                        Кнопки в колонке «Действия» дублируют быстрый доступ: просмотр без смены режима списка, форма редактирования полей, удаление после подтверждения.
+                    </p>
+                    <ul class="sw-recipients-guide-list-rich">
+                        <li>Новый подопученный — кнопка <strong>«Добавить получателя»</strong> в шапке (форма в стиле приложения).</li>
+                        <li>Учёт нагрузки и планирование визитов используют тех же получателей: актуализируйте закрепление и адрес, чтобы связки «работник — пункт — подопученный» в разделе <strong>«Услуги»</strong> были верными.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-page">
+                    <h3 id="rec-guide-page" class="sw-recipients-guide-h"><i class="bi bi-layout-three-columns" aria-hidden="true"></i>Пагинация и чекбоксы</h3>
+                    <p class="sw-recipients-guide-p">
+                        Таблица разбита на страницы по 10 записей. Галочки относятся к строкам <em>текущей страницы</em>; при выгрузке «только отмеченные» перейдите по страницам и отметьте нужных или воспользуйтесь полным списком в окне выгрузки.
+                    </p>
+                </section>
             </div>
         </div>
     </div>

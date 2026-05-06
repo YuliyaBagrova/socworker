@@ -700,6 +700,213 @@
         border: 1px solid rgba(102, 126, 234, 0.15);
         box-shadow: 0 20px 50px rgba(45, 38, 82, 0.15);
     }
+    /* Расширенная справка «Услуги» — секции и сетка в изумрудной палитре панели */
+    body.sw-services-page .sw-sv-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(236, 253, 245, 0.88) 45%, rgba(209, 250, 229, 0.55) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        box-shadow: 0 2px 16px rgba(5, 150, 105, 0.07);
+    }
+    body.sw-services-page .sw-sv-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #047857;
+        background: rgba(16, 185, 129, 0.14);
+        border: 1px solid rgba(5, 150, 105, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-services-page .sw-sv-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-services-page .sw-sv-guide-intro__text strong {
+        color: #065f46;
+        font-weight: 700;
+    }
+    body.sw-services-page .sw-sv-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(167, 243, 208, 0.65);
+    }
+    body.sw-services-page .sw-sv-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-services-page .sw-sv-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #0f766e;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-services-page .sw-sv-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399 0%, #10b981 42%, #047857 100%);
+        box-shadow: 0 3px 10px rgba(5, 150, 105, 0.28);
+    }
+    body.sw-services-page .sw-sv-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-services-page .sw-sv-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-services-page .sw-sv-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-services-page .sw-sv-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(167, 243, 208, 0.65);
+        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-services-page .sw-sv-guide-card:hover {
+        border-color: rgba(45, 212, 191, 0.75);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+    }
+    body.sw-services-page .sw-sv-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #047857;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-services-page .sw-sv-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-services-page .sw-sv-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #ca8a04;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-services-page .sw-sv-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-services-page .sw-sv-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(209, 250, 229, 0.55) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border: 1px solid rgba(45, 212, 191, 0.45);
+        border-left: 4px solid #10b981;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #064e3b;
+    }
+    body.sw-services-page .sw-sv-guide-tip strong {
+        color: #022c22;
+    }
+    body.sw-services-page .sw-sv-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-services-page .sw-sv-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-services-page .sw-sv-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #5eead4, #059669);
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+    body.sw-services-page .sw-sv-guide-list-rich > li strong {
+        color: #0f766e;
+        font-weight: 700;
+    }
+    body.sw-services-page .sw-sv-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-services-page .sw-sv-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-services-page .sw-sv-guide-ol li::marker {
+        color: #059669;
+        font-weight: 700;
+    }
+    body.sw-services-page .sw-sv-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #047857;
+        background: rgba(236, 253, 245, 0.98);
+        border: 1px solid rgba(45, 212, 191, 0.65);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-services-page .sw-filter-dash.sw-services-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-services-page .sw-filter-dash.sw-services-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
 {% endblock %}
 
 {% block content %}
@@ -755,20 +962,84 @@
                     <button type="button" id="servicesGuideToggle" class="sw-services-guide__toggle"
                             data-bs-toggle="collapse" data-bs-target="#servicesGuideCollapse"
                             aria-expanded="false" aria-controls="servicesGuideCollapse">
-                        Подсказка
+                        Как пользоваться
                         <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
             <div class="collapse" id="servicesGuideCollapse">
                 <div class="sw-services-guide__panel">
-                    <p class="sw-services-guide__lead">
-                        Выберите работника и населённый пункт, затем нажмите «Таблица услуг» или откройте готовую связку в списке ниже.
-                    </p>
-                    <ul class="sw-services-guide__list">
-                        <li><strong>В карточке указан пункт</strong> — учитываются все подходящие получатели с этим населённым пунктом.</li>
-                        <li><strong>Пункт не указан</strong> — запись тоже попадёт в выборку, если в адресе есть название выбранного населённого пункта.</li>
-                    </ul>
+                    <div class="sw-sv-guide-intro">
+                        <div class="sw-sv-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                        <p class="sw-sv-guide-intro__text">
+                            Панель <strong>Услуги</strong> связывает социального работника и <strong>населённый пункт</strong>, чтобы получить таблицу подопечных с корректным отбором по месту жительства.
+                            Здесь тот же «стеклянный» интерфейс, что и на остальных панелях, но с устойчивыми изумрудно-бирюзовыми акцентами: спокойно читается долго и хорошо сочетается с учётной логикой маршрутов.
+                        </p>
+                    </div>
+
+                    <section class="sw-sv-guide-section" aria-labelledby="sv-guide-layout">
+                        <h3 id="sv-guide-layout" class="sw-sv-guide-h"><i class="bi bi-columns-gap" aria-hidden="true"></i>Три зоны выбора</h3>
+                        <p class="sw-sv-guide-p">
+                            Основной экран разделён на три части: слева — список работников, справа — населённые пункты, по центру — кнопка перехода к детальной таблице.
+                        </p>
+                        <div class="sw-sv-guide-grid" role="list">
+                            <div class="sw-sv-guide-card" role="listitem">
+                                <p class="sw-sv-guide-card__title">Социальные работники</p>
+                                <p class="sw-sv-guide-card__text">Строка с ФИО и счётчиком «подоп.» — сколько получателей закреплено за сотрудником. Клик выделяет работника (активная строка).</p>
+                            </div>
+                            <div class="sw-sv-guide-card" role="listitem">
+                                <p class="sw-sv-guide-card__title">Населённые пункты</p>
+                                <p class="sw-sv-guide-card__text">Тип пункта и название. Зелёный бейдж показывает, сколько получателей в базе отнесено к этому НП в целом: в карточке выбран пункт <strong>или</strong> (если пункт не задан) в адресе встречается его название — <em>без учёта</em> конкретного работника.</p>
+                            </div>
+                            <div class="sw-sv-guide-card" role="listitem">
+                                <p class="sw-sv-guide-card__title">Таблица услуг</p>
+                                <p class="sw-sv-guide-card__text">Кнопка активна только когда выбраны <strong>и</strong> работник, <strong>и</strong> пункт. Ведёт на страницу связки с полной таблицей и выгрузкой CSV для этой пары.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sw-sv-guide-section" aria-labelledby="sv-guide-search">
+                        <h3 id="sv-guide-search" class="sw-sv-guide-h"><i class="bi bi-search" aria-hidden="true"></i>Поиск в списках</h3>
+                        <ol class="sw-sv-guide-ol">
+                            <li>В каждой колонке сверху есть поле поиска — фильтрация происходит <strong>на месте</strong>, без перезагрузки страницы.</li>
+                            <li>По работникам ищите по ФИО, табельному номеру и телефону (как в подсказке плейсхолдера).</li>
+                            <li>По пунктам — по названию и типу (деревня, посёлок и т.д.).</li>
+                            <li>Если активная строка скрылась фильтром, выделение снимается — снова выберите элемент в списке или очистите поиск.</li>
+                        </ol>
+                    </section>
+
+                    <section class="sw-sv-guide-section" aria-labelledby="sv-guide-rules">
+                        <h3 id="sv-guide-rules" class="sw-sv-guide-h"><i class="bi bi-signpost-split" aria-hidden="true"></i>Как формируется список получателей по пункту</h3>
+                        <p class="sw-sv-guide-p">
+                            При подсчёте и при открытии «Таблицы услуг» учитываются подопученные, закреплённые за выбранным работником. Попадание по населённому пункту определяется так:
+                        </p>
+                        <ul class="sw-sv-guide-list-rich">
+                            <li><strong>Пункт указан в карточке получателя</strong> — запись относится к этому НП, если она закреплена за выбранным работником.</li>
+                            <li><strong>Пункт в карточке не заполнен</strong> — получатель всё равно может попасть в выборку, если в тексте <strong>адреса</strong> встречается название выбранного населённого пункта.</li>
+                        </ul>
+                        <div class="sw-sv-guide-tip">
+                            <strong>Совет:</strong> держите поле населённого пункта в карточке согласованным с адресом — так проще контролировать маршруты и не полагаться только на поиск по строке адреса.
+                        </div>
+                    </section>
+
+                    <section class="sw-sv-guide-section" aria-labelledby="sv-guide-matrix">
+                        <h3 id="sv-guide-matrix" class="sw-sv-guide-h"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>Сводная таблица связок</h3>
+                        <p class="sw-sv-guide-p">
+                            Ниже списков — матрица всех возможных пар «работник — населённый пункт». Колонка «Записей» — это сколько подопученных у <strong>этого</strong> работника попадает под <strong>этот</strong> пункт по правилам из предыдущего блока. Ссылка «Открыть» ведёт на ту же детальную страницу, что и кнопка <span class="sw-sv-guide-kbd">Таблица услуг</span> после выбора пары в списках.
+                        </p>
+                    </section>
+
+                    <section class="sw-sv-guide-section" aria-labelledby="sv-guide-toolbar">
+                        <h3 id="sv-guide-toolbar" class="sw-sv-guide-h"><i class="bi bi-tools" aria-hidden="true"></i>Шапка и справочник пунктов</h3>
+                        <ul class="sw-sv-guide-list-rich">
+                            <li><strong>CSV (все связки)</strong> — одним файлом выгружается свод по всем сочетаниям работник/пункт (без отбора на экране).</li>
+                            <li><strong>Добавить нас. пункт</strong> — форма нового населённого пункта в справочнике.</li>
+                            <li>В строке пункта кнопка <strong>×</strong> удаляет запись из справочника (с подтверждением в диалоге браузера) — действие не затрагивает карточки людей, но уберёт пункт из выбора.</li>
+                        </ul>
+                        <div class="sw-sv-guide-note">
+                            <strong>Важно:</strong> сначала выберите работника и пункт в списках — иначе центральная кнопка остаётся неактивной и подсказывает, чего не хватает.
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
