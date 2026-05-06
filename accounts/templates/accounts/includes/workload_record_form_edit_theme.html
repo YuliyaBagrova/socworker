@@ -1,0 +1,85 @@
+{# Доп. стили секций формы нагрузки в карточке — та же палитра, что «Изменить информацию о медосмотре» (sw_edit_form_theme, is_edit). #}
+    body.sw-entity-edit-page {
+        min-height: 100vh;
+    }
+    body.sw-entity-edit-page .wl-assign-intro {
+        font-size: 0.8125rem;
+        color: #78350f;
+        line-height: 1.45;
+        margin: 0 0 1.25rem 0;
+    }
+    body.sw-entity-edit-page .wl-record-wrap {
+        margin: 0;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-form-section {
+        position: relative;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-form-section::before {
+        display: none;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-form-section__kicker {
+        display: none;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-form-section__title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #9a3412;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #fb923c;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(255, 237, 213, 0.65) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card section.wl-form-section:first-of-type .wl-form-section__title {
+        margin-top: 0;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-form-section__table-hint {
+        font-size: 0.8125rem;
+        color: #78716c;
+        font-weight: 500;
+        margin: -0.15rem 0 1rem 0;
+        line-height: 1.45;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .wl-col-match {
+        font-size: 0.68rem;
+        color: #78716c;
+        margin-top: 0.2rem;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .form-text {
+        color: #78716c;
+    }
+    body.sw-entity-edit-page #wl-hint-no-recipients {
+        font-size: 0.8rem;
+        color: #9a3412;
+        background: rgba(255, 237, 213, 0.75);
+        border: 1px solid rgba(251, 146, 60, 0.45);
+        border-radius: 10px;
+        padding: 0.5rem 0.75rem;
+    }
+    body.sw-entity-edit-page #wl-hint-multi {
+        font-size: 0.8rem;
+        color: #9a3412;
+        background: rgba(255, 247, 237, 0.9);
+        border: 1px solid rgba(251, 146, 60, 0.4);
+        border-radius: 10px;
+        padding: 0.5rem 0.75rem;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card .alert {
+        border-radius: 12px;
+    }
+    body.sw-entity-edit-page .sw-edit-form-card hr {
+        border-color: rgba(251, 146, 60, 0.25);
+        opacity: 1;
+    }

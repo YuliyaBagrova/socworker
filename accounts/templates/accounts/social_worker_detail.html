@@ -126,17 +126,34 @@
         text-decoration: none;
         color: #fff;
         border: none;
-        background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 45%, #6366f1 100%);
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
         box-shadow:
-            0 4px 18px rgba(59, 130, 246, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.22);
-        transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-worker-detail-page a.sw-detail-edit-btn:visited {
+        color: #fff;
     }
     body.sw-worker-detail-page .sw-detail-edit-btn:hover {
         color: #fff;
-        filter: brightness(1.05);
+        filter: brightness(1.08);
         transform: translateY(-2px);
-        box-shadow: 0 8px 26px rgba(99, 102, 241, 0.38);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
     }
     body.sw-worker-detail-page .sw-detail-card {
         border: 1px solid rgba(56, 189, 248, 0.28);

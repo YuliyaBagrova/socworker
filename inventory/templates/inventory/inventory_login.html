@@ -1,0 +1,79 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Вход в систему — SocWorker{% endblock %}
+
+{% block header_title %}Вход{% endblock %}
+{% block header_subtitle %}Введите email и пароль{% endblock %}
+
+{% block content %}
+<div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill text-decoration-none">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> На главную панель
+    </a>
+    <a href="{% url 'inventory:register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-link btn-sm text-muted px-2 text-decoration-none">
+        Регистрация
+    </a>
+</div>
+<form method="post" action="{% url 'inventory:login' %}">
+    {% csrf_token %}
+    {% if request.GET.next %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    {% endif %}
+    
+    <div class="mb-3">
+        <label for="{{ form.username.id_for_label }}" class="form-label">
+            <i class="bi bi-envelope"></i> {{ form.username.label }}
+        </label>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div class="text-danger small">{{ form.username.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.password.id_for_label }}" class="form-label">
+            <i class="bi bi-lock"></i> {{ form.password.label }}
+        </label>
+        <div class="input-group password-input-group">
+            {{ form.password }}
+            <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="Показать пароль" tabindex="0">
+                <i class="bi bi-eye"></i>
+            </button>
+        </div>
+        {% if form.password.errors %}
+            <div class="text-danger small">{{ form.password.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.access_code.id_for_label }}" class="form-label">
+            <i class="bi bi-shield-lock"></i> {{ form.access_code.label }}
+        </label>
+        <div class="input-group password-input-group">
+            {{ form.access_code }}
+            <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="Показать код аутентификации" tabindex="0">
+                <i class="bi bi-eye"></i>
+            </button>
+        </div>
+        {% if form.access_code.errors %}
+            <div class="text-danger small">{{ form.access_code.errors }}</div>
+        {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-box-arrow-in-right"></i> Войти
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block footer %}
+<p class="mb-0">Нет аккаунта? <a href="{% url 'inventory:register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">Зарегистрироваться</a></p>
+{% endblock %}

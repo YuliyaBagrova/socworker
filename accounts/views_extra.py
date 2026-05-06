@@ -8,6 +8,7 @@ from __future__ import annotations
 import csv
 import io
 import os
+import re
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -17,8 +18,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.html import strip_tags
-from django.core.paginator import Paginator
+from urllib.parse import urlencode
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
@@ -47,6 +49,26 @@ from .workload_address_prefill import resolve_workload_prefill_for_recipient
 from .workload_sync import sync_service_recipient_from_workload
 
 MEDICAL_CHECKUP_VALID_DAYS = 365
+
+# Сортировка «таб. № с конца» через (BIAS - n), чтобы порядок был строго по убыванию числа.
+_WL_TAB_DESC_BIAS = 2_000_000_000
+
+
+def _wl_employee_tab_sort_int(raw) -> int:
+    """Число из таб. № для сортировки в Python (как Cast(..., IntegerField) в списках соцработников)."""
+    if raw is None:
+        return 0
+    s = str(raw).strip()
+    if not s:
+        return 0
+    m = re.match(r'^(-?\d+)', s)
+    if not m:
+        return 0
+    try:
+        v = int(m.group(1))
+        return v if v >= 0 else 0
+    except ValueError:
+        return 0
 
 
 def _export_plain_text(value, max_len=500):
@@ -102,12 +124,68 @@ def _recipients_for_service(worker, location):
     )
 
 
-def _workload_wl_context(year: int, month: int, worker_s: str) -> dict:
+def _wl_sort_param(raw) -> str:
+    s = (raw or 'surname').strip()
+    if s not in ('tab_asc', 'tab_desc', 'surname'):
+        return 'surname'
+    return s
+
+
+def _wl_sort_from_request_query(request) -> str:
+    """GET: wl_sort (основной), затем sort — совместимость. Берётся последнее валидное значение в списке."""
+    for key in ('wl_sort', 'sort'):
+        for raw in reversed(request.GET.getlist(key)):
+            s = (raw or '').strip()
+            if s in ('tab_asc', 'tab_desc', 'surname'):
+                return s
+    return 'surname'
+
+
+def _wl_sort_records_within_worker(records: list, sort_order: str) -> list:
+    """Порядок строк одного работника.
+
+    Для таб. № — по подопечному (или по работнику, если подопечного нет в строке).
+    Для фамилии А–Я — порядок записей по pk (блоки на панели упорядочены по соцработнику).
+    """
+    if not records:
+        return records
+    so = _wl_sort_param(sort_order)
+
+    def row_key(r: WorkloadRecord):
+        rec = r.recipient
+        sw = r.social_worker
+        if so == 'tab_asc':
+            tab_n = _wl_employee_tab_sort_int((rec.employee_id if rec else sw.employee_id))
+            ln = (rec.last_name if rec else sw.last_name) or ''
+            fn = (rec.first_name if rec else sw.first_name) or ''
+            return (tab_n, ln, fn, r.pk)
+        if so == 'tab_desc':
+            tab_n = _wl_employee_tab_sort_int((rec.employee_id if rec else sw.employee_id))
+            ln = (rec.last_name if rec else sw.last_name) or ''
+            fn = (rec.first_name if rec else sw.first_name) or ''
+            return (_WL_TAB_DESC_BIAS - tab_n, ln, fn, r.pk)
+        return (r.pk,)
+
+    return sorted(records, key=row_key)
+
+
+def _workload_wl_context(year: int, month: int, worker_s: str, sort_order: str = 'surname') -> dict:
     return {
         'wl_year': year,
         'wl_month': month,
         'wl_worker': worker_s or '',
+        'wl_sort': _wl_sort_param(sort_order),
     }
+
+
+def _workload_panel_url(year: int, month: int, worker_id: str = '', sort_order: str = 'surname') -> str:
+    params = {'year': str(year), 'month': str(month)}
+    if worker_id:
+        params['worker'] = str(worker_id)
+    so = _wl_sort_param(sort_order)
+    if so != 'surname':
+        params['wl_sort'] = so
+    return reverse('accounts:workload_panel') + '?' + urlencode(params)
 
 
 def _workload_recipients_by_worker_map() -> dict:
@@ -139,7 +217,9 @@ def _workload_recipients_by_worker_map() -> dict:
     return out
 
 
-def _build_workload_groups(year: int, month: int, worker_pk: str | None):
+def _build_workload_groups(year: int, month: int, worker_pk: str | None, sort_order: str = 'surname'):
+    from .views import _apply_tab_employee_sort
+
     qs = WorkloadRecord.objects.filter(
         period_year=year,
         period_month=month,
@@ -155,21 +235,26 @@ def _build_workload_groups(year: int, month: int, worker_pk: str | None):
     for rec in qs:
         by_sw[rec.social_worker_id].append(rec)
 
+    if not by_sw:
+        return []
+
     groups = []
-    for sw_id in sorted(
-        by_sw.keys(),
-        key=lambda i: (
-            by_sw[i][0].social_worker.last_name,
-            by_sw[i][0].social_worker.first_name,
-        ),
-    ):
-        records = by_sw[sw_id]
-        sw = records[0].social_worker
+    global_idx = 0
+    so = _wl_sort_param(sort_order)
+    workers_ordered = list(
+        _apply_tab_employee_sort(
+            SocialWorker.objects.filter(pk__in=by_sw.keys()),
+            so,
+        )
+    )
+    for sw in workers_ordered:
+        records = _wl_sort_records_within_worker(by_sw[sw.pk], sort_order)
         rows = []
         total_minutes = 0
         load_sum = Decimal('0')
-        for i, r in enumerate(records, 1):
-            rows.append({'num': i, 'record': r})
+        for r in records:
+            global_idx += 1
+            rows.append({'num': global_idx, 'record': r})
             total_minutes += int(r.worked_minutes_month or 0)
             load_sum += r.load_coefficient or Decimal('0')
         total_hours = (Decimal(total_minutes) / Decimal('60')).quantize(Decimal('0.01'))
@@ -559,19 +644,80 @@ def report_csv(request, report_type):
                 rows.append([i, w.get_full_name(), loc_label, cnt])
         return _csv_response('services_all_report.csv', header, rows)
 
+    if report_type == 'inventory':
+        from inventory.inv_user_sql import responsible_row_for_csv
+        from inventory.models import InventoryUnit
+        from inventory.permissions import has_inventory_access
+
+        if not has_inventory_access(request.user):
+            messages.error(request, 'Нет доступа к отчёту инвентаризации.')
+            return redirect('accounts:report_select')
+
+        units_qs = InventoryUnit.objects.select_related('responsible')
+        filename = 'inventory_report.csv'
+
+        if request.method == 'POST':
+            scope = request.POST.get('scope', 'all')
+            if scope == 'selected':
+                raw_ids = request.POST.getlist('inventory_unit_ids')
+                pks = []
+                for x in raw_ids:
+                    s = str(x).strip()
+                    if s.isdigit():
+                        pks.append(int(s))
+                pks = list(dict.fromkeys(pks))
+                if not pks:
+                    messages.warning(
+                        request,
+                        'Отметьте хотя бы одну единицу учёта или выберите выгрузку всего списка.',
+                    )
+                    return redirect('inventory:panel')
+                units = list(units_qs.filter(pk__in=pks).order_by('inventory_number'))
+                if not units:
+                    messages.warning(request, 'Выбранные единицы учёта не найдены.')
+                    return redirect('inventory:panel')
+                filename = 'inventory_selected_report.csv'
+            else:
+                units = list(units_qs.order_by('inventory_number'))
+        else:
+            units = list(units_qs.order_by('inventory_number'))
+
+        header = [
+            'Инвентарный номер',
+            'Название',
+            'Стоимость',
+            'Ответственный (логин)',
+            'ФИО ответственного',
+            'Отделение ответственного',
+        ]
+        rows = []
+        for u in units:
+            name, dept = responsible_row_for_csv(u.responsible_id)
+            rows.append([
+                u.inventory_number,
+                u.name,
+                str(u.cost),
+                u.responsible.username,
+                name,
+                dept,
+            ])
+        return _csv_response(filename, header, rows)
+
     return redirect('accounts:report_select')
 
 
 # ── Медосмотр PDF/CSV ─────────────────────────────────────────────────────
 
 
-def _medical_workers_queryset(worker, status):
+def _medical_workers_queryset(worker, status, sort_order='surname'):
+    from .views import _apply_tab_employee_sort
+
     qs = SocialWorker.objects.filter(medical_panel_registered=True)
     if worker and str(worker).isdigit():
         qs = qs.filter(pk=int(worker))
     if status:
         qs = qs.filter(status=status)
-    return qs.order_by('last_name', 'first_name')
+    return _apply_tab_employee_sort(qs, _wl_sort_param(sort_order))
 
 
 def _medical_worker_row(w: SocialWorker, today: date):
@@ -596,11 +742,11 @@ def _medical_worker_row(w: SocialWorker, today: date):
     return [
         w.employee_id or '—',
         w.get_full_name(),
-        w.get_medical_checkup_display(),
         last_s,
         goden,
         akt12,
         w.medical_checkup_planned_date.strftime('%d.%m.%Y') if w.medical_checkup_planned_date else '—',
+        w.get_medical_checkup_display(),
         notes_short or '—',
     ]
 
@@ -612,7 +758,8 @@ def medical_checkup_panel_pdf(request):
     scope = request.POST.get('scope', 'all')
     worker = request.POST.get('worker', '')
     status = request.POST.get('status', '')
-    qs = _medical_workers_queryset(worker, status)
+    sort_order = request.POST.get('sort', 'surname')
+    qs = _medical_workers_queryset(worker, status, sort_order)
     today = date.today()
 
     if scope == 'selected':
@@ -626,8 +773,8 @@ def medical_checkup_panel_pdf(request):
         workers = list(qs)
 
     headers = [
-        'Таб. №', 'ФИО', 'Поле в системе', 'Дата последнего осмотра',
-        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Примечания',
+        'Таб. №', 'ФИО', 'Дата последнего осмотра',
+        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Поле в системе', 'Примечания',
     ]
     rows = [_medical_worker_row(w, today) for w in workers]
     return _pdf_table_response(
@@ -645,7 +792,8 @@ def medical_checkup_panel_csv(request):
     scope = request.POST.get('scope', 'all')
     worker = request.POST.get('worker', '')
     status = request.POST.get('status', '')
-    qs = _medical_workers_queryset(worker, status)
+    sort_order = request.POST.get('sort', 'surname')
+    qs = _medical_workers_queryset(worker, status, sort_order)
     today = date.today()
 
     if scope == 'selected':
@@ -659,8 +807,8 @@ def medical_checkup_panel_csv(request):
         workers = list(qs)
 
     header = [
-        'Таб. №', 'ФИО', 'Поле в системе', 'Дата последнего осмотра',
-        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Примечания',
+        'Таб. №', 'ФИО', 'Дата последнего осмотра',
+        'Годен до', 'Актуально 12 мес.', 'Назначен на', 'Поле в системе', 'Примечания',
     ]
     rows = [_medical_worker_row(w, today) for w in workers]
     return _csv_response('medical_checkup_panel.csv', header, rows)
@@ -669,13 +817,17 @@ def medical_checkup_panel_csv(request):
 # ── ТБ PDF/CSV ────────────────────────────────────────────────────────────
 
 
-def _safety_records_filtered(worker, title_q):
+def _safety_records_filtered(worker, title_q, sort_order='surname'):
+    from .views import _apply_social_worker_related_tab_sort
+
     qs = SafetyBriefingRecord.objects.select_related('social_worker').all()
     if worker and str(worker).isdigit():
         qs = qs.filter(social_worker_id=int(worker))
     if title_q:
         qs = qs.filter(briefing_title__icontains=title_q)
-    return qs.order_by('-briefing_date', 'social_worker__last_name', 'pk')
+    return _apply_social_worker_related_tab_sort(
+        qs, _wl_sort_param(sort_order), 'social_worker', ('-briefing_date', 'pk'),
+    )
 
 
 @login_required
@@ -685,7 +837,8 @@ def safety_briefing_panel_pdf(request):
     scope = request.POST.get('scope', 'all')
     worker = request.POST.get('worker', '')
     title_q = request.POST.get('title', '').strip()
-    qs = _safety_records_filtered(worker, title_q)
+    sort_order = request.POST.get('sort', 'surname')
+    qs = _safety_records_filtered(worker, title_q, sort_order)
 
     if scope == 'selected':
         pks = [int(x) for x in request.POST.getlist('briefing_record_ids') if str(x).strip().isdigit()]
@@ -722,7 +875,8 @@ def safety_briefing_panel_csv(request):
     scope = request.POST.get('scope', 'all')
     worker = request.POST.get('worker', '')
     title_q = request.POST.get('title', '').strip()
-    qs = _safety_records_filtered(worker, title_q)
+    sort_order = request.POST.get('sort', 'surname')
+    qs = _safety_records_filtered(worker, title_q, sort_order)
 
     if scope == 'selected':
         pks = [int(x) for x in request.POST.getlist('briefing_record_ids') if str(x).strip().isdigit()]
@@ -755,6 +909,11 @@ def safety_briefing_panel_csv(request):
 
 
 def _visit_planning_recipients(data):
+    from .views import _apply_tab_employee_sort
+
+    sort_order = data.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
     recipients = ServiceRecipient.objects.filter(
         social_worker__isnull=False,
         visit_planning_panel_registered=True,
@@ -771,10 +930,7 @@ def _visit_planning_recipients(data):
     rid = data.get('recipient')
     if rid and str(rid).isdigit():
         recipients = recipients.filter(pk=int(rid))
-    return list(recipients.order_by(
-        'social_worker__last_name', 'social_worker__first_name',
-        'last_name', 'first_name',
-    ))
+    return list(_apply_tab_employee_sort(recipients, sort_order))
 
 
 def _visit_planning_upcoming_by_recipient(rec_list):
@@ -902,18 +1058,22 @@ def workload_panel(request):
     year = max(2000, min(2100, year))
 
     worker_filter = request.GET.get('worker', '').strip()
-    workload_groups = _build_workload_groups(year, month, worker_filter or None)
-    workers = SocialWorker.objects.order_by('last_name', 'first_name')
+    sort_order = _wl_sort_param(_wl_sort_from_request_query(request))
+    workload_groups = _build_workload_groups(year, month, worker_filter or None, sort_order)
+    from .views import _apply_tab_employee_sort
+
+    workers = _apply_tab_employee_sort(SocialWorker.objects.all(), sort_order)
 
     ctx = {
         'year': year,
         'month': month,
         'worker_filter': worker_filter,
         'wl_worker': worker_filter,
+        'sort_order': sort_order,
         'workload_groups': workload_groups,
         'workers': workers,
         'norm_hours_default': WORKLOAD_LOAD_COEF_REFERENCE_HOURS,
-        **_workload_wl_context(year, month, worker_filter),
+        **_workload_wl_context(year, month, worker_filter, sort_order),
     }
     return render(request, 'accounts/workload_panel.html', ctx)
 
@@ -933,27 +1093,24 @@ def _workload_records_qs(year_f, month_f, worker_f):
 
 @login_required
 def workload_records_list(request):
-    today = date.today()
-    year_filter = request.GET.get('year', '').strip()
-    month_filter = request.GET.get('month', '').strip()
-    worker_filter = request.GET.get('worker', '').strip()
-
-    wl_y = int(year_filter) if year_filter.isdigit() else today.year
-    wl_m = int(month_filter) if month_filter.isdigit() else today.month
-
-    qs = _workload_records_qs(year_filter or None, month_filter or None, worker_filter)
-    paginator = Paginator(qs, 30)
-    page_obj = paginator.get_page(request.GET.get('page'))
-
-    ctx = {
-        'page_obj': page_obj,
-        'year_filter': year_filter,
-        'month_filter': month_filter,
-        'worker_filter': worker_filter,
-        'workers': SocialWorker.objects.order_by('last_name', 'first_name'),
-        **_workload_wl_context(wl_y, wl_m, worker_filter),
-    }
-    return render(request, 'accounts/workload_records_list.html', ctx)
+    """Раньше — плоский журнал; теперь тот же учёт на главной панели. Сохраняем URL для закладок."""
+    params = {}
+    y = request.GET.get('year', '').strip()
+    m = request.GET.get('month', '').strip()
+    w = request.GET.get('worker', '').strip()
+    if y.isdigit():
+        params['year'] = y
+    if m.isdigit():
+        params['month'] = m
+    if w.isdigit():
+        params['worker'] = w
+    s = request.GET.get('wl_sort', '').strip() or request.GET.get('sort', '').strip()
+    if s in ('tab_asc', 'tab_desc', 'surname') and s != 'surname':
+        params['wl_sort'] = s
+    base = reverse('accounts:workload_panel')
+    if params:
+        base = base + '?' + urlencode(params)
+    return redirect(base)
 
 
 @login_required
@@ -981,12 +1138,18 @@ def workload_record_create(request):
             for msg in sync_service_recipient_from_workload(obj):
                 messages.warning(request, msg)
             messages.success(request, 'Запись учёта сохранена.')
-            return redirect('accounts:workload_records_list')
+            return redirect(_workload_panel_url(
+                obj.period_year,
+                obj.period_month,
+                str(obj.social_worker_id),
+                request.POST.get('wl_panel_sort', 'surname'),
+            ))
     else:
         form = WorkloadRecordForm(initial=initial)
 
     py = initial.get('period_year', today.year)
     pm = initial.get('period_month', today.month)
+    wl_sort = _wl_sort_param(request.GET.get('wl_sort') or request.GET.get('sort', 'surname'))
     ctx = {
         'form': form,
         'is_edit': False,
@@ -996,7 +1159,7 @@ def workload_record_create(request):
         'workload_default_month': pm,
         'wl_edit_recipient_id': None,
         'wl_edit_recipient_name': '',
-        **_workload_wl_context(py, pm, wk or ''),
+        **_workload_wl_context(py, pm, wk or '', wl_sort),
     }
     return render(request, 'accounts/workload_record_form.html', ctx)
 
@@ -1015,10 +1178,16 @@ def workload_record_edit(request, pk):
             for msg in sync_service_recipient_from_workload(obj):
                 messages.warning(request, msg)
             messages.success(request, 'Изменения сохранены.')
-            return redirect('accounts:workload_records_list')
+            return redirect(_workload_panel_url(
+                obj.period_year,
+                obj.period_month,
+                str(obj.social_worker_id),
+                request.POST.get('wl_panel_sort', 'surname'),
+            ))
     else:
         form = WorkloadRecordForm(instance=record)
 
+    wl_sort = _wl_sort_param(request.GET.get('wl_sort') or request.GET.get('sort', 'surname'))
     ctx = {
         'form': form,
         'is_edit': True,
@@ -1032,6 +1201,7 @@ def workload_record_edit(request, pk):
             record.period_year,
             record.period_month,
             '',
+            wl_sort,
         ),
     }
     return render(request, 'accounts/workload_record_form.html', ctx)
@@ -1043,10 +1213,15 @@ def workload_record_delete(request, pk):
     if request.method == 'POST':
         record.delete()
         messages.success(request, 'Запись удалена.')
-        return redirect('accounts:workload_records_list')
+        return redirect(_workload_panel_url(record.period_year, record.period_month))
     ctx = {
         'record': record,
-        **_workload_wl_context(record.period_year, record.period_month, ''),
+        **_workload_wl_context(
+            record.period_year,
+            record.period_month,
+            '',
+            _wl_sort_param(request.GET.get('wl_sort') or request.GET.get('sort', 'surname')),
+        ),
     }
     return render(request, 'accounts/workload_record_confirm_delete.html', ctx)
 
@@ -1131,12 +1306,32 @@ def workload_export_csv(request):
     return _csv_response('workload_journal.csv', header, rows)
 
 
+def _workload_reorder_records_for_panel_export(records: list, sort_order: str = 'surname'):
+    """Тот же порядок групп по работнику, что на панели нагрузки."""
+    from .views import _apply_tab_employee_sort
+
+    if not records:
+        return records
+    by_sw: dict[int, list] = defaultdict(list)
+    for r in records:
+        by_sw[r.social_worker_id].append(r)
+    so = _wl_sort_param(sort_order)
+    out = []
+    for w in _apply_tab_employee_sort(
+        SocialWorker.objects.filter(pk__in=by_sw.keys()),
+        so,
+    ):
+        out.extend(_wl_sort_records_within_worker(by_sw[w.pk], sort_order))
+    return out
+
+
 def _workload_pdf_csv_rows(
     year: int,
     month: int,
     worker_pk: str,
     scope: str,
     raw_ids: list[str],
+    sort_order: str = 'surname',
 ):
     qs = WorkloadRecord.objects.filter(
         period_year=year,
@@ -1149,6 +1344,7 @@ def _workload_pdf_csv_rows(
     if scope == 'selected':
         id_set = {int(x) for x in raw_ids if str(x).strip().isdigit()}
         records = [r for r in records if r.pk in id_set]
+    records = _workload_reorder_records_for_panel_export(records, sort_order)
     rows = []
     for r in records:
         name = r.recipient.get_full_name() if r.recipient else r.social_worker.get_full_name()
@@ -1182,8 +1378,9 @@ def workload_panel_pdf(request):
     scope = request.POST.get('scope', 'all')
     worker_pk = request.POST.get('worker', '').strip()
     raw_ids = request.POST.getlist('workload_record_ids')
+    sort_order = request.POST.get('wl_sort') or request.POST.get('sort', 'surname')
 
-    rows = _workload_pdf_csv_rows(year, month, worker_pk, scope, raw_ids)
+    rows = _workload_pdf_csv_rows(year, month, worker_pk, scope, raw_ids, sort_order)
     if scope == 'selected' and not rows:
         messages.warning(request, 'Не выбраны строки для выгрузки.')
         return redirect('accounts:workload_panel')
@@ -1213,8 +1410,9 @@ def workload_panel_csv(request):
     scope = request.POST.get('scope', 'all')
     worker_pk = request.POST.get('worker', '').strip()
     raw_ids = request.POST.getlist('workload_record_ids')
+    sort_order = request.POST.get('wl_sort') or request.POST.get('sort', 'surname')
 
-    rows = _workload_pdf_csv_rows(year, month, worker_pk, scope, raw_ids)
+    rows = _workload_pdf_csv_rows(year, month, worker_pk, scope, raw_ids, sort_order)
     if scope == 'selected' and not rows:
         messages.warning(request, 'Не выбраны строки для выгрузки.')
         return redirect('accounts:workload_panel')

@@ -1,6 +1,11 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}Отделения{% endblock %}
+{% block body_attrs %} class="sw-inventory-page"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% endblock %}
 {% block content %}
+<div class="sw-inv-layout">
 {% include 'inventory/includes/inventory_subnav.html' %}
 
 <div class="page-header flex-wrap">
@@ -31,5 +36,6 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>
 {% endblock %}

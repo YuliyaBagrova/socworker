@@ -1,33 +1,207 @@
 {% extends 'accounts/base_dashboard.html' %}
-{% block title %}{% if is_edit %}Редактирование{% else %}Новая единица{% endif %}{% endblock %}
+{% block title %}{% if is_edit %}Редактирование — Инвентаризация{% else %}Новая единица учёта — Инвентаризация{% endif %}{% endblock %}
+{% block body_attrs %} class="sw-inventory-page sw-inv-unit-form-page{% if is_edit %} sw-entity-edit-page{% endif %}"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% if is_edit %}
+{% include 'accounts/includes/sw_edit_form_theme.html' with is_edit=True %}
+{% endif %}
+{% include 'inventory/includes/inventory_unit_form_theme.html' %}
+{% endblock %}
 {% block content %}
-{% include 'inventory/includes/inventory_subnav.html' %}
-
-<div class="page-header">
-    <h2><i class="bi bi-box"></i> {% if is_edit %}Редактирование{% else %}Новая единица учёта{% endif %}</h2>
-    <a href="{% url 'inventory:unit_list' %}" class="btn btn-outline-secondary btn-sm">К списку</a>
+{% if is_edit %}
+<div class="page-header sw-entity-form-header">
+    <h1 class="sw-edit-page-title mb-0">
+        <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+        <span class="sw-edit-page-title__label">Редактирование единицы учёта</span>
+    </h1>
+    <a href="{% url 'inventory:panel' %}" class="sw-edit-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели инвентаризации
+    </a>
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-body">
-                {% if 'responsible' not in form.fields %}
-                    <p class="text-muted small mb-3">Ответственным за единицу будете указаны вы.</p>
-                {% endif %}
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for err in field.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
-                        </div>
+<div class="card sw-edit-form-card mx-auto">
+    <div class="card-body">
+{% else %}
+<div class="inv-unit-assign-form-header">
+    <h1 class="inv-unit-assign-page-title mb-0">
+        <span class="inv-unit-assign-page-title__icon" aria-hidden="true">
+            <i class="bi bi-plus-circle"></i>
+        </span>
+        <span class="inv-unit-assign-page-title__label">
+            Новая единица учёта
+        </span>
+    </h1>
+    <a href="{% url 'inventory:panel' %}" class="inv-unit-assign-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели инвентаризации
+    </a>
+</div>
+
+<div class="card inv-unit-assign-form-card mx-auto">
+    <div class="card-body">
+{% endif %}
+        <form method="post" novalidate enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="section-title"><i class="bi bi-person-plus"></i> Ответственный</div>
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="id_inv_unit_responsible_select">{{ form.responsible.label }}</label>
+                <select name="responsible" id="id_inv_unit_responsible_select" class="form-select" required>
+                    <option value="">Выберите…</option>
+                    {% for u in form.responsible.field.queryset %}
+                    {% with display=u.get_full_name %}
+                    <option value="{{ u.pk }}"
+                            data-username="{{ u.username|escape }}"
+                            data-fullname="{% if display %}{{ display|escape }}{% else %}{{ u.username|escape }}{% endif %}"
+                            {% if form.responsible.value == u.pk %}selected{% endif %}>
+                        {% if user.is_authenticated and u.pk == user.pk %}Вы — {% endif %}
+                        {% if display %}{{ display }} ({{ u.username }}){% else %}{{ u.username }}{% endif %}
+                    </option>
+                    {% endwith %}
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                </form>
+                </select>
+                {% if form.responsible.errors %}<div class="text-danger small mt-1">{{ form.responsible.errors }}</div>{% endif %}
             </div>
-        </div>
+            <div class="row g-3 mb-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="inv_unit_responsible_login">Логин</label>
+                    <input type="text" class="form-control" id="inv_unit_responsible_login" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="inv_unit_responsible_name">ФИО</label>
+                    <input type="text" class="form-control" id="inv_unit_responsible_name" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-box-seam"></i> Единица учёта</div>
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+            </div>
+            <div class="row g-3 mb-3 mt-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.inventory_number.id_for_label }}">{{ form.inventory_number.label }}</label>
+                    {{ form.inventory_number }}
+                    {% if form.inventory_number.errors %}<div class="text-danger small mt-1">{{ form.inventory_number.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.cost.id_for_label }}">{{ form.cost.label }}</label>
+                    {{ form.cost }}
+                    {% if form.cost.errors %}<div class="text-danger small mt-1">{{ form.cost.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-image"></i> Фото техники</div>
+            {% if is_edit and unit.equipment_photo %}
+            <div class="mb-3 mt-3">
+                <div class="text-muted small mb-1">Текущее фото</div>
+                <a href="{{ unit.equipment_photo.url }}" target="_blank" rel="noopener">
+                    <img src="{{ unit.equipment_photo.url }}" alt="" class="img-thumbnail rounded" style="max-height: 9rem; object-fit: contain;">
+                </a>
+            </div>
+            {% endif %}
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="{{ form.equipment_photo.id_for_label }}">{{ form.equipment_photo.label }}</label>
+                {{ form.equipment_photo }}
+                {% if form.equipment_photo.errors %}<div class="text-danger small mt-1">{{ form.equipment_photo.errors }}</div>{% endif %}
+                <div id="inv-unit-new-photo-preview" class="inv-unit-new-photo-preview mt-2 d-none" aria-live="polite">
+                    <div class="inv-unit-new-photo-preview__toolbar d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div class="min-w-0 flex-grow-1">
+                            <div class="text-muted small mb-1">Выбранный файл</div>
+                            <div class="inv-unit-new-photo-preview__filename small text-break" id="inv-unit-photo-filename"></div>
+                        </div>
+                        <button type="button" class="inv-unit-new-photo-preview__clear" id="inv-unit-photo-clear" title="Убрать выбранное фото" aria-label="Убрать выбранное фото">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <img id="inv-unit-photo-preview-img" class="inv-unit-new-photo-preview__img img-thumbnail d-none" alt="Предпросмотр выбранного изображения">
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-3 pt-2 border-top">
+                <a href="{% url 'inventory:panel' %}" class="btn btn-outline-secondary{% if not is_edit %} inv-unit-assign-btn-cancel{% endif %}">Отмена</a>
+                <button type="submit" class="btn btn-primary{% if not is_edit %} inv-unit-assign-btn-save{% endif %}"><i class="bi bi-check-circle"></i> Сохранить</button>
+            </div>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const select = document.getElementById('id_inv_unit_responsible_select');
+    const loginEl = document.getElementById('inv_unit_responsible_login');
+    const nameEl = document.getElementById('inv_unit_responsible_name');
+    function sync() {
+        if (!select || !loginEl || !nameEl) return;
+        const opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) {
+            loginEl.value = '';
+            nameEl.value = '';
+            return;
+        }
+        loginEl.value = opt.getAttribute('data-username') || '';
+        nameEl.value = opt.getAttribute('data-fullname') || '';
+    }
+    if (select) {
+        select.addEventListener('change', sync);
+        sync();
+    }
+
+    const fileInput = document.getElementById('{{ form.equipment_photo.id_for_label }}');
+    const previewWrap = document.getElementById('inv-unit-new-photo-preview');
+    const previewImg = document.getElementById('inv-unit-photo-preview-img');
+    const previewName = document.getElementById('inv-unit-photo-filename');
+    const clearPhotoBtn = document.getElementById('inv-unit-photo-clear');
+    let previewObjectUrl = null;
+    function revokePreviewUrl() {
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = null;
+        }
+    }
+    function hidePhotoPreview() {
+        revokePreviewUrl();
+        if (previewWrap) previewWrap.classList.add('d-none');
+        if (previewImg) {
+            previewImg.classList.add('d-none');
+            previewImg.removeAttribute('src');
+        }
+        if (previewName) previewName.textContent = '';
+    }
+    function showPhotoPreview(file) {
+        if (!previewWrap || !previewImg || !previewName || !file) return;
+        previewName.textContent = file.name;
+        revokePreviewUrl();
+        if (file.type && file.type.indexOf('image/') === 0) {
+            previewObjectUrl = URL.createObjectURL(file);
+            previewImg.src = previewObjectUrl;
+            previewImg.classList.remove('d-none');
+        } else {
+            previewImg.classList.add('d-none');
+            previewImg.removeAttribute('src');
+        }
+        previewWrap.classList.remove('d-none');
+    }
+    if (fileInput && previewWrap) {
+        fileInput.addEventListener('change', function () {
+            const f = fileInput.files && fileInput.files[0];
+            if (!f) hidePhotoPreview();
+            else showPhotoPreview(f);
+        });
+    }
+    if (clearPhotoBtn && fileInput) {
+        clearPhotoBtn.addEventListener('click', function () {
+            fileInput.value = '';
+            hidePhotoPreview();
+        });
+    }
+})();
+</script>
 {% endblock %}

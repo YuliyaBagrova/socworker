@@ -2,7 +2,7 @@
 <div class="workload-subnav mb-3">
     <div class="d-flex flex-wrap align-items-center gap-2">
         <span class="text-muted small me-1">Нагрузка на соцработников</span>
-        <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}"
+        <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}{% if wl_sort != 'surname' %}&wl_sort={{ wl_sort }}{% endif %}"
            class="btn btn-sm {% if active == 'accounting' %}btn-primary{% else %}btn-outline-primary{% endif %}">
             Учёт рабочего времени
         </a>

@@ -63,6 +63,20 @@ class InventoryUnit(models.Model):
         related_name='inventory_units',
         verbose_name='Ответственный',
     )
+    equipment_photo = models.ImageField(
+        upload_to='inventory/equipment/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name='Фото техники',
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='inventory_units_created',
+        verbose_name='Кем заведена запись',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -73,3 +87,8 @@ class InventoryUnit(models.Model):
 
     def __str__(self):
         return f'{self.inventory_number} — {self.name[:40]}'
+
+    def delete(self, *args, **kwargs):
+        if self.equipment_photo:
+            self.equipment_photo.delete(save=False)
+        super().delete(*args, **kwargs)

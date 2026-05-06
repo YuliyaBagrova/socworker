@@ -321,29 +321,92 @@
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
         background: #fff;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+    /* «Найти» / сброс — как панель «Инвентаризация»; иконка — bi-search */
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .wk-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .wk-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit {
         border: none;
         border-radius: 12px;
         font-weight: 700;
-        font-size: 0.9rem;
         letter-spacing: 0.03em;
-        padding: 0.62rem 1rem;
-        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
         box-shadow:
-            0 4px 18px rgba(99, 102, 241, 0.38),
+            0 4px 18px rgba(102, 126, 234, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
         transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn,
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset.wk-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn i,
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset.wk-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit:hover {
         color: #fff;
         transform: translateY(-2px);
-        filter: brightness(1.06);
+        filter: brightness(1.04);
         box-shadow:
-            0 10px 28px rgba(102, 126, 234, 0.42),
+            0 8px 28px rgba(118, 75, 162, 0.38),
             inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit:active {
         transform: translateY(0);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     .sw-sheet-wrap {
         overflow-x: auto;
@@ -792,7 +855,7 @@
     </div>
 </div>
 
-<div class="sw-filter-dash mb-0">
+<div class="sw-filter-dash mb-0 sw-workers-filter-dash">
     <div class="sw-filter-dash-inner">
         <h2 class="sw-page-title sw-filter-panel-heading mb-0">
             <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
@@ -827,8 +890,7 @@
             <div class="col-12 col-lg-3">
                 <label for="sort" class="sw-filter-label d-block">Сортировка</label>
                 <div class="sw-select-wrap">
-                    <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="При смене варианта список обновится"
-                            onchange="this.form.submit()">
+                    <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="Сортировка применится после нажатия «Найти»">
                         <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
                         <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
@@ -836,19 +898,16 @@
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
-            <div class="col-12 col-lg-2">
-                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
-                    <i class="bi bi-search"></i> Найти
-                </button>
+            <div class="col-12 col-lg wk-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wk-filter-actions" id="wk-filter-actions">
+                    <button type="submit" class="btn btn-primary wk-filter-submit wk-filter-icon-btn" aria-label="Найти по поиску и фильтрам">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:social_workers_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="wk-filter-reset wk-filter-icon-btn" id="wk-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить поиск, статус и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-            {% if has_active_filters %}
-            <div class="col-12 pt-1">
-                <a href="{% url 'accounts:social_workers_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="bi bi-x-lg"></i> Показать всех работников
-                </a>
-                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск и фильтр по статусу</span>
-            </div>
-            {% endif %}
         </form>
     </div>
 </div>

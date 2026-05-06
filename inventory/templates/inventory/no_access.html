@@ -1,14 +1,25 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}Нет доступа — Инвентаризация{% endblock %}
+{% block body_attrs %} class="sw-inventory-page"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% endblock %}
 {% block content %}
 <div class="card" style="max-width: 560px; margin: 0 auto;">
     <div class="card-body p-4 text-center">
         <h2 class="h5 mb-3"><i class="bi bi-lock text-warning"></i> Раздел «Инвентаризация»</h2>
         <p class="text-muted mb-4">
-            У вашей учётной записи нет профиля инвентаризации. Обратитесь к завхозу или администратору,
-            чтобы вас добавили в систему с ролью сотрудника, руководителя отдела или завхоза.
+            У вашей учётной записи не настроен доступ к инвентаризации.
+            Войдите через <a href="{% url 'inventory:login' %}">форму входа</a> (как на основном сайте, плюс поле «Код аутентификации») или
+            <a href="{% url 'inventory:register' %}">зарегистрируйтесь</a>.
+            Код аутентификации выдаётся начальником и в интерфейсе не показывается.
+            Роль также может назначить завхоз или ответственный за инвентарь.
         </p>
-        <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary">На главную</a>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="{% url 'inventory:login' %}" class="btn btn-primary">Вход</a>
+            <a href="{% url 'inventory:register' %}" class="btn btn-outline-primary">Регистрация</a>
+            <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">На главную</a>
+        </div>
     </div>
 </div>
 {% endblock %}

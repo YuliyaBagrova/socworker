@@ -77,6 +77,26 @@ def _apply_tab_employee_sort(qs, sort_order):
     return qs.order_by('last_name', 'first_name')
 
 
+def _apply_social_worker_related_tab_sort(qs, sort_order, prefix='social_worker', extra=()):
+    """
+    Сортировка queryset по полям закреплённого SocialWorker (таб. № как число, ФИО).
+    extra — доп. поля порядка (например '-briefing_date', 'pk' для записей ТБ).
+    """
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
+    ln, fn = f'{prefix}__last_name', f'{prefix}__first_name'
+    emp = f'{prefix}__employee_id'
+    if sort_order == 'tab_asc':
+        return qs.annotate(
+            _sw_rel_tab=Cast(emp, IntegerField()),
+        ).order_by('_sw_rel_tab', ln, fn, *extra)
+    if sort_order == 'tab_desc':
+        return qs.annotate(
+            _sw_rel_tab=Cast(emp, IntegerField()),
+        ).order_by('-_sw_rel_tab', ln, fn, *extra)
+    return qs.order_by(ln, fn, *extra)
+
+
 def _export_plain_text(value, max_len=500):
     """Текст для PDF/CSV: без HTML, одна строка по возможности."""
     if not value:
@@ -317,6 +337,9 @@ def medical_checkup_panel(request):
     """Таблица сотрудников: годовая актуальность медосмотра, назначение даты."""
     worker_filter = request.GET.get('worker', '')
     status_filter = request.GET.get('status', '')
+    sort_order = request.GET.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
 
     workers = SocialWorker.objects.filter(medical_panel_registered=True)
     if worker_filter and str(worker_filter).isdigit():
@@ -324,7 +347,7 @@ def medical_checkup_panel(request):
     if status_filter:
         workers = workers.filter(status=status_filter)
 
-    workers = workers.order_by('last_name', 'first_name')
+    workers = _apply_tab_employee_sort(workers, sort_order)
     paginator = Paginator(workers, 15)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -355,8 +378,11 @@ def medical_checkup_panel(request):
         'page_obj': page_obj,
         'filter_worker': worker_filter if (worker_filter and str(worker_filter).isdigit()) else '',
         'status_filter': status_filter,
+        'sort_order': sort_order,
         'has_active_filters': bool(
-            (worker_filter and str(worker_filter).isdigit()) or status_filter,
+            (worker_filter and str(worker_filter).isdigit())
+            or status_filter
+            or sort_order != 'surname',
         ),
         'status_choices': SocialWorker.STATUS_CHOICES,
         'all_workers': SocialWorker.objects.filter(
@@ -635,6 +661,9 @@ def safety_briefing_panel(request):
     """Панель техники безопасности: инструктажи, статус прохождения, действия."""
     worker_filter = request.GET.get('worker', '')
     title_q = request.GET.get('title', '').strip()
+    sort_order = request.GET.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
 
     records = SafetyBriefingRecord.objects.select_related('social_worker').all()
     if worker_filter and str(worker_filter).isdigit():
@@ -642,7 +671,9 @@ def safety_briefing_panel(request):
     if title_q:
         records = records.filter(briefing_title__icontains=title_q)
 
-    records = records.order_by('-briefing_date', 'social_worker__last_name', 'pk')
+    records = _apply_social_worker_related_tab_sort(
+        records, sort_order, 'social_worker', ('-briefing_date', 'pk'),
+    )
     paginator = Paginator(records, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -657,8 +688,11 @@ def safety_briefing_panel(request):
         'page_obj': page_obj,
         'filter_worker': worker_filter if (worker_filter and str(worker_filter).isdigit()) else '',
         'filter_title': title_q,
+        'sort_order': sort_order,
         'has_active_filters': bool(
-            (worker_filter and str(worker_filter).isdigit()) or title_q,
+            (worker_filter and str(worker_filter).isdigit())
+            or title_q
+            or sort_order != 'surname',
         ),
         'all_workers': SocialWorker.objects.order_by('last_name', 'first_name'),
         'page_query': query,
@@ -723,15 +757,28 @@ def safety_briefing_edit(request, pk):
 
 @login_required
 def safety_briefing_delete(request, pk):
-    if request.method != 'POST':
+    record = get_object_or_404(
+        SafetyBriefingRecord.objects.select_related('social_worker'),
+        pk=pk,
+    )
+    next_q = (request.POST.get('next') or request.GET.get('next') or '').strip()
+
+    if request.method == 'POST':
+        title = record.briefing_title
+        name = record.social_worker.get_full_name()
+        record.delete()
+        messages.success(
+            request,
+            f'Запись об инструктаже «{title}» ({name}) удалена.',
+        )
+        if next_q.startswith('/') and not next_q.startswith('//'):
+            return redirect(next_q)
         return redirect('accounts:safety_briefing_panel')
-    obj = get_object_or_404(SafetyBriefingRecord, pk=pk)
-    obj.delete()
-    messages.success(request, 'Запись об инструктаже удалена.')
-    next_url = request.POST.get('next', '')
-    if next_url.startswith('/') and not next_url.startswith('//'):
-        return redirect(next_url)
-    return redirect('accounts:safety_briefing_panel')
+
+    return render(request, 'accounts/safety_briefing_delete_confirm.html', {
+        'record': record,
+        'next_url': next_q,
+    })
 
 
 @login_required
@@ -985,6 +1032,10 @@ def visit_planning(request):
         except ValueError:
             pass
 
+    sort_order = request.GET.get('sort', 'surname')
+    if sort_order not in ('tab_asc', 'tab_desc', 'surname'):
+        sort_order = 'surname'
+
     recipients = ServiceRecipient.objects.filter(
         social_worker__isnull=False,
         visit_planning_panel_registered=True,
@@ -1008,10 +1059,7 @@ def visit_planning(request):
     if rid and str(rid).isdigit():
         recipients = recipients.filter(pk=int(rid))
 
-    recipients = recipients.order_by(
-        'social_worker__last_name', 'social_worker__first_name',
-        'last_name', 'first_name',
-    )
+    recipients = _apply_tab_employee_sort(recipients, sort_order)
     rec_list = list(recipients)
     rec_ids = [r.pk for r in rec_list]
     today = date.today()
@@ -1132,6 +1180,7 @@ def visit_planning(request):
         or (rid and str(rid).isdigit())
         or living
         or wstatus
+        or sort_order != 'surname'
     )
 
     ctx = {
@@ -1161,6 +1210,7 @@ def visit_planning(request):
         'filter_recipient': rid if (rid and str(rid).isdigit()) else '',
         'filter_living': living or '',
         'filter_wstatus': wstatus or '',
+        'sort_order': sort_order,
         'living_choices': ServiceRecipient.LIVING_STATUS_CHOICES,
         'worker_status_choices': SocialWorker.STATUS_CHOICES,
         'timeline': timeline,
@@ -2230,6 +2280,75 @@ def report_pdf(request, report_type):
 
         col_widths = [32, 145, 175, 52]
         filename = 'services_all_report.pdf'
+
+    elif report_type == 'inventory':
+        from inventory.inv_user_sql import responsible_row_for_csv
+        from inventory.models import InventoryUnit
+        from inventory.permissions import has_inventory_access
+
+        if not has_inventory_access(request.user):
+            messages.error(request, 'Нет доступа к отчёту инвентаризации.')
+            return redirect('accounts:report_select')
+
+        units_qs = InventoryUnit.objects.select_related('responsible')
+        subtitle_suffix = ''
+        filename = 'inventory_report.pdf'
+
+        if request.method == 'POST':
+            scope = request.POST.get('scope', 'all')
+            if scope == 'selected':
+                raw_ids = request.POST.getlist('inventory_unit_ids')
+                pks = []
+                for x in raw_ids:
+                    s = str(x).strip()
+                    if s.isdigit():
+                        pks.append(int(s))
+                pks = list(dict.fromkeys(pks))
+                if not pks:
+                    messages.warning(
+                        request,
+                        'Отметьте хотя бы одну единицу учёта или выберите выгрузку всего списка.',
+                    )
+                    return redirect('inventory:panel')
+                units = list(units_qs.filter(pk__in=pks).order_by('inventory_number'))
+                if not units:
+                    messages.warning(request, 'Выбранные единицы учёта не найдены.')
+                    return redirect('inventory:panel')
+                subtitle_suffix = ' (выбранные записи)'
+                filename = 'inventory_selected_report.pdf'
+            else:
+                units = list(units_qs.order_by('inventory_number'))
+        else:
+            units = list(units_qs.order_by('inventory_number'))
+
+        elements.append(
+            Paragraph(f'Отчёт: Инвентаризация{subtitle_suffix} — {now}', title_style),
+        )
+
+        headers = [
+            PH('№'),
+            PH('Инв. №'),
+            PH('Название'),
+            PH('Стоимость'),
+            PH('Логин отв.'),
+            PH('ФИО отв.'),
+            PH('Отделение'),
+        ]
+
+        data = [headers]
+        for i, u in enumerate(units, 1):
+            name, dept = responsible_row_for_csv(u.responsible_id)
+            data.append([
+                P(i),
+                P(u.inventory_number),
+                P(u.name),
+                P(str(u.cost)),
+                P(u.responsible.username),
+                P(name),
+                P(dept),
+            ])
+
+        col_widths = [26, 40, 118, 44, 52, 76, 72]
 
     else:
         return redirect('accounts:report_select')

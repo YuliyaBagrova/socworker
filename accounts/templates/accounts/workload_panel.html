@@ -204,57 +204,212 @@
         border-color: rgba(99, 102, 241, 0.35);
         border-left: 3px solid #6366f1;
     }
-    .sw-wl-filter-card {
-        position: relative;
+    /* Блок периода — та же визуальная схема, что «Поиск и сортировка» у соцработников */
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--dash-glass-border);
         border-radius: 18px;
-        overflow: hidden;
-        background: linear-gradient(165deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 242, 255, 0.75) 100%);
-        -webkit-backdrop-filter: blur(18px);
-        backdrop-filter: blur(18px);
-        border: 1px solid rgba(255, 255, 255, 0.95);
         box-shadow:
-            0 6px 28px rgba(30, 27, 75, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+            0 8px 32px rgba(26, 26, 46, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        transition: box-shadow 0.25s ease, transform 0.2s ease;
     }
-    .sw-wl-filter-card::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        border-radius: 18px 0 0 18px;
-        background: linear-gradient(180deg, #38bdf8 0%, #6366f1 50%, #4f46e5 100%);
-        opacity: 0.9;
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter:hover {
+        box-shadow:
+            0 12px 36px rgba(102, 126, 234, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
-    .sw-wl-filter-card .card-body {
-        padding: 1rem 1.1rem 1.05rem 1.35rem;
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.2rem;
     }
-    .sw-wl-filter-card .form-label {
-        color: #3730a3;
-        font-weight: 600;
-        font-size: 0.7rem;
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.14);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.12rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        box-shadow:
+            0 4px 16px rgba(102, 126, 234, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #3d2f5c;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        color: var(--dash-violet);
+        margin-bottom: 0.4rem;
     }
-    .sw-wl-filter-card .form-control,
-    .sw-wl-filter-card .form-select {
-        border-radius: 10px;
-        border: 1px solid rgba(99, 102, 241, 0.25);
-        background: rgba(255, 255, 255, 0.95);
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap {
+        position: relative;
     }
-    .sw-wl-filter-card .form-control:focus,
-    .sw-wl-filter-card .form-select:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
     }
-    .sw-wl-filter-card .btn-primary {
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: var(--dash-violet-light);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #4f46e5;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #4f46e5;
+        transform: translateY(-50%) scale(1);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-control.sw-wl-filter-field,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2d2652;
+        background: rgba(255, 255, 255, 0.92);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(45, 38, 82, 0.05);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-control.sw-wl-filter-field:focus,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-select.sw-status-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        background: #fff;
+    }
+    /* «Найти» / «Сбросить» — как панель «Инвентаризация»; иконка поиска — bi-search */
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .wl-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .wl-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit {
         border: none;
         border-radius: 12px;
-        font-weight: 600;
-        padding: 0.45rem 1.15rem;
-        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #1d4ed8 100%);
-        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.28);
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit.wl-filter-icon-btn,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset.wl-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit.wl-filter-icon-btn i,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset.wl-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit:active {
+        transform: translateY(0);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     /* Справка — структура как планирование визитов, голубая гамма панели нагрузки */
     .sw-filter-dash.sw-wl-guide {
@@ -393,6 +548,27 @@
     .sw-wl-guide__lead strong {
         color: #1e40af;
     }
+    .sw-wl-guide__subsection-title {
+        margin: 0.85rem 0 0.35rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #312e81;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .sw-wl-guide__subsection-title .bi {
+        color: #4f46e5;
+    }
+    .sw-wl-guide__note {
+        margin: 0;
+        font-size: 0.8125rem;
+        line-height: 1.55;
+        color: #475569;
+    }
+    .sw-wl-guide__note + .sw-wl-guide__note {
+        margin-top: 0.5rem;
+    }
     .sw-wl-matrix-card {
         border: 1px solid rgba(255, 255, 255, 0.95);
         border-radius: 18px;
@@ -487,47 +663,121 @@
         text-align: left !important;
         max-width: 220px;
     }
-    .sw-workload-page .workload-sheet .btn-outline-primary {
-        border-color: rgba(99, 102, 241, 0.45);
-        color: #4338ca;
-        border-radius: 8px;
+    .sw-workload-page .workload-sheet .workload-actions-th {
+        max-width: none;
+        white-space: nowrap;
+        min-width: 6.5rem;
     }
-    .sw-workload-page .workload-sheet .btn-outline-primary:hover {
-        background: #eef2ff;
-    }
-    .sw-wl-about-card {
-        border-radius: 18px;
-        border: 1px solid rgba(199, 210, 254, 0.6);
-        background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(224, 231, 255, 0.45) 100%);
-        -webkit-backdrop-filter: blur(12px);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 8px 28px rgba(30, 27, 75, 0.07);
-        overflow: hidden;
-    }
-    .sw-wl-about-card .card-header {
-        background: linear-gradient(90deg, rgba(224, 231, 255, 0.9) 0%, rgba(255, 255, 255, 0.75) 100%);
-        border-bottom: 1px solid rgba(199, 210, 254, 0.5);
-        padding: 0.85rem 1.1rem;
-    }
-    .sw-wl-about-card .card-header h5 {
-        margin: 0;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #312e81;
+    .sw-workload-page .workload-sheet .sw-actions-cell {
         display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        justify-content: center;
         align-items: center;
-        gap: 0.4rem;
     }
-    .sw-wl-about-card .card-header h5 .bi {
-        color: #4f46e5;
+    .sw-workload-page .workload-sheet .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        border-width: 1px;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.12);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-workload-page .workload-sheet a.sw-action-btn.sw-action-btn--destructive:visited {
+        color: #fff;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-workload-page .workload-sheet a.sw-action-btn.sw-action-btn--edit:visited {
+        color: #fff;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    .sw-workload-page .workload-sheet .sw-actions-cell a.sw-action-btn {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-workload-page .workload-sheet .sw-actions-cell a.sw-action-btn:hover {
+        color: #fff;
+        text-decoration: none;
     }
     .sw-wl-rate-badge {
         background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
         color: #422006 !important;
-    }
-    .sw-wl-about-card .card-body {
-        color: #475569;
-        line-height: 1.55;
     }
     .sw-modal-workload .modal-content {
         border-radius: 16px;
@@ -556,26 +806,15 @@
                     <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
                         <i class="bi bi-filetype-csv"></i> CSV
                     </button>
-                    <a href="{% url 'accounts:workload_record_create' %}" class="btn btn-primary sw-toolbar-btn">
+                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}{% if sort_order != 'surname' %}&wl_sort={{ sort_order }}{% endif %}" class="btn btn-primary sw-toolbar-btn">
                         <i class="bi bi-plus-circle"></i> Добавить строку
-                    </a>
-                </div>
-                <div class="sw-toolbar-group">
-                    <a href="{% url 'accounts:workload_records_list' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm sw-toolbar-btn">
-                        <i class="bi bi-list-ul"></i> Плоский список
-                    </a>
-                    <a href="{% url 'accounts:workload_summary' %}?year={{ year }}&month={{ month }}" class="btn btn-outline-primary btn-sm sw-toolbar-btn">
-                        <i class="bi bi-people"></i> Сводка
-                    </a>
-                    <a href="{% url 'accounts:workload_export_csv' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm sw-toolbar-btn" title="Плоский список полей журнала">
-                        <i class="bi bi-list-columns-reverse"></i> Журнал CSV
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="sw-filter-dash mb-0 sw-wl-guide">
+    <div id="workload-about" class="sw-filter-dash mb-0 sw-wl-guide">
         <div class="sw-filter-dash-inner sw-wl-guide__inner">
             <div class="sw-wl-guide__top">
                 <span class="sw-wl-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
@@ -596,39 +835,69 @@
                         Кратность за месяц при пустом поле = за неделю × 4. Коэффициент нагрузки (как на типовой таблице):
                         <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong>. В строке «ИТОГО» коэффициенты по строкам суммируются; ставка — по суммарной нагрузке.
                     </p>
+                    <h6 class="sw-wl-guide__subsection-title">
+                        <i class="bi bi-journal-text" aria-hidden="true"></i>О расчёте нагрузки
+                    </h6>
+                    <p class="sw-wl-guide__note">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
+                    <p class="sw-wl-guide__note">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <form method="get" class="sw-wl-filter-card">
-        <div class="card-body">
-            <div class="row g-2 g-md-3 align-items-end flex-wrap">
-                <div class="col-6 col-sm-auto">
-                    <label class="form-label mb-1">Год</label>
-                    <input type="number" name="year" class="form-control form-control-sm" value="{{ year }}" min="2000" max="2100">
+    <div class="sw-filter-dash mb-0 sw-wl-period-filter">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+                <span class="sw-page-title__label">Период и отбор</span>
+            </h2>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-6 col-lg-2">
+                    <label for="wl_year" class="sw-filter-label d-block">Год</label>
+                    <input type="number" name="year" id="wl_year" class="form-control sw-wl-filter-field"
+                           value="{{ year }}" min="2000" max="2100">
                 </div>
-                <div class="col-6 col-sm-auto">
-                    <label class="form-label mb-1">Месяц</label>
-                    <input type="number" name="month" class="form-control form-control-sm" value="{{ month }}" min="1" max="12">
+                <div class="col-6 col-lg-2">
+                    <label for="wl_month" class="sw-filter-label d-block">Месяц</label>
+                    <input type="number" name="month" id="wl_month" class="form-control sw-wl-filter-field"
+                           value="{{ month }}" min="1" max="12">
                 </div>
-                <div class="col-12 col-md">
-                    <label class="form-label mb-1">Работник</label>
-                    <select name="worker" class="form-select form-select-sm">
-                        <option value="">Все</option>
-                        {% for w in workers %}
-                            <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="col-12 col-lg-4">
+                    <label for="wl_worker" class="sw-filter-label d-block">Работник</label>
+                    <div class="sw-select-wrap">
+                        <select name="worker" id="wl_worker" class="form-select sw-status-select sw-select-native">
+                            <option value="">Все</option>
+                            {% for w in workers %}
+                                <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
                 </div>
-                <div class="col-12 col-sm-auto">
-                    <button type="submit" class="btn btn-primary btn-sm w-100 w-sm-auto">
-                        <i class="bi bi-funnel me-1"></i>Показать
-                    </button>
+                <div class="col-12 col-lg-2">
+                    <label for="wl-filter-sort" class="sw-filter-label d-block">Сортировка</label>
+                    <div class="sw-select-wrap">
+                        <select name="wl_sort" id="wl-filter-sort" class="form-select sw-status-select sw-select-native" title="Сортировка применится после нажатия «Найти»">
+                            <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
+                            <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                            <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
                 </div>
-            </div>
+                <div class="col-12 col-lg wl-filter-actions-col">
+                    <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wl-filter-actions" id="wl-filter-actions">
+                        <button type="submit" class="btn btn-primary wl-filter-submit wl-filter-icon-btn" aria-label="Найти по периоду и фильтрам">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                        </button>
+                        <a href="{% url 'accounts:workload_panel' %}" class="wl-filter-reset wl-filter-icon-btn" id="wl-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить год, месяц, работника и сортировку к умолчанию">
+                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
     <div class="sw-wl-matrix-card">
         <div class="sw-wl-matrix-card__head">
@@ -653,7 +922,7 @@
                         <th rowspan="2">Норма рабочего<br>времени (часов)</th>
                         <th rowspan="2">Коэф-т<br>нагрузки</th>
                         <th rowspan="2">Ставка</th>
-                        <th rowspan="2"></th>
+                        <th rowspan="2" class="text-center workload-actions-th">Действия</th>
                     </tr>
                     <tr class="workload-head-sub">
                         <th>Всего отработано за месяц (минут)</th>
@@ -692,8 +961,17 @@
                                 <td>{{ r.work_time_norm_hours }}</td>
                                 <td>{{ r.load_coefficient }}</td>
                                 <td></td>
-                                <td class="text-nowrap">
-                                    <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm btn-outline-primary py-0 px-1" title="Изменить">изм.</a>
+                                <td>
+                                    <div class="sw-actions-cell">
+                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}{% if sort_order != 'surname' %}?wl_sort={{ sort_order }}{% endif %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Редактировать</span>
+                                        </a>
+                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}{% if sort_order != 'surname' %}?wl_sort={{ sort_order }}{% endif %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Удалить</span>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endwith %}
@@ -714,22 +992,12 @@
                             <td colspan="14" class="text-center py-5" style="color: #64748b;">
                                 <i class="bi bi-inbox d-block fs-1 mb-2 opacity-50"></i>
                                 Нет записей за выбранный период.
-                                <a href="{% url 'accounts:workload_record_create' %}" class="fw-semibold">Добавить строку</a>
+                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}{% if sort_order != 'surname' %}&wl_sort={{ sort_order }}{% endif %}" class="fw-semibold">Добавить строку</a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <div id="workload-about" class="card sw-wl-about-card mt-1">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-journal-text" aria-hidden="true"></i> О расчёте нагрузки</h5>
-        </div>
-        <div class="card-body small">
-            <p class="mb-2">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
-            <p class="mb-0">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
         </div>
     </div>
 </div>
@@ -740,6 +1008,7 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ sort_order }}">
     <span id="workloadPdfIdFields"></span>
 </form>
 
@@ -749,6 +1018,7 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ sort_order }}">
     <span id="workloadCsvIdFields"></span>
 </form>
 

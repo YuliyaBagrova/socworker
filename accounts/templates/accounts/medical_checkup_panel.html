@@ -449,34 +449,92 @@
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
         background: #fff;
     }
-    .sw-medical-page .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+    /* Кнопки «Применить» / «Сбросить» — как на панели «Инвентаризация» */
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .mc-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .mc-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .btn.btn-primary.mc-filter-submit {
         border: none;
         border-radius: 12px;
         font-weight: 700;
-        font-size: 0.9rem;
         letter-spacing: 0.03em;
-        padding: 0.62rem 1rem;
-        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
         box-shadow:
-            0 4px 18px rgba(99, 102, 241, 0.38),
+            0 4px 18px rgba(102, 126, 234, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
         transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
     }
-    .sw-medical-page .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .btn.btn-primary.mc-filter-submit.mc-filter-icon-btn,
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset.mc-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .btn.btn-primary.mc-filter-submit.mc-filter-icon-btn i,
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset.mc-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .btn.btn-primary.mc-filter-submit:hover {
         color: #fff;
         transform: translateY(-2px);
-        filter: brightness(1.06);
+        filter: brightness(1.04);
         box-shadow:
-            0 10px 28px rgba(102, 126, 234, 0.42),
+            0 8px 28px rgba(118, 75, 162, 0.38),
             inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
-    .sw-medical-page .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash .btn.btn-primary.mc-filter-submit:active {
         transform: translateY(0);
     }
-    .sw-medical-page .sw-medical-filter-reset {
-        border-radius: 999px;
-        font-weight: 600;
-        border-color: rgba(100, 116, 139, 0.35);
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset:active {
+        transform: translateY(0);
+    }
+    .sw-medical-page .sw-filter-dash.sw-medical-filter-dash a.mc-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     /* Таблица — как на панели «Социальные работники» (.sw-sheet) */
     .sw-medical-layout .sw-table-card {
@@ -957,7 +1015,7 @@
             <span class="sw-page-title__label">Фильтры отображения</span>
         </h2>
         <form method="get" class="row g-3 align-items-end">
-            <div class="col-12 col-lg-5">
+            <div class="col-12 col-lg-4">
                 <label for="filter_worker" class="sw-filter-label d-block">Соц. работник</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="filter_worker" name="worker">
@@ -969,7 +1027,7 @@
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
-            <div class="col-12 col-lg-5">
+            <div class="col-12 col-lg-4">
                 <label for="status" class="sw-filter-label d-block">Статус работника</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="status" name="status">
@@ -982,17 +1040,26 @@
                 </div>
             </div>
             <div class="col-12 col-lg-2">
-                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
-                    <i class="bi bi-funnel"></i> Применить
-                </button>
+                <label for="mc-filter-sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="mc-filter-sort" name="sort" title="Сортировка применится после нажатия «Применить»">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
             </div>
-            {% if has_active_filters %}
-            <div class="col-12">
-                <a href="{% url 'accounts:medical_checkup_panel' %}" class="btn btn-outline-secondary btn-sm sw-medical-filter-reset">
-                    <i class="bi bi-x-lg"></i> Сбросить фильтры
-                </a>
+            <div class="col-12 col-lg mc-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center mc-filter-actions" id="mc-filter-actions">
+                    <button type="submit" class="btn btn-primary mc-filter-submit mc-filter-icon-btn" aria-label="Применить фильтры и сортировку">
+                        <i class="bi bi-funnel" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:medical_checkup_panel' %}" class="mc-filter-reset mc-filter-icon-btn" id="mc-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить соц. работника, статус и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-            {% endif %}
         </form>
     </div>
 </div>
@@ -1009,11 +1076,11 @@
                         </th>
                         <th class="col-narrow">Таб. №</th>
                         <th class="col-text-left">ФИО</th>
-                        <th class="col-text-left">Поле в системе</th>
                         <th class="col-narrow">Дата последнего осмотра</th>
                         <th class="col-narrow">Годен до</th>
                         <th class="text-center col-narrow">Актуально 12 мес.</th>
                         <th class="col-narrow">Назначен на</th>
+                        <th class="col-text-left">Поле в системе</th>
                         <th class="col-text-left" style="max-width: 11rem;">Примечания</th>
                         <th class="text-center" style="min-width: 300px;">Действия</th>
                     </tr>
@@ -1026,7 +1093,6 @@
                         </td>
                         <td class="col-narrow"><span class="fw-semibold">{{ w.employee_id }}</span></td>
                         <td class="col-text-left"><a href="{% url 'accounts:social_worker_detail' w.pk %}">{{ w.get_full_name }}</a></td>
-                        <td class="col-text-left">{{ w.get_medical_checkup_display }}</td>
                         <td class="col-narrow">{% if w.last_medical_checkup_date %}{{ w.last_medical_checkup_date|date:"d.m.Y" }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
                         <td class="col-narrow">
                             {% if w.mc_valid_until %}
@@ -1049,6 +1115,7 @@
                             {% endif %}
                         </td>
                         <td class="col-narrow">{% if w.medical_checkup_planned_date %}<span class="badge bg-info text-dark">{{ w.medical_checkup_planned_date|date:"d.m.Y" }}</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td class="col-text-left">{{ w.get_medical_checkup_display }}</td>
                         <td class="col-text-left small">
                             {% if w.medical_notes %}
                                 <span title="{{ w.medical_notes }}">{{ w.medical_notes|truncatechars:56 }}</span>
@@ -1126,6 +1193,7 @@
     <input type="hidden" name="scope" id="medicalPdfScope" value="all">
     <input type="hidden" name="worker" value="{{ filter_worker }}">
     <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="medicalPdfIdFields"></span>
 </form>
 
@@ -1134,6 +1202,7 @@
     <input type="hidden" name="scope" id="medicalCsvScope" value="all">
     <input type="hidden" name="worker" value="{{ filter_worker }}">
     <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="medicalCsvIdFields"></span>
 </form>
 

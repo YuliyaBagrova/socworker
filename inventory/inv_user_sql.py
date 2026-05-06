@@ -12,6 +12,63 @@ User = get_user_model()
 _DB_READ_ERRORS = (DatabaseError, ProgrammingError, OperationalError)
 
 
+def inv_role_id_for_user(user_id: int) -> Optional[int]:
+    """inv_role_id в auth User (NULL, если роль не назначена)."""
+    try:
+        with connection.cursor() as c:
+            c.execute(
+                'SELECT inv_role_id FROM auth_user WHERE id = %s',
+                [user_id],
+            )
+            row = c.fetchone()
+    except _DB_READ_ERRORS:
+        return None
+    if not row:
+        return None
+    return row[0]
+
+
+def user_ids_with_inv_role_id(inv_role_id: int) -> Set[int]:
+    """id пользователей auth_user с указанным inv_role_id."""
+    if inv_role_id is None:
+        return set()
+    try:
+        with connection.cursor() as c:
+            c.execute(
+                'SELECT id FROM auth_user WHERE inv_role_id = %s',
+                [inv_role_id],
+            )
+            return {row[0] for row in c.fetchall()}
+    except _DB_READ_ERRORS:
+        return set()
+
+
+def user_ids_same_inv_role_excluding_self(user_id: int) -> Set[int]:
+    """Другие пользователи с тем же inv_role_id (включая обоих с NULL)."""
+    rid = inv_role_id_for_user(user_id)
+    try:
+        with connection.cursor() as c:
+            if rid is None:
+                c.execute(
+                    """
+                    SELECT id FROM auth_user
+                    WHERE id != %s AND inv_role_id IS NULL
+                    """,
+                    [user_id],
+                )
+            else:
+                c.execute(
+                    """
+                    SELECT id FROM auth_user
+                    WHERE id != %s AND inv_role_id = %s
+                    """,
+                    [user_id, rid],
+                )
+            return {row[0] for row in c.fetchall()}
+    except _DB_READ_ERRORS:
+        return set()
+
+
 def inv_role_code_for_user(user_id: int) -> Optional[str]:
     try:
         with connection.cursor() as c:
@@ -30,6 +87,23 @@ def inv_role_code_for_user(user_id: int) -> Optional[str]:
     if not row:
         return None
     return row[0]
+
+
+def inv_inventory_fields_for_user(user_id: int) -> tuple:
+    """(inv_department_id, inv_position, inv_phone) для сохранения при смене только роли."""
+    try:
+        with connection.cursor() as c:
+            c.execute(
+                'SELECT inv_department_id, inv_position, inv_phone FROM auth_user WHERE id = %s',
+                [user_id],
+            )
+            row = c.fetchone()
+    except _DB_READ_ERRORS:
+        return None, '', ''
+    if not row:
+        return None, '', ''
+    dept_id, pos, phone = row[0], row[1] or '', row[2] or ''
+    return dept_id, pos, phone
 
 
 def inv_department_id_for_user(user_id: int) -> Optional[int]:
@@ -101,6 +175,12 @@ def update_auth_user_inventory(
     try:
         with connection.cursor() as c:
             c.execute(sql, params)
+            if c.rowcount == 0:
+                raise RuntimeError(
+                    f'Не удалось обновить auth_user (id={user_id}): запись не найдена '
+                    'или в таблице нет столбцов inv_role_id / inv_department_id. '
+                    'Нужны миграции inventory (в т.ч. 0003 для MySQL): python manage.py migrate'
+                )
     except _DB_READ_ERRORS as e:
         raise RuntimeError(
             'Не удалось сохранить поля инвентаризации в auth_user. '

@@ -1,0 +1,388 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}
+    {% if unit.responsible.last_name or unit.responsible.first_name %}
+        {{ unit.responsible.last_name }} {{ unit.responsible.first_name }} ({{ unit.responsible.username }}) — просмотр — Инвентаризация
+    {% else %}
+        {{ unit.responsible.username }} — просмотр — Инвентаризация
+    {% endif %}
+{% endblock %}
+{% block body_attrs %} class="sw-worker-detail-page"{% endblock %}
+{% block inline_css %}
+    body.sw-worker-detail-page {
+        background-color: #d8eafc;
+        background-image:
+            radial-gradient(ellipse 88% 55% at 94% 6%, rgba(56, 189, 248, 0.32), transparent 54%),
+            radial-gradient(ellipse 72% 48% at 4% 94%, rgba(129, 140, 248, 0.22), transparent 52%),
+            radial-gradient(ellipse 50% 40% at 50% 88%, rgba(125, 211, 252, 0.35), transparent 58%),
+            linear-gradient(168deg, #f0f9ff 0%, #e0f2fe 32%, #e8f0fe 62%, #dbeafe 100%);
+    }
+    body.sw-worker-detail-page .main-content {
+        background: transparent;
+        max-width: 1040px;
+    }
+    body.sw-worker-detail-page .sw-detail-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.35rem;
+    }
+    @media (min-width: 768px) {
+        body.sw-worker-detail-page .sw-detail-header {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+        min-width: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #6366f1 100%);
+        box-shadow:
+            0 6px 22px rgba(56, 189, 248, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-worker-detail-page .sw-detail-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(105deg, #0c4a6e 0%, #075985 28%, #2563eb 58%, #4f46e5 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        word-break: break-word;
+    }
+    @supports not (background-clip: text) {
+        body.sw-worker-detail-page .sw-detail-title__label {
+            color: #0c4a6e;
+            background: none;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.55rem;
+        flex-shrink: 0;
+    }
+    @media (min-width: 768px) {
+        body.sw-worker-detail-page .sw-detail-actions {
+            justify-content: flex-end;
+            padding-top: 0.2rem;
+        }
+    }
+    body.sw-worker-detail-page .sw-detail-back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        order: 1;
+        padding: 0.5rem 1.15rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #0c4a6e;
+        border: 1.5px solid rgba(14, 165, 233, 0.45);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%);
+        box-shadow:
+            0 3px 16px rgba(14, 165, 233, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-worker-detail-page .sw-detail-back-btn:hover {
+        color: #082f49;
+        border-color: rgba(2, 132, 199, 0.55);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(14, 165, 233, 0.2);
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        order: 2;
+        padding: 0.52rem 1.2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #fff;
+        border: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-worker-detail-page a.sw-detail-edit-btn:visited {
+        color: #fff;
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    body.sw-worker-detail-page .sw-detail-edit-btn:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    body.sw-worker-detail-page .sw-detail-card {
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.82);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow:
+            0 10px 36px rgba(15, 76, 129, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+        margin-bottom: 1.1rem;
+    }
+    body.sw-worker-detail-page .sw-detail-card:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-card:hover {
+        box-shadow:
+            0 14px 40px rgba(59, 130, 246, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-worker-detail-page .sw-detail-card__head {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin: 0;
+        padding: 0.85rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+        background: linear-gradient(90deg, rgba(224, 242, 254, 0.75) 0%, rgba(255, 255, 255, 0.4) 100%);
+    }
+    body.sw-worker-detail-page .sw-detail-card__head i {
+        color: #0284c7;
+        font-size: 1.05rem;
+    }
+    body.sw-worker-detail-page .sw-detail-card__body {
+        padding: 1.1rem 1.15rem 1.15rem;
+    }
+    body.sw-worker-detail-page .sw-detail-row {
+        display: grid;
+        grid-template-columns: minmax(7rem, 10rem) 1fr;
+        gap: 0.35rem 1rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+        font-size: 0.9rem;
+    }
+    body.sw-worker-detail-page .sw-detail-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    body.sw-worker-detail-page .sw-detail-row dt,
+    body.sw-worker-detail-page .sw-detail-row .sw-detail-k {
+        margin: 0;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    body.sw-worker-detail-page .sw-detail-row dd,
+    body.sw-worker-detail-page .sw-detail-row .sw-detail-v {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 500;
+    }
+    body.sw-worker-detail-page .sw-detail-link {
+        color: #0284c7;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    body.sw-worker-detail-page .sw-detail-link:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+    body.sw-worker-detail-page .sw-detail-delete {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(239, 68, 68, 0.35);
+        color: #b91c1c;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.9) 100%);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    body.sw-worker-detail-page .sw-detail-delete:hover {
+        color: #991b1b;
+        text-decoration: none;
+        border-color: rgba(220, 38, 38, 0.5);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.15);
+    }
+    body.sw-worker-detail-page .sw-unit-detail-photo {
+        display: block;
+        max-width: 100%;
+        max-height: 16rem;
+        width: auto;
+        height: auto;
+        border-radius: 14px;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        box-shadow: 0 8px 24px rgba(15, 76, 129, 0.12);
+    }
+{% endblock %}
+{% block content %}
+<div class="sw-detail-header">
+    <h1 class="sw-detail-title mb-0">
+        <span class="sw-detail-title__icon" aria-hidden="true"><i class="bi bi-eye"></i></span>
+        <span class="sw-detail-title__label">
+            {% if unit.responsible.last_name or unit.responsible.first_name %}
+                {{ unit.responsible.last_name }} {{ unit.responsible.first_name }} ({{ unit.responsible.username }})
+            {% else %}
+                {{ unit.responsible.username }}
+            {% endif %}
+        </span>
+    </h1>
+    <div class="sw-detail-actions">
+        <a href="{% url 'inventory:panel' %}" class="sw-detail-back-btn">
+            <i class="bi bi-arrow-left-circle"></i> К панели инвентаризации
+        </a>
+        {% if inventory_can_edit_unit %}
+            <a href="{% url 'inventory:unit_edit' unit.pk %}" class="sw-detail-edit-btn">
+                <i class="bi bi-pencil-square"></i> Редактировать
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-person"></i> Ответственный</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>ФИО и логин</dt>
+                        <dd>
+                            {% if unit.responsible.last_name or unit.responsible.first_name %}
+                                {{ unit.responsible.last_name }} {{ unit.responsible.first_name }} ({{ unit.responsible.username }})
+                            {% else %}
+                                {{ unit.responsible.username }}
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-box-seam"></i> Единица учёта</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Инв. номер</dt>
+                        <dd class="fw-semibold">{{ unit.inventory_number }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Название</dt>
+                        <dd>{{ unit.name }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Стоимость</dt>
+                        <dd>{{ unit.cost }}&nbsp;бел.&nbsp;руб.</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-image"></i> Фото техники</h2>
+            <div class="sw-detail-card__body">
+                {% if unit.equipment_photo %}
+                    <a href="{{ unit.equipment_photo.url }}" target="_blank" rel="noopener" class="d-inline-block">
+                        <img src="{{ unit.equipment_photo.url }}" alt="" class="sw-unit-detail-photo" loading="lazy">
+                    </a>
+                    <div class="mt-2">
+                        <a href="{{ unit.equipment_photo.url }}" target="_blank" rel="noopener" class="sw-detail-link small">Открыть в полном размере</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0 small">Фото не загружено.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="sw-detail-card">
+            <h2 class="sw-detail-card__head"><i class="bi bi-clock-history"></i> Служебная информация</h2>
+            <div class="sw-detail-card__body">
+                <dl class="mb-0">
+                    <div class="sw-detail-row">
+                        <dt>Кем заведена</dt>
+                        <dd>
+                            {% if unit.created_by %}
+                                {% if unit.created_by.last_name or unit.created_by.first_name %}
+                                    {{ unit.created_by.last_name }} {{ unit.created_by.first_name }} ({{ unit.created_by.username }})
+                                {% else %}
+                                    {{ unit.created_by.username }}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Создано</dt>
+                        <dd class="small">{{ unit.created_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                    <div class="sw-detail-row">
+                        <dt>Обновлено</dt>
+                        <dd class="small">{{ unit.updated_at|date:"d.m.Y H:i" }}</dd>
+                    </div>
+                </dl>
+                {% if inventory_can_edit_unit %}
+                    <a href="{% url 'inventory:unit_delete' unit.pk %}" class="sw-detail-delete">
+                        <i class="bi bi-trash"></i> Удалить единицу учёта
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

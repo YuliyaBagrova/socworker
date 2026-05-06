@@ -1,54 +1,444 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}Инвентаризация{% endblock %}
+{% block body_attrs %} class="sw-inventory-page"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% endblock %}
 {% block content %}
-{% include 'inventory/includes/inventory_subnav.html' %}
+<div class="sw-inv-layout">
+    <section class="sw-inv-dash" aria-label="Панель инвентаризации">
+        <div class="page-header sw-inv-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-box-seam"></i></span>
+                <span class="sw-page-title__label">Инвентаризация</span>
+            </h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 ms-md-auto">
+                <div class="sw-toolbar-group">
+                    <button type="button" class="btn btn-outline-danger btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#invPdfModal">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#invCsvModal">
+                        <i class="bi bi-filetype-csv"></i> CSV
+                    </button>
+                    {% if inventory_can_add_unit %}
+                        <a href="{% url 'inventory:unit_create' %}" class="btn btn-primary sw-toolbar-btn">
+                            <i class="bi bi-plus-circle"></i> Новая единица учёта
+                        </a>
+                    {% else %}
+                        <span class="btn btn-primary sw-toolbar-btn disabled" title="Нет права на добавление единицы учёта" style="pointer-events: none; opacity: 0.65;">
+                            <i class="bi bi-plus-circle"></i> Новая единица учёта
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="page-header flex-wrap">
-    <h2 class="mb-0"><i class="bi bi-box-seam"></i> Инвентаризация</h2>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h6 class="text-muted small mb-1">Ваша роль</h6>
-                <p class="fw-bold mb-0">
-                    {% if inventory_role == 'warehouse_keeper' %}Завхоз
-                    {% elif inventory_role == 'department_head' %}Руководитель отдела
-                    {% else %}Сотрудник{% endif %}
-                </p>
+    <div class="sw-filter-dash mb-0 sw-services-guide sw-inv-services-guide">
+        <div class="sw-filter-dash-inner sw-services-guide__inner">
+            <div class="sw-services-guide__top">
+                <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+                <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span class="sw-services-guide__title">Справка по разделу «Инвентаризация»</span>
+                    <button type="button" id="inventoryGuideToggle" class="sw-services-guide__toggle"
+                            data-bs-toggle="collapse" data-bs-target="#inventoryGuideCollapse"
+                            aria-expanded="false" aria-controls="inventoryGuideCollapse">
+                        Подсказка
+                        <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="collapse" id="inventoryGuideCollapse">
+                <div class="sw-services-guide__panel">
+                    <p class="sw-services-guide__lead">
+                        Таблицу можно сузить блоком <strong>«Фильтры отображения»</strong> (ответственный, поиск по названию или инв.&nbsp;№, сортировка) и кнопкой <strong>«Применить»</strong>.
+                        <strong>PDF</strong> и <strong>CSV</strong> — либо все единицы учёта организации, либо только строки, <strong>отмеченные</strong> в первой колонке таблицы.
+                        В колонке <strong>«Фото»</strong> наведите курсор на превью и нажмите на значок камеры, чтобы <strong>загрузить или заменить</strong> изображение (до 5 МБ).
+                        При <strong>новой единице учёта</strong> в поле «Ответственный» доступны <strong>все активные пользователи</strong> системы, кроме учётных записей, созданных <strong>только через регистрацию в разделе «Инвентаризация»</strong>.
+                        Редактирование, удаление и загрузка фото для строки, <strong>созданной другим пользователем с вашей же ролью инвентаризации</strong>, недоступны; у суперпользователя это ограничение не действует.
+                        Кнопка <strong>«Смотреть»</strong> — просмотр карточки без редактирования; кнопки <strong>«Изм.»</strong> и <strong>«Удал.»</strong> — при наличии права на строку.
+                    </p>
+                    <p class="sw-services-guide__lead mb-0 mt-3 pt-3 border-top border-secondary border-opacity-25">
+                        <strong>Как устроен доступ.</strong>
+                        <strong>Ответственный при создании</strong>&nbsp;— вы или учётная запись соц.&nbsp;работника (не пользователь с той же ролью инвентаризации, что вы).
+                        <strong>Правки чужих записей «своей» роли</strong> недоступны; суперпользователь может всё.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h6 class="text-muted small mb-1">Единиц в вашей выборке</h6>
-                <p class="fw-bold mb-0">{{ n_units }}</p>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card sw-inv-stat-card border-0 h-100">
+                <div class="card-body">
+                    <div class="sw-inv-stat-label">Доступ к разделу</div>
+                    <p class="sw-inv-stat-value mb-0">{{ inventory_role|default:'—' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card sw-inv-stat-card border-0 h-100">
+                <div class="card-body">
+                    <div class="sw-inv-stat-label">Всего единиц учёта</div>
+                    <p class="sw-inv-stat-value mb-0">{{ n_units }}</p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body d-flex flex-column">
-                <a href="{% url 'inventory:unit_list' %}" class="btn btn-outline-primary btn-sm mb-2">Список единиц</a>
-                {% if inventory_can_add_unit %}
-                    <a href="{% url 'inventory:unit_create' %}" class="btn btn-outline-success btn-sm mb-2"><i class="bi bi-plus-lg"></i> Новая единица учёта</a>
-                {% endif %}
-                <a href="{% url 'inventory:report_csv' %}" class="btn btn-primary btn-sm">Скачать отчёт CSV</a>
+
+    <div class="sw-filter-dash mb-0 sw-inv-filter-dash">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-funnel"></i></span>
+                <span class="sw-page-title__label">Фильтры отображения</span>
+            </h2>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-12 col-lg-4">
+                    <label for="inv-filter-responsible" class="sw-filter-label d-block">Ответственный</label>
+                    <div class="sw-select-wrap">
+                        <select name="responsible" id="inv-filter-responsible" class="form-select sw-status-select sw-select-native" title="Фильтр по закреплённому сотруднику">
+                            <option value="">Все</option>
+                            {% for fu in filter_users %}
+                                <option value="{{ fu.pk }}" {% if filter_responsible == fu.pk|stringformat:"s" %}selected{% endif %}>
+                                    {% if fu.last_name or fu.first_name %}{{ fu.last_name }} {{ fu.first_name }}{% else %}{{ fu.username }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <label for="inv-filter-name" class="sw-filter-label d-block">Название техники (поиск)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control sw-search-input" id="inv-filter-name" name="name"
+                               value="{{ filter_name }}" placeholder="Часть названия или инв. №…" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <label for="inv-filter-sort" class="sw-filter-label d-block">Сортировка</label>
+                    <div class="sw-select-wrap">
+                        <select name="sort" id="inv-filter-sort" class="form-select sw-status-select sw-select-native" title="Сортировка применится после «Применить»">
+                            <option value="inv_asc" {% if filter_sort == 'inv_asc' %}selected{% endif %}>Инв. № (по возрастанию)</option>
+                            <option value="inv_desc" {% if filter_sort == 'inv_desc' %}selected{% endif %}>Инв. № (по убыванию)</option>
+                            <option value="name_asc" {% if filter_sort == 'name_asc' %}selected{% endif %}>Название (А–Я)</option>
+                            <option value="resp_asc" {% if filter_sort == 'resp_asc' %}selected{% endif %}>Ответственный (А–Я)</option>
+                            <option value="cost_desc" {% if filter_sort == 'cost_desc' %}selected{% endif %}>Стоимость (от высокой к низкой)</option>
+                            <option value="cost_asc" {% if filter_sort == 'cost_asc' %}selected{% endif %}>Стоимость (от низкой к высокой)</option>
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg sw-inv-filter-actions-col">
+                    <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center sw-inv-filter-actions" id="inv-filter-actions">
+                        <button type="submit" class="btn btn-primary sw-inv-filter-submit sw-inv-filter-icon-btn" aria-label="Применить фильтры и сортировку">
+                            <i class="bi bi-funnel" aria-hidden="true"></i>
+                        </button>
+                        <a href="{% url 'inventory:panel' %}" class="sw-inv-filter-reset sw-inv-filter-icon-btn" id="inv-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить ответственного, поиск и сортировку">
+                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card sw-table-card" id="inv-panel-table">
+        <div class="card-body p-0">
+            <div class="sw-sheet-wrap">
+                <table class="sw-sheet mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                                <input type="checkbox" class="form-check-input" id="inventorySelectAll" aria-label="Отметить все строки в таблице">
+                            </th>
+                            <th class="sw-inv-col-inv">Инв. №</th>
+                            <th class="text-center sw-inv-photo-th">Фото</th>
+                            <th class="col-text-left">Название</th>
+                            <th class="col-narrow">Стоимость (бел.руб.)</th>
+                            <th class="col-text-left">Ответственный</th>
+                            <th class="text-center col-narrow">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in units %}
+                            <tr class="data-row">
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input inventory-unit-select"
+                                           value="{{ u.pk }}" aria-label="Выбрать единицу учёта {{ u.inventory_number }}">
+                                </td>
+                                <td class="sw-inv-col-inv"><span class="fw-semibold">{{ u.inventory_number }}</span></td>
+                                <td class="align-top text-center sw-inv-photo-cell">
+                                    <div class="sw-inv-photo-stack">
+                                    {% if u.pk in inventory_editable_unit_ids %}
+                                        <form method="post" action="{% url 'inventory:unit_photo_upload' u.pk %}" enctype="multipart/form-data" class="sw-inv-photo-upload-form">
+                                            {% csrf_token %}
+                                            <div class="sw-inv-photo-hover-wrap">
+                                                <div class="sw-inv-photo-inner">
+                                                    {% if u.equipment_photo %}
+                                                        <span class="sw-inv-photo-frame" title="Фото техники {{ u.inventory_number }}">
+                                                            <img src="{{ u.equipment_photo.url }}" alt="" class="sw-inv-equipment-thumb" loading="lazy">
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="sw-inv-photo-frame sw-inv-photo-frame--empty" title="Нет фото"><span class="visually-hidden">Нет фото</span></span>
+                                                    {% endif %}
+                                                    <label for="inv-photo-{{ u.pk }}" class="sw-inv-photo-upload-overlay">
+                                                        <i class="bi bi-camera-fill sw-inv-photo-upload-ico" aria-hidden="true"></i>
+                                                        <span class="sw-inv-photo-upload-caption">Загрузить</span>
+                                                        <span class="visually-hidden">Выбрать файл фото для {{ u.inventory_number }}</span>
+                                                    </label>
+                                                </div>
+                                                {% if u.equipment_photo %}
+                                                    <a href="{{ u.equipment_photo.url }}" target="_blank" rel="noopener" class="sw-inv-photo-open-tab" title="Открыть фото">
+                                                        <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+                                                        <span class="visually-hidden">Открыть фото</span>
+                                                    </a>
+                                                {% endif %}
+                                                <input type="file" name="equipment_photo" id="inv-photo-{{ u.pk }}"
+                                                       class="visually-hidden" autocomplete="off"
+                                                       accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+                                                       onchange="if (this.files.length) this.form.submit();">
+                                            </div>
+                                        </form>
+                                    {% else %}
+                                        {% if u.equipment_photo %}
+                                            <a href="{{ u.equipment_photo.url }}" target="_blank" rel="noopener" class="sw-inv-photo-frame-link" title="Открыть фото">
+                                                <span class="sw-inv-photo-frame">
+                                                    <img src="{{ u.equipment_photo.url }}" alt="" class="sw-inv-equipment-thumb" loading="lazy">
+                                                </span>
+                                            </a>
+                                        {% else %}
+                                            <span class="sw-inv-photo-frame sw-inv-photo-frame--empty" title="Нет фото"><span class="visually-hidden">Нет фото</span></span>
+                                        {% endif %}
+                                    {% endif %}
+                                    </div>
+                                </td>
+                                <td class="col-text-left">{{ u.name }}</td>
+                                <td class="col-narrow">{{ u.cost }}</td>
+                                <td class="col-text-left">
+                                    {% if u.responsible.last_name or u.responsible.first_name %}
+                                        {{ u.responsible.last_name }} {{ u.responsible.first_name }} ({{ u.responsible.username }})
+                                    {% else %}
+                                        {{ u.responsible.username }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="sw-actions-cell">
+                                        <a href="{% url 'inventory:unit_detail' u.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Смотреть">
+                                            <i class="bi bi-eye" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Смотреть</span>
+                                        </a>
+                                        {% if u.pk in inventory_editable_unit_ids %}
+                                            <a href="{% url 'inventory:unit_edit' u.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Редактировать</span>
+                                            </a>
+                                            <a href="{% url 'inventory:unit_delete' u.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Удалить</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted py-4">Нет записей.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header"><h5 class="mb-0">Как устроен доступ</h5></div>
-    <div class="card-body small text-muted">
-        <ul class="mb-0 ps-3">
-            <li class="mb-2"><strong>Завхоз</strong> — полный доступ: любой ответственный, правка и удаление единиц, отделения и учётные записи, отчёт по всей организации. Остальные роли могут только создавать записи в пределах своих прав.</li>
-            <li class="mb-2"><strong>Руководитель отдела</strong> — видит единицы, закреплённые за сотрудниками своего отделения, и отчёт только по ним; может добавлять единицы с ответственным из своего отделения.</li>
-            <li><strong>Сотрудник</strong> — видит только свои единицы и отчёт по ним; может добавлять единицы с собой как ответственным.</li>
-        </ul>
+<form id="invPanelPdfForm" method="post" action="{% url 'accounts:report_pdf' 'inventory' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="invPanelPdfScope" value="all">
+    <span id="invPanelPdfIdFields"></span>
+</form>
+
+<form id="invPanelCsvForm" method="post" action="{% url 'accounts:report_csv' 'inventory' %}" target="_blank" class="d-none">
+    {% csrf_token %}
+    <input type="hidden" name="scope" id="invPanelCsvScope" value="all">
+    <span id="invPanelCsvIdFields"></span>
+</form>
+
+<div class="modal fade" id="invPdfModal" tabindex="-1" aria-labelledby="invPdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="invPdfModalLabel">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="inv_pdf_scope_choice" id="invPdfScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="invPdfScopeAll">Все единицы учёта организации</label>
+                        <div class="small text-muted ms-4">Полный список из базы (как на панели «Социальные работники»)</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="inv_pdf_scope_choice" id="invPdfScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="invPdfScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки в первой колонце ниже</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="invPanelPdfConfirm">
+                    <i class="bi bi-download"></i> Сформировать PDF
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="modal fade" id="invCsvModal" tabindex="-1" aria-labelledby="invCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="invCsvModalLabel">
+                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+                <div class="d-grid gap-2">
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="inv_csv_scope_choice" id="invCsvScopeAll" value="all" checked>
+                        <label class="form-check-label fw-semibold" for="invCsvScopeAll">Все единицы учёта организации</label>
+                        <div class="small text-muted ms-4">Полный список из базы</div>
+                    </div>
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="inv_csv_scope_choice" id="invCsvScopeSelected" value="selected">
+                        <label class="form-check-label fw-semibold" for="invCsvScopeSelected">Только отмеченные в таблице</label>
+                        <div class="small text-muted ms-4">Флажки в первой колонце</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-success" id="invPanelCsvConfirm">
+                    <i class="bi bi-download"></i> Сформировать CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const selectAll = document.getElementById('inventorySelectAll');
+    const tableAnchor = document.getElementById('inv-panel-table');
+
+    function scrollToExportTable() {
+        if (tableAnchor) {
+            tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    document.querySelectorAll('input[name="inv_pdf_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+    document.querySelectorAll('input[name="inv_csv_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.inventory-unit-select').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+        });
+    }
+
+    const pdfConfirm = document.getElementById('invPanelPdfConfirm');
+    if (pdfConfirm) {
+        pdfConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="inv_pdf_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('invPanelPdfForm');
+            const scopeInput = document.getElementById('invPanelPdfScope');
+            const idContainer = document.getElementById('invPanelPdfIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.inventory-unit-select:checked');
+                if (!checked.length) {
+                    var pdfModal = document.getElementById('invPdfModal');
+                    var pdfInst = pdfModal && window.bootstrap ? bootstrap.Modal.getInstance(pdfModal) : null;
+                    if (pdfInst) {
+                        pdfInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одну единицу учёта в таблице ниже или выберите «Все единицы учёта организации».');
+                    }, 450);
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'inventory_unit_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+
+    const csvConfirm = document.getElementById('invPanelCsvConfirm');
+    if (csvConfirm) {
+        csvConfirm.addEventListener('click', function () {
+            const choice = document.querySelector('input[name="inv_csv_scope_choice"]:checked');
+            const scope = choice ? choice.value : 'all';
+            const form = document.getElementById('invPanelCsvForm');
+            const scopeInput = document.getElementById('invPanelCsvScope');
+            const idContainer = document.getElementById('invPanelCsvIdFields');
+            scopeInput.value = scope;
+            idContainer.innerHTML = '';
+            if (scope === 'selected') {
+                const checked = document.querySelectorAll('.inventory-unit-select:checked');
+                if (!checked.length) {
+                    var csvModal = document.getElementById('invCsvModal');
+                    var csvInst = csvModal && window.bootstrap ? bootstrap.Modal.getInstance(csvModal) : null;
+                    if (csvInst) {
+                        csvInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одну единицу учёта в таблице ниже или выберите «Все единицы учёта организации».');
+                    }, 450);
+                    return;
+                }
+                checked.forEach(function (cb) {
+                    const h = document.createElement('input');
+                    h.type = 'hidden';
+                    h.name = 'inventory_unit_ids';
+                    h.value = cb.value;
+                    idContainer.appendChild(h);
+                });
+            }
+            form.submit();
+        });
+    }
+})();
+</script>
 {% endblock %}

@@ -520,29 +520,92 @@
         box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
         background: #fff;
     }
-    .vp-planning-page .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+    /* Кнопки «Применить» / «Сбросить» — как на панели «Инвентаризация» (.sw-inv-filter-*) */
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .vp-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        .vp-planning-page .sw-filter-dash.vp-filter-dash .vp-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit {
         border: none;
         border-radius: 12px;
         font-weight: 700;
-        font-size: 0.9rem;
         letter-spacing: 0.03em;
-        padding: 0.62rem 1rem;
+        color: #fff;
         background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
         box-shadow:
             0 4px 18px rgba(102, 126, 234, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
         transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
     }
-    .vp-planning-page .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit.vp-filter-icon-btn,
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset.vp-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit.vp-filter-icon-btn i,
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset.vp-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit:hover {
         color: #fff;
         transform: translateY(-2px);
-        filter: brightness(1.05);
+        filter: brightness(1.04);
         box-shadow:
-            0 10px 28px rgba(118, 75, 162, 0.38),
+            0 8px 28px rgba(118, 75, 162, 0.38),
             inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
-    .vp-planning-page .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit:active {
         transform: translateY(0);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:active {
+        transform: translateY(0);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     .vp-tabs-modern.vp-tabs .nav-link {
         border-radius: 12px;
@@ -1812,7 +1875,7 @@
             <input type="hidden" name="tab" value="{{ tab }}">
             <input type="hidden" name="cal" value="{{ cal_view }}">
             <input type="hidden" name="ref" value="{{ ref_iso }}">
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-lg-2">
                 <label for="vp-filter-worker" class="sw-filter-label d-block">Соц. работник</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="vp-filter-worker" name="worker">
@@ -1824,7 +1887,7 @@
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-lg-2">
                 <label for="vp-filter-recipient" class="sw-filter-label d-block">Подопечный</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="vp-filter-recipient" name="recipient">
@@ -1861,17 +1924,26 @@
                 </div>
             </div>
             <div class="col-12 col-lg-2">
-                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
-                    <i class="bi bi-funnel"></i> Применить
-                </button>
+                <label for="vp-filter-sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-sort" name="sort" title="Сортировка применится после нажатия «Применить»">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
             </div>
-            {% if has_active_filters %}
-            <div class="col-12">
-                <a href="{% url 'accounts:visit_planning' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-x-lg"></i> Сбросить фильтры
-                </a>
+            <div class="col-12 col-lg vp-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center vp-filter-actions" id="vp-filter-actions">
+                    <button type="submit" class="btn btn-primary vp-filter-submit vp-filter-icon-btn" aria-label="Применить фильтры и сортировку">
+                        <i class="bi bi-funnel" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:visit_planning' %}" class="vp-filter-reset vp-filter-icon-btn" id="vp-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить соц. работника, подопечного, категорию, статус и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-            {% endif %}
         </form>
     </div>
 </div>
@@ -1880,19 +1952,19 @@
 <ul class="nav nav-pills vp-tabs vp-tabs-modern gap-2 flex-wrap justify-content-center">
     <li class="nav-item">
         <a class="nav-link {% if tab == 'table' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=table&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таблица</a>
+           href="{% url 'accounts:visit_planning' %}?tab=table&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Таблица</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'calendar' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Календарь</a>
+           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Календарь</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'list' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=list&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Сегодня / завтра</a>
+           href="{% url 'accounts:visit_planning' %}?tab=list&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Сегодня / завтра</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'timeline' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=timeline&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таймлайн</a>
+           href="{% url 'accounts:visit_planning' %}?tab=timeline&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Таймлайн</a>
     </li>
 </ul>
 </div>
@@ -2034,18 +2106,18 @@
             <div class="vp-cal-toolbar__row">
                 <div class="vp-cal-seg" role="group" aria-label="Масштаб календаря">
                     <a class="vp-cal-seg-btn {% if cal_view == 'day' %}active{% endif %}"
-                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">День</a>
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">День</a>
                     <a class="vp-cal-seg-btn {% if cal_view == 'week' %}active{% endif %}"
-                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=week&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Неделя</a>
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=week&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Неделя</a>
                     <a class="vp-cal-seg-btn {% if cal_view == 'month' %}active{% endif %}"
-                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=month&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Месяц</a>
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=month&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Месяц</a>
                     <a class="vp-cal-seg-btn {% if cal_view == 'year' %}active{% endif %}"
-                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=year&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Год</a>
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=year&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Год</a>
                 </div>
                 <div class="vp-cal-nav">
-                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ prev_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}" title="Предыдущий период" aria-label="Назад"><i class="bi bi-chevron-left"></i></a>
+                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ prev_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}" title="Предыдущий период" aria-label="Назад"><i class="bi bi-chevron-left"></i></a>
                     <span class="vp-cal-nav-title">{{ cal_title }}</span>
-                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ next_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}" title="Следующий период" aria-label="Вперёд"><i class="bi bi-chevron-right"></i></a>
+                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ next_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}" title="Следующий период" aria-label="Вперёд"><i class="bi bi-chevron-right"></i></a>
                 </div>
             </div>
         </div>
@@ -2140,7 +2212,7 @@
                 <div class="cal-month-grid mb-2">
                     {% for cell in week %}
                         <a class="cal-cell cal-cell-link {% if not cell.in_month %}muted{% endif %} {% if cell.is_weekend %}weekend{% endif %}"
-                           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ cell.date|date:'Y-m-d' }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">
+                           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ cell.date|date:'Y-m-d' }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">
                             <div class="cal-day-num">{{ cell.date.day }}</div>
                             {% if cell.count %}
                                 <div class="cal-count">{{ cell.count }} виз.</div>
@@ -2402,6 +2474,7 @@
     <input type="hidden" name="recipient" value="{{ filter_recipient }}">
     <input type="hidden" name="living" value="{{ filter_living }}">
     <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="visitPlanningPdfIdFields"></span>
 </form>
 
@@ -2416,6 +2489,7 @@
     <input type="hidden" name="recipient" value="{{ filter_recipient }}">
     <input type="hidden" name="living" value="{{ filter_living }}">
     <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="visitPlanningCsvIdFields"></span>
 </form>
 

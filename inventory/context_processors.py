@@ -18,5 +18,5 @@ def inventory_nav(request):
         'show_inventory_nav': has_inventory_access(request.user),
         'inventory_can_manage': can_manage_inventory(request.user),
         'inventory_can_add_unit': can_create_inventory_unit(request.user),
-        'inventory_role': inventory_role(request.user) or 'employee',
+        'inventory_role': inventory_role(request.user) or '',
     }

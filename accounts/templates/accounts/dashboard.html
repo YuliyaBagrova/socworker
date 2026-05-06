@@ -581,8 +581,8 @@
                     <a class="dash-side-link" href="{% url 'accounts:recipients_list' %}">
                         <i class="bi bi-person-lines-fill"></i> Подопечные
                     </a>
-                    <a class="dash-side-link" href="{% url 'accounts:workload_records_list' %}?year={{ dash_year }}&month={{ dash_month }}">
-                        <i class="bi bi-clock-history"></i> Журнал нагрузки
+                    <a class="dash-side-link" href="{% url 'accounts:workload_panel' %}?year={{ dash_year }}&month={{ dash_month }}">
+                        <i class="bi bi-calculator"></i> Расчёт нагрузки за месяц
                     </a>
                     <a class="dash-side-link" href="{% url 'accounts:medical_checkup_panel' %}">
                         <i class="bi bi-heart-pulse"></i> Медосмотр
@@ -662,8 +662,8 @@
                         <span class="text-muted">({{ row.period_month }}.{{ row.period_year }}, {{ row.updated_at|date:"d.m H:i" }})</span>
                     </div>
                 {% endfor %}
-                <a href="{% url 'accounts:workload_records_list' %}?year={{ dash_year }}&month={{ dash_month }}" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
-                    Журнал за текущий месяц
+                <a href="{% url 'accounts:workload_panel' %}?year={{ dash_year }}&month={{ dash_month }}" class="btn btn-sm btn-outline-primary mt-2 rounded-pill">
+                    Панель за текущий месяц
                 </a>
             </div>
             {% endif %}

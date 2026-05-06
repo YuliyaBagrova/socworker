@@ -609,6 +609,7 @@
         </div>
 
         <div class="user-area">
+            {% block user_area %}
             <div class="dropdown user-menu-dropdown">
                 <button class="btn btn-user-menu dropdown-toggle" type="button" id="userMenuDropdown"
                         data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
@@ -642,6 +643,7 @@
                     <li><a class="dropdown-item text-danger fw-medium" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Выход</a></li>
                 </ul>
             </div>
+            {% endblock %}
         </div>
     </nav>
 
