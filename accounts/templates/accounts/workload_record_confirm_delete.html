@@ -154,7 +154,7 @@
             </div>
             <form method="post" class="del-confirm-actions">
                 {% csrf_token %}
-                <a href="{% url 'accounts:workload_panel' %}?year={{ record.period_year }}&month={{ record.period_month }}{% if wl_sort != 'surname' %}&wl_sort={{ wl_sort }}{% endif %}" class="btn btn-del-cancel">Отмена</a>
+                <a href="{% url 'accounts:workload_panel' %}?year={{ record.period_year }}&month={{ record.period_month }}" class="btn btn-del-cancel">Отмена</a>
                 <button type="submit" class="btn btn-del-submit">
                     <i class="bi bi-trash me-1" aria-hidden="true"></i>Да, удалить запись
                 </button>

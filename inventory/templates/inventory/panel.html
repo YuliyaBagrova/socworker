@@ -310,12 +310,14 @@
 
 <form id="invPanelPdfForm" method="post" action="{% url 'accounts:report_pdf' 'inventory' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ filter_sort }}">
     <input type="hidden" name="scope" id="invPanelPdfScope" value="all">
     <span id="invPanelPdfIdFields"></span>
 </form>
 
 <form id="invPanelCsvForm" method="post" action="{% url 'accounts:report_csv' 'inventory' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ filter_sort }}">
     <input type="hidden" name="scope" id="invPanelCsvScope" value="all">
     <span id="invPanelCsvIdFields"></span>
 </form>

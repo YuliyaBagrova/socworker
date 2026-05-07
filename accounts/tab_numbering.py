@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""После удаления записей пересчитывает колонку «Таб. №» / инв. номер без пропусков (1,2,3…)."""
+"""После удаления записей пересчитывает колонку «№» (табельный номер) / инв. номер без пропусков (1,2,3…)."""
 import re
 
 from django.db import transaction
@@ -27,7 +27,7 @@ def _leading_int(value) -> int:
 
 
 def compact_social_worker_employee_ids() -> None:
-    """Таб. № работников: 1, 2, 3… (порядок — по прежнему числу в номере, затем pk)."""
+    """№ работников: 1, 2, 3… (порядок — по прежнему числу в номере, затем pk)."""
     rows = list(SocialWorker.objects.all())
     if not rows:
         return
@@ -41,7 +41,7 @@ def compact_social_worker_employee_ids() -> None:
 
 
 def compact_service_recipient_employee_ids() -> None:
-    """Таб. № подопечных: 1, 2, 3… (как у соцработников, без префикса R-)."""
+    """№ подопечных: 1, 2, 3… (как у соцработников, без префикса R-)."""
     rows = list(ServiceRecipient.objects.all())
     if not rows:
         return

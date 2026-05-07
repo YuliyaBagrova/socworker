@@ -1,302 +1,853 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}О пользователе - SocWorker{% endblock %}
+{% block body_attrs %} class="sw-profile-page"{% endblock %}
 
 {% block inline_css %}
-    .profile-action-bar .btn { border-radius: 10px; }
-    .profile-avatar-card {
-        border-radius: 16px;
-        border: 1px solid #e8eaed;
+    /* Фон страницы: первое изображение («Современный профиль») из статики */
+    body.sw-profile-page {
+        min-height: 100vh;
+        background-color: #f8fafc;
+        background-image: url("{% static 'img/profile-page-bg.png' %}");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    /* Как у «Техника безопасности»: полная ширина main-content, боковые 1.25rem */
+    body.sw-profile-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-profile-page .sw-profile-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        min-height: 0;
+    }
+    .sw-profile-page .sw-profile-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1rem;
+        margin-bottom: 0;
+        padding: 1.25rem 1.5rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        box-shadow:
+            0 4px 20px rgba(102, 126, 234, 0.08),
+            0 1px 4px rgba(26, 26, 46, 0.04);
+    }
+    .sw-profile-page .sw-profile-toolbar__title {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 0;
+        font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #1a1a2e;
+    }
+    .sw-profile-page .sw-profile-toolbar__title i {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #5a6fd6 45%, #764ba2 100%);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+    }
+    /* Кнопки шапки — как «Открыть календарь» на главной (размер btn-sm без изменений) */
+    .sw-profile-page .sw-profile-toolbar .btn.btn-sm {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        padding: 0.38rem 0.8rem;
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease,
+            background 0.2s ease, filter 0.2s ease;
         overflow: hidden;
-        background: linear-gradient(180deg, #fafbff 0%, #fff 45%);
+        text-decoration: none;
     }
-    .profile-avatar-ring {
-        width: 112px;
-        height: 112px;
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn i {
+        font-size: 1rem;
+        opacity: 0.95;
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn.btn-primary {
+        border: none;
+        color: #fff !important;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn.btn-primary:hover {
+        color: #fff !important;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn.sw-toolbar-btn--logout {
+        border: none;
+        color: #fff !important;
+        background: linear-gradient(135deg, #fb7185 0%, #ef4444 42%, #b91c1c 100%);
+        box-shadow:
+            0 4px 18px rgba(239, 68, 68, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-profile-page .sw-profile-toolbar .sw-toolbar-btn.sw-toolbar-btn--logout:hover {
+        color: #fff !important;
+        box-shadow:
+            0 8px 28px rgba(185, 28, 28, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.26);
+        filter: brightness(1.05);
+    }
+    /* Bento-сетка: один gap между всеми ячейками (как между «Учётная запись» и «Дополнительно») */
+    .sw-profile-page .sw-profile-bento {
+        display: grid;
+        gap: 0.65rem;
+        margin-bottom: 0;
+        grid-template-columns: 1fr;
+    }
+    @media (min-width: 768px) {
+        .sw-profile-page .sw-profile-bento {
+            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            align-items: stretch;
+        }
+        .sw-profile-page .sw-profile-tile--photo {
+            grid-column: 1;
+            grid-row: 1;
+            justify-self: start;
+            width: min(22rem, 100%);
+            max-width: 100%;
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sw-profile-page .sw-profile-tile--photo .sw-profile-tile__pad {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .sw-profile-page .sw-profile-tile--stats {
+            grid-column: 2;
+            grid-row: 1;
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            margin-left: -95px;
+            position: relative;
+            z-index: 1;
+        }
+        .sw-profile-page .sw-profile-tile--stats .sw-profile-tile__pad {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        .sw-profile-page .sw-profile-tile--wide {
+            grid-column: 1 / -1;
+            grid-row: 2;
+        }
+        .sw-profile-page .sw-profile-photo-actions {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+    }
+    @media (min-width: 1100px) {
+        .sw-profile-page .sw-profile-tile--photo {
+            width: min(23rem, 100%);
+        }
+    }
+    .sw-profile-page .sw-profile-tile {
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.93);
+        box-shadow: 0 4px 18px rgba(26, 26, 46, 0.055);
+        overflow: hidden;
+        height: auto;
+    }
+    /* Карточка с аватаром: не клиповать текст у краёв скругления */
+    .sw-profile-page .sw-profile-tile--photo {
+        overflow: visible;
+    }
+    .sw-profile-page .sw-profile-tile--photo .sw-profile-tile__pad {
+        overflow: visible;
+    }
+    .sw-profile-page .sw-profile-tile--wide {
+        grid-column: 1 / -1;
+    }
+    .sw-profile-page .sw-profile-tile .sw-profile-tile__pad {
+        padding: 1.25rem 1.5rem;
+    }
+    .sw-profile-page .sw-profile-tile--stats .sw-profile-tile__pad {
+        padding: 1.15rem 1.05rem;
+    }
+    .sw-profile-page .sw-profile-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.85rem;
+    }
+    @media (min-width: 400px) {
+        .sw-profile-page .sw-profile-hero {
+            flex-direction: row;
+            align-items: flex-start;
+            text-align: left;
+        }
+    }
+    .sw-profile-page .profile-avatar-hitbox {
+        position: relative;
+        flex-shrink: 0;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
         border-radius: 50%;
-        margin: 0 auto 1rem;
-        padding: 4px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.25);
+        display: block;
+        line-height: 0;
     }
-    .profile-avatar-ring img,
-    .profile-avatar-ring .profile-avatar-fallback {
-        width: 100%;
-        height: 100%;
+    .sw-profile-page .profile-avatar-hitbox:focus-visible {
+        outline: 3px solid rgba(102, 126, 234, 0.65);
+        outline-offset: 4px;
+    }
+    .sw-profile-page .profile-avatar-hitbox__plus {
+        position: absolute;
+        inset: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.78);
+        color: #fff;
+        font-size: 1.75rem;
+        line-height: 1;
+        opacity: 0;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        pointer-events: none;
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+    }
+    .sw-profile-page .profile-avatar-hitbox:hover .profile-avatar-hitbox__plus,
+    .sw-profile-page .profile-avatar-hitbox:focus-visible .profile-avatar-hitbox__plus {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+    .sw-profile-page .profile-avatar-ring {
+        width: 88px;
+        height: 88px;
+        min-width: 88px;
+        border-radius: 50%;
+        padding: 3px;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.28);
+    }
+    .sw-profile-page .profile-avatar-ring img,
+    .sw-profile-page .profile-avatar-ring .profile-avatar-fallback {
         border-radius: 50%;
         object-fit: cover;
+        width: 100%;
+        height: 100%;
         display: block;
         border: 2px solid #fff;
     }
-    .profile-avatar-fallback {
+    .sw-profile-page .profile-avatar-fallback {
         background: linear-gradient(145deg, #5a67d6, #6b4a9e);
         color: #fff;
         display: flex !important;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
+        font-size: 1.55rem;
         font-weight: 800;
-        letter-spacing: 0.04em;
     }
-    .profile-avatar-form .form-label { font-size: 0.85rem; color: #5f6368; }
-    .profile-avatar-form .form-control { border-radius: 10px; }
-    .profile-accordion .accordion-button:not(.collapsed) {
-        background: rgba(102, 126, 234, 0.08);
+    .sw-profile-page .sw-profile-hero__name {
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
         color: #1a1a2e;
-        box-shadow: none;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
-    .profile-accordion .accordion-button:focus { box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.25); }
-    .profile-quick-grid {
+    .sw-profile-page .sw-profile-role-badge .badge {
+        font-weight: 600;
+        font-size: 0.72rem;
+        padding: 0.28em 0.65em;
+        white-space: normal;
+        max-width: 100%;
+        text-align: inherit;
+        line-height: 1.25;
+        hyphens: auto;
+    }
+    .sw-profile-page .sw-profile-hero-hint {
+        font-size: 0.75rem;
+        color: #64748b;
+        line-height: 1.45;
+        margin: 0.5rem 0 0;
+        max-width: none;
+        overflow-wrap: anywhere;
+    }
+    .sw-profile-page .sw-profile-photo-actions {
+        margin-top: 0.75rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid rgba(241, 245, 249, 0.95);
+    }
+    .sw-profile-page .profile-avatar-form .form-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.3rem;
+    }
+    .sw-profile-page .sw-profile-avatar-input {
+        border-radius: 10px;
+        font-size: 0.8125rem;
+        padding: 0.35rem 0.55rem;
+        width: 100%;
+        min-width: 0;
+    }
+    .sw-profile-page .profile-avatar-form input[type='file'].form-control {
+        text-overflow: clip;
+        white-space: normal;
+        height: auto;
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    .sw-profile-page .sw-profile-file-hint {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+        min-height: 1.15em;
+        word-break: break-word;
+    }
+    .sw-profile-page .sw-profile-new-photo-preview {
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: linear-gradient(165deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
+    }
+    .sw-profile-page .sw-profile-new-photo-preview__clear {
+        flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 10px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.95);
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .sw-profile-page .sw-profile-new-photo-preview__clear:hover {
+        background: rgba(254, 226, 226, 0.65);
+        border-color: rgba(248, 113, 113, 0.45);
+        color: #b91c1c;
+    }
+    .sw-profile-page .sw-profile-new-photo-preview__img {
+        max-height: 11rem;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+    .sw-profile-page .sw-profile-btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.65rem;
+    }
+    .sw-profile-page .sw-profile-btn-row .btn {
+        flex: 1 1 auto;
+        min-width: 7.5rem;
+    }
+    .sw-profile-page .btn-sw-profile-primary {
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 11px;
+        padding: 0.48rem 0.85rem;
+        font-size: 0.8125rem;
+        background: linear-gradient(135deg, #667eea 0%, #5a6fd6 40%, #764ba2 100%);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.32);
+        transition: filter 0.15s ease, transform 0.12s ease;
+    }
+    .sw-profile-page .btn-sw-profile-primary:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        transform: translateY(-1px);
+    }
+    .sw-profile-page .btn-sw-profile-outline {
+        border-radius: 11px;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        padding: 0.48rem 0.85rem;
+        border: 1px solid rgba(148, 163, 184, 0.55);
+        color: #475569;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    .sw-profile-page .btn-sw-profile-outline:hover {
+        border-color: rgba(102, 126, 234, 0.45);
+        color: #4338ca;
+    }
+    /* Плитки данных — ритм по вертикали и между колонками */
+    .sw-profile-page .sw-profile-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: 0.72rem;
+        column-gap: 0.55rem;
+    }
+    @media (max-width: 420px) {
+        .sw-profile-page .sw-profile-stat-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .sw-profile-page .sw-profile-stat-cell {
+        padding: 0.62rem 0.8rem;
+        border-radius: 12px;
+        background: linear-gradient(165deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(226, 232, 240, 0.85);
+    }
+    .sw-profile-page .sw-profile-stat-cell__label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 0.2rem;
+        line-height: 1.2;
+    }
+    .sw-profile-page .sw-profile-stat-cell__value {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+    .sw-profile-page .sw-profile-stat-cell--accent {
+        border-color: rgba(102, 126, 234, 0.22);
+        background: linear-gradient(145deg, rgba(102, 126, 234, 0.06) 0%, rgba(255, 255, 255, 0.95) 100%);
+    }
+    /* Аккордеон — компактнее */
+    .sw-profile-page .sw-profile-more-head {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.06) 0%, transparent 55%);
+    }
+    .sw-profile-page .sw-profile-more-head h2 {
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.02em;
+        color: #1a1a2e;
+    }
+    .sw-profile-page .sw-profile-more-head p {
+        margin: 0.2rem 0 0;
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    .sw-profile-page .profile-accordion .accordion-button {
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 0.72rem 1.5rem;
+        background: #fff;
+        color: #1e293b;
+    }
+    .sw-profile-page .profile-accordion .accordion-button:not(.collapsed) {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, #fff 70%);
+        color: #312e81;
+    }
+    .sw-profile-page .profile-accordion .accordion-button:focus {
+        box-shadow: 0 0 0 0.12rem rgba(102, 126, 234, 0.2);
+    }
+    .sw-profile-page .profile-quick-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-        gap: 0.5rem;
+        gap: 0.65rem;
+        padding: 0.25rem 0.15rem 0.35rem;
     }
-    .profile-quick-grid a {
+    .sw-profile-page .profile-quick-grid a {
         display: flex;
         align-items: center;
-        gap: 0.45rem;
-        padding: 0.55rem 0.75rem;
-        border-radius: 10px;
-        border: 1px solid #e8eaed;
-        background: #fafbfc;
-        color: #1a1a2e;
+        gap: 0.55rem;
+        padding: 0.62rem 0.9rem;
+        border-radius: 14px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: linear-gradient(
+            165deg,
+            rgba(255, 255, 255, 0.98) 0%,
+            rgba(248, 250, 252, 0.94) 100%
+        );
+        color: #1e293b;
         text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: background 0.15s, border-color 0.15s;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        box-shadow:
+            0 2px 6px rgba(102, 126, 234, 0.05),
+            0 1px 0 rgba(255, 255, 255, 0.9) inset;
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.22s ease,
+            border-color 0.18s ease,
+            background 0.2s ease,
+            color 0.18s ease;
     }
-    .profile-quick-grid a:hover {
-        background: #f0f2ff;
+    .sw-profile-page .profile-quick-grid a i {
+        width: 2.125rem;
+        height: 2.125rem;
+        min-width: 2.125rem;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .sw-profile-page .profile-quick-grid a:hover {
+        transform: translateY(-2px);
         border-color: rgba(102, 126, 234, 0.35);
-        color: var(--primary, #667eea);
+        background: linear-gradient(
+            165deg,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(241, 245, 255, 0.88) 100%
+        );
+        color: #312e81;
+        box-shadow:
+            0 8px 22px rgba(102, 126, 234, 0.14),
+            0 1px 0 rgba(255, 255, 255, 0.95) inset;
+    }
+    .sw-profile-page .profile-quick-grid a:hover i {
+        border-color: rgba(102, 126, 234, 0.22);
+        background: rgba(102, 126, 234, 0.08);
+    }
+    .sw-profile-page .profile-accordion .accordion-body {
+        padding: 0.9rem 1.35rem 1.15rem;
+        background: rgba(252, 252, 254, 0.92);
     }
 {% endblock %}
 
 {% block content %}
-<div class="page-header flex-wrap profile-action-bar">
-    <h2 class="mb-0"><i class="bi bi-person-circle"></i> О пользователе</h2>
-    <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-key"></i> Смена пароля
-        </a>
-        <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Выход
-        </a>
+<div class="sw-profile-layout">
+    <div class="sw-profile-toolbar">
+        <h1 class="sw-profile-toolbar__title">
+            <i class="bi bi-person-badge" aria-hidden="true"></i>
+            <span>О пользователе</span>
+        </h1>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'accounts:password_change' %}" class="btn btn-primary btn-sm sw-toolbar-btn">
+                <i class="bi bi-key" aria-hidden="true"></i> Смена пароля
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="btn btn-sm sw-toolbar-btn sw-toolbar-btn--logout js-sw-logout-confirm">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Выход
+            </a>
+        </div>
     </div>
-</div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card h-100 profile-avatar-card shadow-sm">
-            <div class="card-body p-4 text-center">
-                <div class="profile-avatar-ring">
-                    {% if socworker_profile.avatar %}
-                        <img src="{{ socworker_profile.avatar.url }}" alt="Фото профиля">
-                    {% else %}
-                        <div class="profile-avatar-fallback" role="img" aria-label="Инициалы">{{ avatar_initials }}</div>
-                    {% endif %}
-                </div>
-                <h5 class="fw-bold mb-2">{{ user.get_full_name|default:user.username }}</h5>
-                {% if user.is_staff %}
-                    <span class="badge bg-success rounded-pill">Администратор</span>
-                {% else %}
-                    <span class="badge rounded-pill" style="background:linear-gradient(135deg,#667eea,#764ba2);">Пользователь</span>
-                {% endif %}
-                <p class="small text-muted mt-3 mb-0 text-start">По желанию загрузите своё фото — оно показывается на главной панели в блоке приветствия. Форматы: JPG, PNG, WebP или GIF, до 2 МБ.</p>
-            </div>
-            <div class="card-body border-top pt-3 profile-avatar-form">
-                <form method="post" enctype="multipart/form-data" class="mb-0">
-                    {% csrf_token %}
-                    {% if avatar_form.non_field_errors %}
-                        <div class="alert alert-danger small py-2">{{ avatar_form.non_field_errors }}</div>
-                    {% endif %}
-                    {% if avatar_form.avatar.errors %}
-                        <div class="text-danger small mb-2">{{ avatar_form.avatar.errors }}</div>
-                    {% endif %}
-                    <label class="form-label" for="{{ avatar_form.avatar.id_for_label }}">{{ avatar_form.avatar.label }}</label>
-                    {{ avatar_form.avatar }}
-                    <button type="submit" name="save_avatar" value="1" class="btn btn-primary btn-sm w-100 mt-3 rounded-pill fw-semibold">
-                        <i class="bi bi-cloud-upload me-1"></i>Сохранить фото
+    <div class="sw-profile-bento">
+        <div class="sw-profile-tile sw-profile-tile--photo">
+            <div class="sw-profile-tile__pad">
+                <div class="sw-profile-hero">
+                    <button type="button" class="profile-avatar-hitbox js-profile-avatar-trigger"
+                            aria-label="Выбрать изображение для профиля" title="Добавить или сменить фото">
+                        <div class="profile-avatar-ring">
+                            {% if socworker_profile.avatar %}
+                                <img src="{{ socworker_profile.avatar.url }}" alt="Фото профиля">
+                            {% else %}
+                                <div class="profile-avatar-fallback" role="img" aria-label="Инициалы">{{ avatar_initials }}</div>
+                            {% endif %}
+                        </div>
+                        <span class="profile-avatar-hitbox__plus" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
                     </button>
-                </form>
-                {% if socworker_profile.avatar %}
-                <form method="post" class="mt-2 mb-0">
-                    {% csrf_token %}
-                    <button type="submit" name="clear_avatar" value="1" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
-                        <i class="bi bi-x-lg me-1"></i>Удалить фото
-                    </button>
-                </form>
-                {% endif %}
-            </div>
-            <div class="card-body border-top pt-3">
-                <div class="mb-2">
-                    <small class="text-muted d-block">Имя пользователя</small>
-                    <span class="fw-medium">{{ user.username }}</span>
+                    <div class="flex-grow-1 min-w-0">
+                        <p class="sw-profile-hero__name">{{ user.get_full_name|default:user.username }}</p>
+                        <div class="sw-profile-role-badge">
+                            {% if profile_role_variant == 'admin' %}
+                                <span class="badge bg-success rounded-pill">{{ profile_role_label }}</span>
+                            {% elif profile_role_variant == 'inventory' %}
+                                <span class="badge rounded-pill text-white" style="background:linear-gradient(135deg,#ea580c,#c2410c);">{{ profile_role_label }}</span>
+                            {% else %}
+                                <span class="badge rounded-pill text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">{{ profile_role_label }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="sw-profile-hero-hint">Фото в шапке и меню · JPG, PNG, WebP, GIF · до 2 МБ</p>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <small class="text-muted d-block">Email</small>
-                    <span class="fw-medium">{{ user.email|default:"Не указан" }}</span>
-                </div>
-                <div class="mb-2">
-                    <small class="text-muted d-block">Имя</small>
-                    <span class="fw-medium">{{ user.first_name|default:"Не указано" }}</span>
-                </div>
-                <div class="mb-0">
-                    <small class="text-muted d-block">Фамилия</small>
-                    <span class="fw-medium">{{ user.last_name|default:"Не указана" }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-shield-check me-1 text-primary"></i> Права доступа</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Роль</small>
-                    {% if user.is_staff %}
-                        <span class="badge bg-success">Администратор</span>
-                    {% else %}
-                        <span class="badge bg-primary">Пользователь</span>
-                    {% endif %}
-                </div>
-                <div class="mb-0">
-                    <small class="text-muted d-block mb-1">Аккаунт активен</small>
-                    {% if user.is_active %}
-                        <span class="badge bg-success">Да</span>
-                    {% else %}
-                        <span class="badge bg-danger">Нет</span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-check me-1 text-primary"></i> Информация</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Дата регистрации</small>
-                    <span>{{ user.date_joined|date:"d.m.Y H:i" }}</span>
-                </div>
-                <div class="mb-0">
-                    <small class="text-muted d-block mb-1">Последний вход</small>
-                    <span>
-                        {% if user.last_login %}
-                            {{ user.last_login|date:"d.m.Y H:i" }}
-                        {% else %}
-                            Первый вход
+                <div class="sw-profile-photo-actions profile-avatar-form">
+                    <form id="profileAvatarForm" method="post" enctype="multipart/form-data" class="mb-0">
+                        {% csrf_token %}
+                        {% if avatar_form.non_field_errors %}
+                            <div class="alert alert-danger small py-2 mb-2">{{ avatar_form.non_field_errors }}</div>
                         {% endif %}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card profile-accordion">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0"><i class="bi bi-grid-1x2-fill me-2 text-primary"></i> Дополнительные возможности</h5>
-        <p class="text-muted small mb-0 mt-1">Разверните блок — быстрые действия и разделы приложения.</p>
-    </div>
-    <div class="card-body p-0">
-        <div class="accordion accordion-flush" id="profileUserAccordion">
-            <div class="accordion-item border-0 border-bottom">
-                <h2 class="accordion-header" id="profileHeadQuick">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#profileCollapseQuick" aria-expanded="false" aria-controls="profileCollapseQuick">
-                        <i class="bi bi-lightning-charge-fill text-warning me-2"></i> Быстрый доступ
-                    </button>
-                </h2>
-                <div id="profileCollapseQuick" class="accordion-collapse collapse" aria-labelledby="profileHeadQuick" data-bs-parent="#profileUserAccordion">
-                    <div class="accordion-body pt-0">
-                        <div class="profile-quick-grid">
-                            <a href="{% url 'accounts:dashboard' %}"><i class="bi bi-house-door-fill text-primary"></i> Главная</a>
-                            <a href="{% url 'accounts:social_workers_list' %}"><i class="bi bi-people-fill text-primary"></i> Соц. работники</a>
-                            <a href="{% url 'accounts:recipients_list' %}"><i class="bi bi-person-heart text-danger"></i> Получатели</a>
-                            <a href="{% url 'accounts:services_panel' %}"><i class="bi bi-briefcase-fill text-success"></i> Услуги</a>
-                            <a href="{% url 'accounts:visit_planning' %}"><i class="bi bi-calendar-week text-info"></i> Планирование</a>
-                            <a href="{% url 'accounts:workload_panel' %}"><i class="bi bi-calculator text-warning"></i> Нагрузка</a>
+                        {% if avatar_form.avatar.errors %}
+                            <div class="text-danger small mb-2">{{ avatar_form.avatar.errors }}</div>
+                        {% endif %}
+                        <label class="form-label" for="{{ avatar_form.avatar.id_for_label }}">{{ avatar_form.avatar.label }}</label>
+                        {{ avatar_form.avatar }}
+                        <div id="sw-profile-new-photo-preview" class="sw-profile-new-photo-preview mt-2 d-none" aria-live="polite">
+                            <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="text-muted small mb-1">Выбранный файл</div>
+                                    <div class="small text-break fw-semibold text-secondary" id="sw-profile-photo-filename"></div>
+                                </div>
+                                <button type="button" class="sw-profile-new-photo-preview__clear" id="sw-profile-photo-clear" title="Убрать выбранное изображение" aria-label="Убрать выбранное изображение">
+                                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <img id="sw-profile-photo-preview-img" class="sw-profile-new-photo-preview__img img-thumbnail d-none" alt="Предпросмотр выбранного изображения">
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item border-0 border-bottom">
-                <h2 class="accordion-header" id="profileHeadWork">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#profileCollapseWork" aria-expanded="false" aria-controls="profileCollapseWork">
-                        <i class="bi bi-clipboard2-pulse text-danger me-2"></i> Медосмотр и безопасность
-                    </button>
-                </h2>
-                <div id="profileCollapseWork" class="accordion-collapse collapse" aria-labelledby="profileHeadWork" data-bs-parent="#profileUserAccordion">
-                    <div class="accordion-body pt-0">
-                        <div class="profile-quick-grid">
-                            <a href="{% url 'accounts:medical_checkup_panel' %}"><i class="bi bi-heart-pulse text-danger"></i> Медосмотр</a>
-                            <a href="{% url 'accounts:safety_briefing_panel' %}"><i class="bi bi-shield-check" style="color:#764ba2;"></i> Техника безопасности</a>
-                            <a href="{% url 'accounts:assigned_persons' %}"><i class="bi bi-diagram-3-fill text-primary"></i> Закреплённые лица</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item border-0 border-bottom">
-                <h2 class="accordion-header" id="profileHeadReports">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#profileCollapseReports" aria-expanded="false" aria-controls="profileCollapseReports">
-                        <i class="bi bi-file-earmark-bar-graph text-success me-2"></i> Отчёты и выгрузки
-                    </button>
-                </h2>
-                <div id="profileCollapseReports" class="accordion-collapse collapse" aria-labelledby="profileHeadReports" data-bs-parent="#profileUserAccordion">
-                    <div class="accordion-body pt-0">
-                        <div class="profile-quick-grid">
-                            <a href="{% url 'accounts:report_select' %}"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> PDF / CSV отчёты</a>
-                            <a href="{% url 'accounts:workload_summary' %}"><i class="bi bi-people text-warning"></i> Сводка нагрузки</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item border-0 border-bottom">
-                <h2 class="accordion-header" id="profileHeadInv">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#profileCollapseInv" aria-expanded="false" aria-controls="profileCollapseInv">
-                        <i class="bi bi-box-seam text-secondary me-2"></i> Инвентаризация
-                    </button>
-                </h2>
-                <div id="profileCollapseInv" class="accordion-collapse collapse" aria-labelledby="profileHeadInv" data-bs-parent="#profileUserAccordion">
-                    <div class="accordion-body pt-0">
-                        <div class="profile-quick-grid">
-                            <a href="{% url 'inventory:panel' %}"><i class="bi bi-speedometer2 text-primary"></i> Панель инвентаризации</a>
-                            <a href="{% url 'inventory:report_csv' %}"><i class="bi bi-filetype-csv text-success"></i> Отчёт CSV</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item border-0">
-                <h2 class="accordion-header" id="profileHeadSecurity">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#profileCollapseSecurity" aria-expanded="false" aria-controls="profileCollapseSecurity">
-                        <i class="bi bi-shield-lock text-primary me-2"></i> Безопасность аккаунта
-                    </button>
-                </h2>
-                <div id="profileCollapseSecurity" class="accordion-collapse collapse" aria-labelledby="profileHeadSecurity" data-bs-parent="#profileUserAccordion">
-                    <div class="accordion-body pt-0">
-                        <p class="small text-muted mb-3">Регулярно обновляйте пароль и выходите из системы на общих компьютерах.</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a href="{% url 'accounts:password_change' %}" class="btn btn-primary btn-sm"><i class="bi bi-key"></i> Сменить пароль</a>
-                            <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Выйти из системы</a>
-                        </div>
-                        {% if user.is_staff %}
-                        <hr class="my-3">
-                        <p class="small text-muted mb-2">Администрирование Django:</p>
-                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener"><i class="bi bi-gear-wide-connected"></i> Админ-панель</a>
+                        <p class="sw-profile-file-hint mb-0" id="profileAvatarFileHint" aria-live="polite"></p>
+                    </form>
+                    <div class="sw-profile-btn-row">
+                        <button type="submit" form="profileAvatarForm" name="save_avatar" value="1" class="btn btn-sw-profile-primary btn-sm">
+                            <i class="bi bi-cloud-upload me-1" aria-hidden="true"></i>Сохранить
+                        </button>
+                        {% if socworker_profile.avatar %}
+                        <form method="post" class="flex-grow-1 d-flex" style="min-width:7.5rem;">
+                            {% csrf_token %}
+                            <button type="submit" name="clear_avatar" value="1" class="btn btn-sw-profile-outline btn-sm w-100">
+                                <i class="bi bi-trash me-1" aria-hidden="true"></i>Удалить
+                            </button>
+                        </form>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="sw-profile-tile sw-profile-tile--stats">
+            <div class="sw-profile-tile__pad">
+                <p class="small fw-bold text-uppercase text-muted mb-2 ps-1" style="font-size:0.65rem;letter-spacing:0.08em;">Учётная запись</p>
+                <div class="sw-profile-stat-grid">
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Логин</div>
+                        <div class="sw-profile-stat-cell__value">{{ user.username }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell sw-profile-stat-cell--accent">
+                        <div class="sw-profile-stat-cell__label">Email</div>
+                        <div class="sw-profile-stat-cell__value">{{ user.email|default:"—" }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Имя</div>
+                        <div class="sw-profile-stat-cell__value">{{ user.first_name|default:"—" }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Фамилия</div>
+                        <div class="sw-profile-stat-cell__value">{{ user.last_name|default:"—" }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell sw-profile-stat-cell--accent">
+                        <div class="sw-profile-stat-cell__label">Роль</div>
+                        <div class="sw-profile-stat-cell__value">{{ profile_role_label }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Активен</div>
+                        <div class="sw-profile-stat-cell__value">{% if user.is_active %}Да{% else %}Нет{% endif %}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Регистрация</div>
+                        <div class="sw-profile-stat-cell__value">{{ user.date_joined|date:"d.m.Y" }}</div>
+                    </div>
+                    <div class="sw-profile-stat-cell">
+                        <div class="sw-profile-stat-cell__label">Последний вход</div>
+                        <div class="sw-profile-stat-cell__value">
+                            {% if user.last_login %}{{ user.last_login|date:"d.m.Y H:i" }}{% else %}—{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sw-profile-tile sw-profile-tile--wide profile-accordion border-0">
+            <div class="sw-profile-more-head">
+                <h2><i class="bi bi-grid-1x2-fill me-2 text-primary"></i>Дополнительно</h2>
+                <p>Быстрые переходы по разделам приложения</p>
+            </div>
+            <div class="p-0">
+                <div class="accordion accordion-flush" id="profileUserAccordion">
+                    <div class="accordion-item border-0 border-bottom">
+                        <h3 class="accordion-header" id="profileHeadQuick">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#profileCollapseQuick" aria-expanded="false" aria-controls="profileCollapseQuick">
+                                <i class="bi bi-lightning-charge-fill text-warning me-2"></i> Быстрый доступ
+                            </button>
+                        </h3>
+                        <div id="profileCollapseQuick" class="accordion-collapse collapse" aria-labelledby="profileHeadQuick" data-bs-parent="#profileUserAccordion">
+                            <div class="accordion-body">
+                                <div class="profile-quick-grid">
+                                    <a href="{% url 'accounts:dashboard' %}"><i class="bi bi-house-door-fill text-primary"></i> Главная</a>
+                                    <a href="{% url 'accounts:social_workers_list' %}"><i class="bi bi-people-fill text-primary"></i> Соц. работники</a>
+                                    <a href="{% url 'accounts:recipients_list' %}"><i class="bi bi-person-heart text-danger"></i> Получатели</a>
+                                    <a href="{% url 'accounts:services_panel' %}"><i class="bi bi-briefcase-fill text-success"></i> Услуги</a>
+                                    <a href="{% url 'accounts:visit_planning' %}"><i class="bi bi-calendar-week text-info"></i> Планирование</a>
+                                    <a href="{% url 'accounts:workload_panel' %}"><i class="bi bi-calculator text-warning"></i> Нагрузка</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 border-bottom">
+                        <h3 class="accordion-header" id="profileHeadWork">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#profileCollapseWork" aria-expanded="false" aria-controls="profileCollapseWork">
+                                <i class="bi bi-clipboard2-pulse text-danger me-2"></i> Медосмотр и безопасность
+                            </button>
+                        </h3>
+                        <div id="profileCollapseWork" class="accordion-collapse collapse" aria-labelledby="profileHeadWork" data-bs-parent="#profileUserAccordion">
+                            <div class="accordion-body">
+                                <div class="profile-quick-grid">
+                                    <a href="{% url 'accounts:medical_checkup_panel' %}"><i class="bi bi-heart-pulse text-danger"></i> Медосмотр</a>
+                                    <a href="{% url 'accounts:safety_briefing_panel' %}"><i class="bi bi-shield-check" style="color:#764ba2;"></i> ТБ</a>
+                                    <a href="{% url 'accounts:assigned_persons' %}"><i class="bi bi-diagram-3-fill text-primary"></i> Закрепления</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 border-bottom">
+                        <h3 class="accordion-header" id="profileHeadReports">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#profileCollapseReports" aria-expanded="false" aria-controls="profileCollapseReports">
+                                <i class="bi bi-file-earmark-bar-graph text-success me-2"></i> Отчёты
+                            </button>
+                        </h3>
+                        <div id="profileCollapseReports" class="accordion-collapse collapse" aria-labelledby="profileHeadReports" data-bs-parent="#profileUserAccordion">
+                            <div class="accordion-body">
+                                <div class="profile-quick-grid">
+                                    <a href="{% url 'accounts:report_select' %}"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> PDF / CSV</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0">
+                        <h3 class="accordion-header" id="profileHeadInv">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#profileCollapseInv" aria-expanded="false" aria-controls="profileCollapseInv">
+                                <i class="bi bi-box-seam text-secondary me-2"></i> Инвентаризация
+                            </button>
+                        </h3>
+                        <div id="profileCollapseInv" class="accordion-collapse collapse" aria-labelledby="profileHeadInv" data-bs-parent="#profileUserAccordion">
+                            <div class="accordion-body">
+                                <div class="profile-quick-grid">
+                                    <a href="{% url 'inventory:panel' %}"><i class="bi bi-speedometer2 text-primary"></i> Панель</a>
+                                    <a href="{% url 'inventory:report_csv' %}"><i class="bi bi-filetype-csv text-success"></i> CSV</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+(function () {
+    var input = document.querySelector('.js-profile-avatar-input');
+    var hint = document.getElementById('profileAvatarFileHint');
+    var trigger = document.querySelector('.js-profile-avatar-trigger');
+    var previewWrap = document.getElementById('sw-profile-new-photo-preview');
+    var previewImg = document.getElementById('sw-profile-photo-preview-img');
+    var previewName = document.getElementById('sw-profile-photo-filename');
+    var clearBtn = document.getElementById('sw-profile-photo-clear');
+    var previewObjectUrl = null;
+
+    function revokePreviewUrl() {
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = null;
+        }
+    }
+    function hidePhotoPreview() {
+        revokePreviewUrl();
+        if (previewWrap) previewWrap.classList.add('d-none');
+        if (previewImg) {
+            previewImg.classList.add('d-none');
+            previewImg.removeAttribute('src');
+        }
+        if (previewName) previewName.textContent = '';
+        if (hint) hint.textContent = '';
+    }
+    function showPhotoPreview(file) {
+        if (!previewWrap || !previewImg || !previewName || !file) return;
+        previewName.textContent = file.name;
+        if (hint) hint.textContent = '';
+        revokePreviewUrl();
+        if (file.type && file.type.indexOf('image/') === 0) {
+            previewObjectUrl = URL.createObjectURL(file);
+            previewImg.src = previewObjectUrl;
+            previewImg.classList.remove('d-none');
+        } else {
+            previewImg.classList.add('d-none');
+            previewImg.removeAttribute('src');
+        }
+        previewWrap.classList.remove('d-none');
+    }
+
+    if (input && previewWrap) {
+        input.addEventListener('change', function () {
+            var f = input.files && input.files[0];
+            if (!f) hidePhotoPreview();
+            else showPhotoPreview(f);
+        });
+    }
+    if (clearBtn && input) {
+        clearBtn.addEventListener('click', function () {
+            input.value = '';
+            hidePhotoPreview();
+        });
+    }
+    if (trigger && input) {
+        trigger.addEventListener('click', function () {
+            input.click();
+        });
+        trigger.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                input.click();
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

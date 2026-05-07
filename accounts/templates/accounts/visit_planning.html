@@ -908,7 +908,7 @@
         display: flex;
         flex-direction: column;
         min-height: 0;
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         padding: 0;
     }
     .vp-planning-page .vp-sheet-wrap {
@@ -920,8 +920,8 @@
         min-width: 0;
         max-height: min(70vh, 42rem);
         border-radius: 0 0 14px 14px;
-        flex: 1 1 auto;
-        min-height: 12rem;
+        flex: 0 1 auto;
+        min-height: 0;
         overscroll-behavior-x: contain;
     }
     .vp-planning-page .vp-sheet {
@@ -1841,7 +1841,7 @@
         border-color: #f87171;
     }
     .vp-planning-page .vp-tl-root .sw-table-card {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         display: flex;
         flex-direction: column;
         min-height: 0;
@@ -1852,7 +1852,7 @@
         overflow: visible;
     }
     .vp-planning-page .vp-tl-root .sw-table-card > .card-body {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         display: flex;
         flex-direction: column;
         min-height: 0;
@@ -1864,8 +1864,8 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         border-radius: 0 0 14px 14px;
-        flex: 1 1 auto;
-        min-height: 12rem;
+        flex: 0 1 auto;
+        min-height: 0;
         max-height: min(70vh, 42rem);
         width: 100%;
         max-width: 100%;
@@ -2080,7 +2080,7 @@
                     </p>
                     <ol class="vp-guide-ol">
                         <li><strong>Соц. работник</strong>, <strong>Подопечный</strong>, <strong>Категория</strong> проживания и <strong>Статус работника</strong> — сужают выборку.</li>
-                        <li><strong>Сортировка</strong> — таб. № (возрастание / убывание) или фамилия А–Я; применяется после <span class="vp-guide-kbd">Применить</span>.</li>
+                        <li><strong>Сортировка</strong> — № (возрастание / убывание) или фамилия А–Я; применяется после <span class="vp-guide-kbd">Применить</span>.</li>
                         <li>Параметры сохраняются в <strong>адресе страницы</strong> (можно закладкой вернуться к тому же срезу).</li>
                     </ol>
                 </section>
@@ -2114,7 +2114,7 @@
                 <section class="vp-guide-section" aria-labelledby="vp-guide-actions">
                     <h3 id="vp-guide-actions" class="vp-guide-h"><i class="bi bi-calendar-plus" aria-hidden="true"></i>Запись и правки визитов</h3>
                     <ul class="vp-guide-list-rich">
-                        <li><strong>Запланировать визит</strong> — отдельная страница: включает подопученного в панель и задаёт первую дату.</li>
+                        <li><strong>Запланировать визит</strong> — отдельная страница: включает подопечного в панель и задаёт первую дату.</li>
                         <li><strong>Карандаш в строке</strong> и форма создания визита — дальнейшее редактирование расписания.</li>
                     </ul>
                 </section>
@@ -2123,7 +2123,7 @@
                     <h3 id="vp-guide-export" class="vp-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>PDF и CSV</h3>
                     <p class="vp-guide-p">
                         В отчёт вместе с выгрузкой передаются те же поля фильтра и сортировки, что видны на экране.
-                        Режим «весь список» включает всех подопученных панели, проходящих текущий отбор; «только отмеченные» — строки с галочкой на вкладке таблицы.
+                        Режим «весь список» включает всех подопечных панели, проходящих текущий отбор; «только отмеченные» — строки с галочкой на вкладке таблицы.
                     </p>
                     <div class="vp-guide-note">
                         <strong>Важно:</strong> перед выгрузкой при необходимости откройте вкладку «Таблица» и отметьте строки — галочки других вкладок в файл не попадают.
@@ -2196,8 +2196,8 @@
                 <label for="vp-filter-sort" class="sw-filter-label d-block">Сортировка</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="vp-filter-sort" name="sort" title="Сортировка применится после нажатия «Применить»">
-                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                     </select>
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
@@ -2267,7 +2267,7 @@
                             <input type="checkbox" class="form-check-input" id="vpSelectAll" aria-label="Отметить всех на странице">
                         </th>
                         {% endif %}
-                        <th class="col-narrow">Таб. №</th>
+                        <th class="col-narrow">№</th>
                         <th class="col-text-left">Подопечный</th>
                         <th class="col-text-left">Соц. работник</th>
                         <th>Кратность</th>

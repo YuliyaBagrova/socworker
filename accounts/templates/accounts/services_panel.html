@@ -932,10 +932,10 @@
 
     <div class="modal fade sw-modal-services" id="servicesAllCsvModal" tabindex="-1" aria-labelledby="servicesAllCsvModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="border-radius:14px;">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="servicesAllCsvModalLabel">
-                        <i class="bi bi-filetype-csv text-success me-2"></i>Скачать CSV
+                    <h5 class="modal-title" id="servicesAllCsvModalLabel">
+                        <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
@@ -943,10 +943,12 @@
                     <p class="text-muted mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт»?</p>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Нет</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
                     <form method="get" action="{% url 'accounts:report_csv' 'services_all' %}" target="_blank" class="d-inline"
                           onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('servicesAllCsvModal'));if(m)m.hide();">
-                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">Да, скачать</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-download"></i> Сформировать CSV
+                        </button>
                     </form>
                 </div>
             </div>
@@ -1011,7 +1013,7 @@
                     <section class="sw-sv-guide-section" aria-labelledby="sv-guide-rules">
                         <h3 id="sv-guide-rules" class="sw-sv-guide-h"><i class="bi bi-signpost-split" aria-hidden="true"></i>Как формируется список получателей по пункту</h3>
                         <p class="sw-sv-guide-p">
-                            При подсчёте и при открытии «Таблицы услуг» учитываются подопученные, закреплённые за выбранным работником. Попадание по населённому пункту определяется так:
+                            При подсчёте и при открытии «Таблицы услуг» учитываются подопечные, закреплённые за выбранным работником. Попадание по населённому пункту определяется так:
                         </p>
                         <ul class="sw-sv-guide-list-rich">
                             <li><strong>Пункт указан в карточке получателя</strong> — запись относится к этому НП, если она закреплена за выбранным работником.</li>
@@ -1025,7 +1027,7 @@
                     <section class="sw-sv-guide-section" aria-labelledby="sv-guide-matrix">
                         <h3 id="sv-guide-matrix" class="sw-sv-guide-h"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>Сводная таблица связок</h3>
                         <p class="sw-sv-guide-p">
-                            Ниже списков — матрица всех возможных пар «работник — населённый пункт». Колонка «Записей» — это сколько подопученных у <strong>этого</strong> работника попадает под <strong>этот</strong> пункт по правилам из предыдущего блока. Ссылка «Открыть» ведёт на ту же детальную страницу, что и кнопка <span class="sw-sv-guide-kbd">Таблица услуг</span> после выбора пары в списках.
+                            Ниже списков — матрица всех возможных пар «работник — населённый пункт». Колонка «Записей» — это сколько подопечных у <strong>этого</strong> работника попадает под <strong>этот</strong> пункт по правилам из предыдущего блока. Ссылка «Открыть» ведёт на ту же детальную страницу, что и кнопка <span class="sw-sv-guide-kbd">Таблица услуг</span> после выбора пары в списках.
                         </p>
                     </section>
 
@@ -1057,7 +1059,7 @@
                     <div class="sw-sel-search-wrap">
                         <i class="bi bi-search sw-sel-search-icon" aria-hidden="true"></i>
                         <input type="search" id="workerListSearch" class="form-control sw-sel-search-input"
-                               placeholder="ФИО, таб. №, телефон…" autocomplete="off" data-services-search="workerList">
+                               placeholder="ФИО, №, телефон…" autocomplete="off" data-services-search="workerList">
                     </div>
                     <p class="sw-sel-search-hint mb-0">Фильтр по списку; прокрутка сохраняется.</p>
                 </div>

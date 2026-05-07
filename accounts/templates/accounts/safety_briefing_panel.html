@@ -1287,7 +1287,7 @@
                                 <p class="sw-tb-help-card__text">Выбор строк для выгрузки PDF/CSV «только отмеченные».</p>
                             </div>
                             <div class="sw-tb-help-card" role="listitem">
-                                <p class="sw-tb-help-card__title">Таб. №, ФИО</p>
+                                <p class="sw-tb-help-card__title">№, ФИО</p>
                                 <p class="sw-tb-help-card__text">Идентификация сотрудника в организации.</p>
                             </div>
                             <div class="sw-tb-help-card" role="listitem">
@@ -1314,7 +1314,7 @@
                         <ol class="sw-tb-help-ol">
                             <li><strong>ФИО</strong> — выпадающий список сотрудников.</li>
                             <li><strong>Название инструктажа</strong> — текстовый поиск по части строки.</li>
-                            <li><strong>Сортировка</strong> по таб. № или фамилии — после <span class="sw-tb-help-kbd">Найти</span>.</li>
+                            <li><strong>Сортировка</strong> по № или фамилии — после <span class="sw-tb-help-kbd">Найти</span>.</li>
                         </ol>
                     </section>
 
@@ -1364,8 +1364,8 @@
                     <label for="safety-filter-sort" class="sw-filter-label d-block">Сортировка</label>
                     <div class="sw-select-wrap">
                         <select class="form-select sw-status-select sw-select-native" id="safety-filter-sort" name="sort" title="Сортировка применится после нажатия «Найти»">
-                            <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                            <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                            <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                            <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                             <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                         </select>
                         <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
@@ -1395,7 +1395,7 @@
                             <th class="text-center col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
                                 <input type="checkbox" class="form-check-input" id="safetySelectAll" aria-label="Отметить все на странице">
                             </th>
-                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-narrow">№</th>
                             <th class="col-text-left">ФИО</th>
                             <th class="col-text-left">Название инструктажа</th>
                             <th class="text-center col-narrow">Прохождение</th>

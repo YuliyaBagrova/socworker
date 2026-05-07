@@ -740,7 +740,7 @@
     }
     /* Таблица — как на панели «Социальные работники» (.sw-sheet) */
     .sw-medical-layout .sw-table-card {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         display: flex;
         flex-direction: column;
         min-height: 0;
@@ -751,7 +751,7 @@
         overflow: hidden;
     }
     .sw-medical-layout .sw-table-card > .card-body {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         display: flex;
         flex-direction: column;
         min-height: 0;
@@ -762,8 +762,9 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         border-radius: 0 0 14px 14px;
-        flex: 1 1 auto;
-        min-height: 12rem;
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: min(70vh, 42rem);
     }
     .sw-medical-page .sw-sheet {
         width: 100%;
@@ -1219,7 +1220,7 @@
                     <section class="sw-med-help-section" aria-labelledby="med-guide-onboard">
                         <h3 id="med-guide-onboard" class="sw-med-help-h"><i class="bi bi-person-plus" aria-hidden="true"></i>Кто виден в таблице</h3>
                         <p class="sw-med-help-p">
-                            Сотрудники из общего раздела «Социальные работники» появляются здесь только после действия <strong>«Назначить медосмотр»</strong> — по той же логике, что панель планирования визитов для подопученных.
+                            Сотрудники из общего раздела «Социальные работники» появляются здесь только после действия <strong>«Назначить медосмотр»</strong> — по той же логике, что панель планирования визитов для подопечных.
                         </p>
                     </section>
 
@@ -1231,7 +1232,7 @@
                                 <p class="sw-med-help-card__text">Галочка для выгрузки PDF/CSV «только выбранные»; в шапке — «все на странице».</p>
                             </div>
                             <div class="sw-med-help-card" role="listitem">
-                                <p class="sw-med-help-card__title">Таб. № и ФИО</p>
+                                <p class="sw-med-help-card__title">№ и ФИО</p>
                                 <p class="sw-med-help-card__text">Порядковый номер и ссылка на карточку соцработника.</p>
                             </div>
                             <div class="sw-med-help-card" role="listitem">
@@ -1253,7 +1254,7 @@
                         <h3 id="med-guide-filters" class="sw-med-help-h"><i class="bi bi-funnel" aria-hidden="true"></i>Фильтры и сортировка</h3>
                         <ol class="sw-med-help-ol">
                             <li><strong>Соц. работник</strong> и <strong>Статус работника</strong> сужают список.</li>
-                            <li><strong>Сортировка</strong> по таб. № или фамилии — после <span class="sw-med-help-kbd">Применить</span>.</li>
+                            <li><strong>Сортировка</strong> по № или фамилии — после <span class="sw-med-help-kbd">Применить</span>.</li>
                         </ol>
                     </section>
 
@@ -1307,8 +1308,8 @@
                 <label for="mc-filter-sort" class="sw-filter-label d-block">Сортировка</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="mc-filter-sort" name="sort" title="Сортировка применится после нажатия «Применить»">
-                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                     </select>
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
@@ -1338,7 +1339,7 @@
                         <th class="text-center col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
                             <input type="checkbox" class="form-check-input" id="medicalSelectAll" aria-label="Отметить всех на странице">
                         </th>
-                        <th class="col-narrow">Таб. №</th>
+                        <th class="col-narrow">№</th>
                         <th class="col-text-left">ФИО</th>
                         <th class="col-narrow">Дата последнего осмотра</th>
                         <th class="col-narrow">Годен до</th>

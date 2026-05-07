@@ -34,6 +34,7 @@ from .forms import (
     PlannedVisitForm,
     VisitTaskReminderForm,
     SafetyBriefingRecordForm,
+    UserProfileAvatarForm,
 )
 from .models import (
     SocialWorker,
@@ -58,6 +59,8 @@ from .visit_schedule import (
     visits_per_week_from_frequency,
     week_start_monday,
 )
+
+from inventory.permissions import has_inventory_access
 
 MEDICAL_CHECKUP_VALID_DAYS = 365
 
@@ -109,6 +112,58 @@ def _export_plain_text(value, max_len=500):
     if len(t) > max_len:
         return t[: max_len - 1] + '…'
     return t
+
+
+def _recipient_location_export_label(recipient):
+    """Населённый пункт для PDF/CSV (как в карточке получателя)."""
+    loc = getattr(recipient, 'location', None)
+    if loc:
+        return f'{loc.get_location_type_display()} {loc.name}'.strip()
+    return '—'
+
+
+def _inventory_responsible_export_cell(user):
+    """Ответственный в одной колонке — как в таблице панели инвентаризации."""
+    if getattr(user, 'last_name', None) or getattr(user, 'first_name', None):
+        name = f'{user.last_name or ""} {user.first_name or ""}'.strip()
+        return f'{name} ({user.username})'
+    return user.username
+
+
+def _report_tab_sort_param(request):
+    """Сортировка списков соцработников/получателей для PDF/CSV (как на экране)."""
+    raw = request.POST.get('sort')
+    if not raw:
+        raw = request.GET.get('sort') or request.GET.get('rec_sort') or 'surname'
+    if raw not in ('tab_asc', 'tab_desc', 'surname'):
+        return 'surname'
+    return raw
+
+
+def _inventory_report_order_qs(qs, sort_order: str):
+    """Тот же порядок строк, что на панели инвентаризации."""
+    so = (sort_order or 'inv_asc').strip()
+    valid = frozenset({
+        'inv_asc', 'inv_desc', 'name_asc', 'resp_asc', 'cost_desc', 'cost_asc',
+    })
+    if so not in valid:
+        so = 'inv_asc'
+    if so == 'name_asc':
+        return qs.order_by('name', 'inventory_number')
+    if so == 'resp_asc':
+        return qs.order_by(
+            'responsible__last_name',
+            'responsible__first_name',
+            'responsible__username',
+            'inventory_number',
+        )
+    if so == 'inv_desc':
+        return qs.order_by('-inventory_number')
+    if so == 'cost_desc':
+        return qs.order_by('-cost', 'inventory_number')
+    if so == 'cost_asc':
+        return qs.order_by('cost', 'inventory_number')
+    return qs.order_by('inventory_number')
 
 
 def _register_fonts():
@@ -279,11 +334,67 @@ def dashboard_view(request):
     })
 
 
+def profile_interface_role(request):
+    """Подпись роли на «О пользователе»: администратор, управляющий инвентарём или заведующий."""
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        return {'label': 'Администратор', 'variant': 'admin'}
+    if has_inventory_access(user):
+        return {'label': 'Управляющий инвентарём', 'variant': 'inventory'}
+    return {'label': 'Заведующий отделением', 'variant': 'department'}
+
+
+def _user_avatar_initials(user):
+    fn = (user.first_name or '').strip()
+    ln = (user.last_name or '').strip()
+    if fn and ln:
+        return (fn[0] + ln[0]).upper()
+    if fn:
+        return (fn[:2] if len(fn) >= 2 else fn).upper()
+    if ln:
+        return (ln[:2] if len(ln) >= 2 else ln).upper()
+    un = (user.username or '?').strip()
+    return un[:2].upper()
+
+
 @login_required
 def profile_view(request):
-    """Страница О пользователе"""
+    """Страница «О пользователе»: профиль, загрузка фото, быстрые ссылки."""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    initials = _user_avatar_initials(request.user)
+
+    if request.method == 'POST':
+        if request.POST.get('clear_avatar'):
+            if profile.avatar:
+                profile.avatar.delete(save=False)
+                profile.avatar = None
+                profile.save()
+            messages.success(request, 'Фото профиля удалено.')
+            return redirect('accounts:profile')
+        if request.POST.get('save_avatar'):
+            if not request.FILES.get('avatar'):
+                messages.warning(request, 'Выберите файл изображения (JPG, PNG, WebP или GIF, до 2 МБ).')
+                avatar_form = UserProfileAvatarForm(instance=profile)
+            else:
+                form = UserProfileAvatarForm(request.POST, request.FILES, instance=profile)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Фото профиля сохранено.')
+                    return redirect('accounts:profile')
+                avatar_form = form
+        else:
+            avatar_form = UserProfileAvatarForm(instance=profile)
+    else:
+        avatar_form = UserProfileAvatarForm(instance=profile)
+
+    role = profile_interface_role(request)
     return render(request, 'accounts/profile.html', {
-        'user': request.user
+        'user': request.user,
+        'socworker_profile': profile,
+        'avatar_form': avatar_form,
+        'avatar_initials': initials,
+        'profile_role_label': role['label'],
+        'profile_role_variant': role['variant'],
     })
 
 
@@ -1378,7 +1489,7 @@ def _visit_planning_assignable_bundle():
 
 
 def _visit_planning_panel_recipient_meta():
-    """Подопечные в панели планирования — для подсказок Таб. № / ФИО в форме визита."""
+    """Подопечные в панели планирования — для подсказок № / ФИО в форме визита."""
     order = (
         'social_worker__last_name', 'social_worker__first_name',
         'last_name', 'first_name',
@@ -1684,6 +1795,7 @@ def _recipients_for_service(worker, location):
     return (
         ServiceRecipient.objects.filter(social_worker=worker)
         .filter(q_location | q_address)
+        .select_related('location')
         .distinct()
         .order_by('last_name', 'first_name')
     )
@@ -1883,7 +1995,9 @@ def unassign_recipient(request, pk):
 @login_required
 def report_select(request):
     """Страница выбора типа отчёта"""
-    return render(request, 'accounts/report_select.html')
+    return render(request, 'accounts/report_select.html', {
+        'show_inventory_reports': has_inventory_access(request.user),
+    })
 
 
 @login_required
@@ -1933,7 +2047,8 @@ def report_pdf(request, report_type):
     now = datetime.now().strftime('%d.%m.%Y %H:%M')
 
     if report_type == 'social_workers':
-        workers_qs = SocialWorker.objects.all()
+        tab_sort = _report_tab_sort_param(request)
+        workers_ordered_qs = _apply_tab_employee_sort(SocialWorker.objects.all(), tab_sort)
         subtitle_suffix = ''
         filename = 'social_workers_report.pdf'
 
@@ -1953,33 +2068,30 @@ def report_pdf(request, report_type):
                         'Отметьте хотя бы одного социального работника или выберите выгрузку всего списка.',
                     )
                     return redirect('accounts:social_workers_list')
-                workers = list(
-                    workers_qs.filter(pk__in=pks).order_by('last_name', 'first_name')
-                )
+                workers = list(workers_ordered_qs.filter(pk__in=pks))
                 if not workers:
                     messages.warning(request, 'Выбранные сотрудники не найдены.')
                     return redirect('accounts:social_workers_list')
                 subtitle_suffix = ' (выбранные записи)'
                 filename = 'social_workers_selected_report.pdf'
             else:
-                workers = list(workers_qs.order_by('last_name', 'first_name'))
+                workers = list(workers_ordered_qs)
         else:
-            workers = list(workers_qs.order_by('last_name', 'first_name'))
+            workers = list(workers_ordered_qs)
 
         elements.append(
             Paragraph(f'Отчёт: Социальные работники{subtitle_suffix} — {now}', title_style),
         )
 
         headers = [
-            PH('№'), PH('Таб. №'), PH('ФИО'), PH('Год рожд.'),
+            PH('№'), PH('ФИО'), PH('Год рожд.'),
             PH('Адрес'), PH('Телефон'), PH('Мед. осмотр'),
             PH('Дата приёма на работу'), PH('Примечания'), PH('Статус'),
         ]
 
         data = [headers]
-        for i, w in enumerate(workers, 1):
+        for w in workers:
             data.append([
-                P(i),
                 P(w.employee_id or '—'),
                 P(w.get_full_name()),
                 P(w.birth_date.strftime('%Y') if w.birth_date else '—'),
@@ -1991,10 +2103,14 @@ def report_pdf(request, report_type):
                 P(w.get_status_display()),
             ])
 
-        col_widths = [28, 34, 102, 34, 94, 54, 54, 54, 92, 88]
+        col_widths = [42, 102, 34, 94, 54, 54, 54, 92, 88]
 
     elif report_type == 'recipients':
-        recipients_qs = ServiceRecipient.objects.select_related('social_worker').all()
+        tab_sort = _report_tab_sort_param(request)
+        recipients_ordered_qs = _apply_tab_employee_sort(
+            ServiceRecipient.objects.select_related('social_worker', 'location'),
+            tab_sort,
+        )
         subtitle_suffix = ''
         filename = 'recipients_report.pdf'
 
@@ -2014,39 +2130,39 @@ def report_pdf(request, report_type):
                         'Отметьте хотя бы одного получателя или выберите выгрузку всего списка.',
                     )
                     return redirect('accounts:recipients_list')
-                recipients = list(
-                    recipients_qs.filter(pk__in=pks).order_by('last_name', 'first_name')
-                )
+                recipients = list(recipients_ordered_qs.filter(pk__in=pks))
                 if not recipients:
                     messages.warning(request, 'Выбранные получатели не найдены.')
                     return redirect('accounts:recipients_list')
                 subtitle_suffix = ' (выбранные записи)'
                 filename = 'recipients_selected_report.pdf'
             else:
-                recipients = list(recipients_qs.order_by('last_name', 'first_name'))
+                recipients = list(recipients_ordered_qs)
         else:
-            recipients = list(recipients_qs.order_by('last_name', 'first_name'))
+            recipients = list(recipients_ordered_qs)
 
         elements.append(
             Paragraph(f'Отчёт: Получатели услуг{subtitle_suffix} — {now}', title_style),
         )
 
         headers = [
-            PH('№'), PH('Таб. №'), PH('ФИО'), PH('Год рожд.'), PH('Телефон'), PH('Адрес'),
+            PH('№'), PH('ФИО'), PH('Год рожд.'), PH('Телефон'), PH('Адрес'),
+            PH('Населённый пункт'), PH('Тип жилья'),
             PH('Гр. инвал.'), PH('Оплата'), PH('Кратность'),
             PH('Категория'), PH('Дата приёма'), PH('Дни посещ.'),
             PH('АПИ'), PH('Примечания'), PH('Соц. работник'),
         ]
 
         data = [headers]
-        for i, r in enumerate(recipients, 1):
+        for r in recipients:
             data.append([
-                P(i),
                 P(r.employee_id or '—'),
                 P(r.get_full_name()),
                 P(r.birth_date.strftime('%Y') if r.birth_date else '—'),
                 P(r.phone or '—'),
                 P(r.address or '—'),
+                P(_recipient_location_export_label(r)),
+                P(r.get_housing_type_display()),
                 P(r.get_disability_group_display()),
                 P(f'{r.payment_percent}%'),
                 P(r.get_visit_frequency_display()),
@@ -2058,7 +2174,7 @@ def report_pdf(request, report_type):
                 P(r.social_worker.get_full_name() if r.social_worker else '—'),
             ])
 
-        col_widths = [22, 28, 88, 30, 50, 72, 34, 30, 44, 44, 46, 44, 24, 58, 68]
+        col_widths = [34, 76, 28, 46, 54, 54, 42, 30, 28, 38, 38, 40, 38, 22, 50, 62]
 
     elif report_type == 'assigned':
         filename = 'assigned_persons_report.pdf'
@@ -2221,18 +2337,20 @@ def report_pdf(request, report_type):
         ))
 
         headers = [
-            PH('№'), PH('Таб. №'), PH('Ф.И.О.'), PH('Год рожд.'),
-            PH('Адрес проживания'), PH('Гр. инвал.'), PH('Оплата'), PH('Кратность'),
+            PH('№'), PH('Ф.И.О.'), PH('Год рожд.'),
+            PH('Адрес проживания'), PH('Населённый пункт'), PH('Тип жилья'),
+            PH('Гр. инвал.'), PH('Оплата'), PH('Кратность'),
             PH('Категория'), PH('Дата приёма'), PH('Дни посещ.'), PH('АПИ'),
         ]
         data = [headers]
-        for i, r in enumerate(recipients, 1):
+        for r in recipients:
             data.append([
-                P(i),
                 P(r.employee_id or '—'),
                 P(r.get_full_name()),
                 P(r.birth_date.strftime('%Y') if r.birth_date else '—'),
                 P(r.address or '—'),
+                P(_recipient_location_export_label(r)),
+                P(r.get_housing_type_display()),
                 P(r.get_disability_group_display()),
                 P(f'{r.payment_percent}%'),
                 P(r.get_visit_frequency_display()),
@@ -2242,7 +2360,7 @@ def report_pdf(request, report_type):
                 P(r.fire_detector_count),
             ])
 
-        col_widths = [24, 30, 96, 32, 84, 38, 32, 50, 46, 44, 44, 30]
+        col_widths = [40, 88, 30, 72, 54, 42, 34, 30, 44, 42, 42, 40, 28]
         safe_loc = ''.join(c for c in (location.name or 'location') if c.isalnum() or c in (' ', '-', '_')).strip() or 'location'
         safe_loc = safe_loc.replace(' ', '_')[:40]
         filename = f'services_w{worker.pk}_{safe_loc}.pdf'
@@ -2253,7 +2371,7 @@ def report_pdf(request, report_type):
         worker_ids = [w.pk for w in workers]
         all_for_panel = list(
             ServiceRecipient.objects.filter(social_worker_id__in=worker_ids)
-            .select_related('location')
+            .select_related('location', 'social_worker')
             .order_by('last_name', 'first_name')
         )
 
@@ -2286,7 +2404,6 @@ def report_pdf(request, report_type):
         filename = 'services_all_report.pdf'
 
     elif report_type == 'inventory':
-        from inventory.inv_user_sql import responsible_row_for_csv
         from inventory.models import InventoryUnit
         from inventory.permissions import has_inventory_access
 
@@ -2294,7 +2411,9 @@ def report_pdf(request, report_type):
             messages.error(request, 'Нет доступа к отчёту инвентаризации.')
             return redirect('accounts:report_select')
 
-        units_qs = InventoryUnit.objects.select_related('responsible')
+        inv_sort = request.POST.get('sort') or request.GET.get('sort', 'inv_asc')
+        units_base_qs = InventoryUnit.objects.select_related('responsible')
+        units_ordered_qs = _inventory_report_order_qs(units_base_qs, inv_sort)
         subtitle_suffix = ''
         filename = 'inventory_report.pdf'
 
@@ -2314,45 +2433,42 @@ def report_pdf(request, report_type):
                         'Отметьте хотя бы одну единицу учёта или выберите выгрузку всего списка.',
                     )
                     return redirect('inventory:panel')
-                units = list(units_qs.filter(pk__in=pks).order_by('inventory_number'))
+                pk_set = set(pks)
+                units = [u for u in units_ordered_qs if u.pk in pk_set]
                 if not units:
                     messages.warning(request, 'Выбранные единицы учёта не найдены.')
                     return redirect('inventory:panel')
                 subtitle_suffix = ' (выбранные записи)'
                 filename = 'inventory_selected_report.pdf'
             else:
-                units = list(units_qs.order_by('inventory_number'))
+                units = list(units_ordered_qs)
         else:
-            units = list(units_qs.order_by('inventory_number'))
+            units = list(units_ordered_qs)
 
         elements.append(
             Paragraph(f'Отчёт: Инвентаризация{subtitle_suffix} — {now}', title_style),
         )
 
         headers = [
-            PH('№'),
             PH('Инв. №'),
+            PH('Фото'),
             PH('Название'),
-            PH('Стоимость'),
-            PH('Логин отв.'),
-            PH('ФИО отв.'),
-            PH('Отделение'),
+            PH('Стоимость (бел.руб.)'),
+            PH('Ответственный'),
         ]
 
         data = [headers]
-        for i, u in enumerate(units, 1):
-            name, dept = responsible_row_for_csv(u.responsible_id)
+        for u in units:
+            photo_cell = 'Да' if getattr(u, 'equipment_photo', None) else 'Нет'
             data.append([
-                P(i),
                 P(u.inventory_number),
+                P(photo_cell),
                 P(u.name),
                 P(str(u.cost)),
-                P(u.responsible.username),
-                P(name),
-                P(dept),
+                P(_inventory_responsible_export_cell(u.responsible)),
             ])
 
-        col_widths = [26, 40, 118, 44, 52, 76, 72]
+        col_widths = [52, 36, 148, 52, 118]
 
     else:
         return redirect('accounts:report_select')
@@ -2414,5 +2530,4 @@ from .views_extra import (  # noqa: E402
     workload_record_delete,
     workload_record_edit,
     workload_records_list,
-    workload_summary,
 )

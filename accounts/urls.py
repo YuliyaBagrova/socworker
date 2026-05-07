@@ -100,6 +100,5 @@ urlpatterns = [
     path('workload/records/add/', views.workload_record_create, name='workload_record_create'),
     path('workload/records/<int:pk>/edit/', views.workload_record_edit, name='workload_record_edit'),
     path('workload/records/<int:pk>/delete/', views.workload_record_delete, name='workload_record_delete'),
-    path('workload/summary/', views.workload_summary, name='workload_summary'),
     path('workload/export.csv', views.workload_export_csv, name='workload_export_csv'),
 ]

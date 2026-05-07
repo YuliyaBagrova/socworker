@@ -40,7 +40,7 @@ class UserProfileAvatarForm(forms.ModelForm):
         labels = {'avatar': 'Изображение'}
         widgets = {
             'avatar': forms.FileInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control sw-profile-avatar-input js-profile-avatar-input',
                 'accept': 'image/jpeg,image/png,image/webp,image/gif',
             }),
         }

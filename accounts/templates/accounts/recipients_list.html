@@ -1105,8 +1105,8 @@
                             <p class="sw-recipients-guide-card__text">Галочка в первой колонке — для выгрузки PDF/CSV «только отмеченные» (учитываются строки текущей страницы). Заголовок колонки позволяет выбрать всех на странице.</p>
                         </div>
                         <div class="sw-recipients-guide-card" role="listitem">
-                            <p class="sw-recipients-guide-card__title">Таб. №</p>
-                            <p class="sw-recipients-guide-card__text">Порядковый номер получателя в организации. После удаления записей номера у оставшихся подопученных пересчитываются подряд (1, 2, 3…), без «дыр».</p>
+                            <p class="sw-recipients-guide-card__title">№</p>
+                            <p class="sw-recipients-guide-card__text">Порядковый номер получателя в организации. После удаления записей номера у оставшихся подопечных пересчитываются подряд (1, 2, 3…), без «дыр».</p>
                         </div>
                         <div class="sw-recipients-guide-card" role="listitem">
                             <p class="sw-recipients-guide-card__title">ФИО и год рожд.</p>
@@ -1148,7 +1148,7 @@
                     <ol class="sw-recipients-guide-ol">
                         <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону, адресу и другим совпадениям.</li>
                         <li>При необходимости выберите <strong>категорию проживания</strong> (или оставьте «Все»).</li>
-                        <li>Задайте <strong>сортировку</strong>: таб. № по возрастанию или убыванию либо фамилия (А–Я).</li>
+                        <li>Задайте <strong>сортировку</strong>: № по возрастанию или убыванию либо фамилия (А–Я).</li>
                         <li>Нажмите <span class="sw-recipients-guide-kbd">Найти</span> (иконка лупы) — таблица обновится. Кнопка <span class="sw-recipients-guide-kbd">↺</span> сбрасывает поиск, категорию и сортировку к значениям по умолчанию.</li>
                     </ol>
                     <div class="sw-recipients-guide-tip">
@@ -1176,8 +1176,8 @@
                         Кнопки в колонке «Действия» дублируют быстрый доступ: просмотр без смены режима списка, форма редактирования полей, удаление после подтверждения.
                     </p>
                     <ul class="sw-recipients-guide-list-rich">
-                        <li>Новый подопученный — кнопка <strong>«Добавить получателя»</strong> в шапке (форма в стиле приложения).</li>
-                        <li>Учёт нагрузки и планирование визитов используют тех же получателей: актуализируйте закрепление и адрес, чтобы связки «работник — пункт — подопученный» в разделе <strong>«Услуги»</strong> были верными.</li>
+                        <li>Новый подопечный — кнопка <strong>«Добавить получателя»</strong> в шапке (форма в стиле приложения).</li>
+                        <li>Учёт нагрузки и планирование визитов используют тех же получателей: актуализируйте закрепление и адрес, чтобы связки «работник — пункт — подопечный» в разделе <strong>«Услуги»</strong> были верными.</li>
                     </ul>
                 </section>
 
@@ -1229,8 +1229,8 @@
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="rec_sort" name="rec_sort"
                             title="Сортировка применится после нажатия «Найти»">
-                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                     </select>
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
@@ -1261,7 +1261,7 @@
                                 <input type="checkbox" class="form-check-input" id="recipientSelectAll"
                                        aria-label="Отметить всех на странице">
                             </th>
-                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-narrow">№</th>
                             <th class="col-text-left">ФИО</th>
                             <th class="col-narrow">Год рожд.</th>
                             <th class="col-narrow">Телефон</th>
@@ -1380,12 +1380,14 @@
 
 <form id="recipientsPdfForm" method="post" action="{% url 'accounts:report_pdf' 'recipients' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <input type="hidden" name="scope" id="recipientsPdfScope" value="all">
     <span id="recipientsPdfIdFields"></span>
 </form>
 
 <form id="recipientsCsvForm" method="post" action="{% url 'accounts:report_csv' 'recipients' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <input type="hidden" name="scope" id="recipientsCsvScope" value="all">
     <span id="recipientsCsvIdFields"></span>
 </form>

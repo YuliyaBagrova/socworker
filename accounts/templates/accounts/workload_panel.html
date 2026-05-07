@@ -1008,7 +1008,7 @@
                     <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
                         <i class="bi bi-filetype-csv"></i> CSV
                     </button>
-                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}{% if sort_order != 'surname' %}&wl_sort={{ sort_order }}{% endif %}" class="btn btn-primary sw-toolbar-btn">
+                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}" class="btn btn-primary sw-toolbar-btn">
                         <i class="bi bi-plus-circle"></i> Добавить строку
                     </a>
                 </div>
@@ -1035,7 +1035,7 @@
                     <div class="sw-wl-help-intro">
                         <div class="sw-wl-help-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
                         <p class="sw-wl-help-intro__text">
-                            <strong>Расчёт нагрузки</strong> — журнал учёта времени социальных работников (и строк с привязкой к подопученным) за выбранный месяц: кратности визитов, фактически отработанные минуты и часы, сравнение с нормой и итоговая ставка.
+                            <strong>Расчёт нагрузки</strong> — журнал учёта времени социальных работников (и строк с привязкой к подопечным) за выбранный месяц: кратности визитов, фактически отработанные минуты и часы, сравнение с нормой и итоговая ставка.
                             Интерфейс выполнен в спокойной голубо-индиго гамме, согласованной с общей визуальной системой SocWorker.
                         </p>
                     </div>
@@ -1044,20 +1044,19 @@
                         <h3 id="wl-guide-period" class="sw-wl-help-h"><i class="bi bi-calendar3" aria-hidden="true"></i>Период и отбор</h3>
                         <ol class="sw-wl-help-ol">
                             <li>Укажите <strong>год</strong> и <strong>месяц</strong> журнала.</li>
-                            <li>При необходимости выберите <strong>работника</strong> — таблица покажет только его группу строк и итоги.</li>
-                            <li><strong>Сортировка</strong> — таб. № или фамилия; действует после <span class="sw-wl-help-kbd">Найти</span> (иконка лупы). <span class="sw-wl-help-kbd">↺</span> сбрасывает отбор к умолчанию.</li>
+                            <li>При необходимости выберите <strong>работника</strong> — таблица покажет только его группу строк и итоги. <span class="sw-wl-help-kbd">↺</span> сбрасывает отбор к умолчанию.</li>
                         </ol>
                     </section>
 
                     <section class="sw-wl-help-section" aria-labelledby="wl-guide-table">
                         <h3 id="wl-guide-table" class="sw-wl-help-h"><i class="bi bi-table" aria-hidden="true"></i>Структура журнала</h3>
                         <p class="sw-wl-help-p">
-                            Строки сгруппированы по социальному работнику; после блока строк выводится <strong>ИТОГО</strong> по минутам, часам, коэффициенту нагрузки и ставке для этого работника.
+                            Строки журнала упорядочены по фамилии и имени лица в строке — подопечного или (если подопечный не указан) социального работника. После <strong>последней</strong> строки каждого социального работника в этом порядке выводится <strong>ИТОГО</strong> по минутам, часам, коэффициенту нагрузки и ставке для этого работника.
                         </p>
                         <div class="sw-wl-help-grid" role="list">
                             <div class="sw-wl-help-card" role="listitem">
                                 <p class="sw-wl-help-card__title">ФИО и пункт</p>
-                                <p class="sw-wl-help-card__text">В столбце ФИО — подопученный или, если строка только по работнику, его имя приглушённым цветом. Населённый пункт и тип жилья подставляются из данных строки / карточки.</p>
+                                <p class="sw-wl-help-card__text">В столбце ФИО — подопечный или, если строка только по работнику, его имя приглушённым цветом. Населённый пункт и тип жилья подставляются из данных строки / карточки.</p>
                             </div>
                             <div class="sw-wl-help-card" role="listitem">
                                 <p class="sw-wl-help-card__title">Кратность</p>
@@ -1088,7 +1087,7 @@
                             Шкала ставки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.
                         </p>
                         <div class="sw-wl-help-tip">
-                            <strong>Совет:</strong> при выборе подопученного в форме строки автоматически подставляются закреплённый за ним социальный работник и населённый пункт из карточки получателя услуг.
+                            <strong>Совет:</strong> при выборе подопечного в форме строки автоматически подставляются закреплённый за ним социальный работник и населённый пункт из карточки получателя услуг.
                         </div>
                     </section>
 
@@ -1100,10 +1099,9 @@
                     </section>
 
                     <section class="sw-wl-help-section" aria-labelledby="wl-guide-more">
-                        <h3 id="wl-guide-more" class="sw-wl-help-h"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Сводка и новая строка</h3>
+                        <h3 id="wl-guide-more" class="sw-wl-help-h"><i class="bi bi-plus-circle" aria-hidden="true"></i>Новая строка</h3>
                         <ul class="sw-wl-help-list-rich">
                             <li>Кнопка <strong>«Добавить строку»</strong> в шапке открывает форму; в запрос подставляются текущие год, месяц и при необходимости работник из фильтра.</li>
-                            <li>Раздел <strong>сводки по нагрузке</strong> в меню приложения дополняет панель агрегированной аналитикой.</li>
                         </ul>
                     </section>
                 </div>
@@ -1128,7 +1126,7 @@
                     <input type="number" name="month" id="wl_month" class="form-control sw-wl-filter-field"
                            value="{{ month }}" min="1" max="12">
                 </div>
-                <div class="col-12 col-lg-4">
+                <div class="col-12 col-lg-6">
                     <label for="wl_worker" class="sw-filter-label d-block">Работник</label>
                     <div class="sw-select-wrap">
                         <select name="worker" id="wl_worker" class="form-select sw-status-select sw-select-native">
@@ -1140,23 +1138,12 @@
                         <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                     </div>
                 </div>
-                <div class="col-12 col-lg-2">
-                    <label for="wl-filter-sort" class="sw-filter-label d-block">Сортировка</label>
-                    <div class="sw-select-wrap">
-                        <select name="wl_sort" id="wl-filter-sort" class="form-select sw-status-select sw-select-native" title="Сортировка применится после нажатия «Найти»">
-                            <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                            <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
-                            <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
-                        </select>
-                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
-                    </div>
-                </div>
                 <div class="col-12 col-lg wl-filter-actions-col">
                     <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wl-filter-actions" id="wl-filter-actions">
                         <button type="submit" class="btn btn-primary wl-filter-submit wl-filter-icon-btn" aria-label="Найти по периоду и фильтрам">
                             <i class="bi bi-search" aria-hidden="true"></i>
                         </button>
-                        <a href="{% url 'accounts:workload_panel' %}" class="wl-filter-reset wl-filter-icon-btn" id="wl-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить год, месяц, работника и сортировку к умолчанию">
+                        <a href="{% url 'accounts:workload_panel' %}" class="wl-filter-reset wl-filter-icon-btn" id="wl-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить год, месяц и работника к умолчанию">
                             <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                         </a>
                     </div>
@@ -1196,14 +1183,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for g in workload_groups %}
-                        {% for row in g.rows %}
-                            {% with r=row.record %}
+                    {% for item in workload_groups %}
+                        {% if item.kind == 'data' %}
+                            {% with r=item.record %}
                             <tr class="data-row">
                                 <td class="text-center align-middle">
-                                    <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="Строка {{ row.num }}">
+                                    <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="№ {{ item.num }}, запись учёта">
                                 </td>
-                                <td>{{ row.num }}</td>
+                                <td><span class="fw-semibold">{{ item.num }}</span></td>
                                 <td class="col-text-left">
                                     {% if r.recipient %}
                                         {{ r.recipient.get_full_name }}
@@ -1229,11 +1216,11 @@
                                 <td></td>
                                 <td>
                                     <div class="sw-actions-cell">
-                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}{% if sort_order != 'surname' %}?wl_sort={{ sort_order }}{% endif %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
                                             <i class="bi bi-pencil" aria-hidden="true"></i>
                                             <span class="visually-hidden">Редактировать</span>
                                         </a>
-                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}{% if sort_order != 'surname' %}?wl_sort={{ sort_order }}{% endif %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                             <span class="visually-hidden">Удалить</span>
                                         </a>
@@ -1241,24 +1228,25 @@
                                 </td>
                             </tr>
                             {% endwith %}
-                        {% endfor %}
+                        {% elif item.kind == 'subtotal' %}
                         <tr class="workload-total-row">
                             <td></td>
                             <td></td>
-                            <td class="col-text-left" colspan="6">ИТОГО по {{ g.worker.get_full_name }}</td>
-                            <td>{{ g.total_minutes }}</td>
-                            <td>{{ g.total_hours }}</td>
+                            <td class="col-text-left" colspan="6">ИТОГО по {{ item.worker.get_full_name }}</td>
+                            <td>{{ item.total_minutes }}</td>
+                            <td>{{ item.total_hours }}</td>
                             <td>—</td>
-                            <td>{{ g.load_sum }}</td>
-                            <td><span class="badge rounded-pill sw-wl-rate-badge">{{ g.rate }}</span></td>
+                            <td>{{ item.load_sum }}</td>
+                            <td><span class="badge rounded-pill sw-wl-rate-badge">{{ item.rate }}</span></td>
                             <td></td>
                         </tr>
+                        {% endif %}
                     {% empty %}
                         <tr>
                             <td colspan="14" class="text-center py-5" style="color: #64748b;">
                                 <i class="bi bi-inbox d-block fs-1 mb-2 opacity-50"></i>
                                 Нет записей за выбранный период.
-                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}{% if sort_order != 'surname' %}&wl_sort={{ sort_order }}{% endif %}" class="fw-semibold">Добавить строку</a>
+                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}" class="fw-semibold">Добавить строку</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -1274,7 +1262,6 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
-    <input type="hidden" name="wl_sort" value="{{ sort_order }}">
     <span id="workloadPdfIdFields"></span>
 </form>
 
@@ -1284,7 +1271,6 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
-    <input type="hidden" name="wl_sort" value="{{ sort_order }}">
     <span id="workloadCsvIdFields"></span>
 </form>
 

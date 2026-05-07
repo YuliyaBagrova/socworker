@@ -1065,7 +1065,7 @@
                     </p>
                     <div class="sw-workers-guide-grid" role="list">
                         <div class="sw-workers-guide-card" role="listitem">
-                            <p class="sw-workers-guide-card__title">Таб. №</p>
+                            <p class="sw-workers-guide-card__title">№</p>
                             <p class="sw-workers-guide-card__text">Уникальный порядковый номер в организации. После удаления записи номера у оставшихся сотрудников пересчитываются подряд (1, 2, 3…).</p>
                         </div>
                         <div class="sw-workers-guide-card" role="listitem">
@@ -1096,11 +1096,11 @@
                     <ol class="sw-workers-guide-ol">
                         <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону или фрагменту адреса.</li>
                         <li>При необходимости выберите <strong>статус</strong> в выпадающем списке (или оставьте «Все статусы»).</li>
-                        <li>Задайте <strong>сортировку</strong>: по таб. № по возрастанию или убыванию либо по фамилии (А–Я).</li>
+                        <li>Задайте <strong>сортировку</strong>: по № по возрастанию или убыванию либо по фамилии (А–Я).</li>
                         <li>Нажмите <span class="sw-workers-guide-kbd">Найти</span> (иконка лупы) — таблица обновится с учётом условий. Кнопка <span class="sw-workers-guide-kbd">↺</span> сбрасывает поиск, статус и сортировку к умолчанию.</li>
                     </ol>
                     <div class="sw-workers-guide-tip">
-                        <strong>Совет:</strong> сортировка по таб. № удобна для сверки с бухгалтерскими или кадровыми журналами, где порядок номеров совпадает с порядком строк в приложении после пересчёта.
+                        <strong>Совет:</strong> сортировка по № удобна для сверки с бухгалтерскими или кадровыми журналами, где порядок номеров совпадает с порядком строк в приложении после пересчёта.
                     </div>
                 </section>
 
@@ -1176,8 +1176,8 @@
                 <label for="sort" class="sw-filter-label d-block">Сортировка</label>
                 <div class="sw-select-wrap">
                     <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="Сортировка применится после нажатия «Найти»">
-                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                     </select>
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
@@ -1208,7 +1208,7 @@
                                 <input type="checkbox" class="form-check-input" id="socialWorkerSelectAll"
                                        aria-label="Отметить всех на странице">
                             </th>
-                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-narrow">№</th>
                             <th class="col-text-left">ФИО</th>
                             <th class="col-narrow">Год рожд.</th>
                             <th class="col-text-left">Адрес</th>
@@ -1331,12 +1331,14 @@
 
 <form id="socialWorkersPdfForm" method="post" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <input type="hidden" name="scope" id="socialWorkersPdfScope" value="all">
     <span id="socialWorkersPdfIdFields"></span>
 </form>
 
 <form id="socialWorkersCsvForm" method="post" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <input type="hidden" name="scope" id="socialWorkersCsvScope" value="all">
     <span id="socialWorkersCsvIdFields"></span>
 </form>

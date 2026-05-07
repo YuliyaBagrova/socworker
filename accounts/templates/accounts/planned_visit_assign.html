@@ -38,7 +38,7 @@
             {% endif %}
 
             <div class="section-title"><i class="bi bi-person-heart"></i> Подопечный</div>
-            <p class="section-lead mb-0">Колонка таблицы «Подопечный». Выберите закреплённого подопечного, ещё не внесённого в панель — после сохранения строка появится в таблице планирования.</p>
+            <p class="section-lead mb-0">Колонка таблицы «Подопечный». Выберите закреплённого подопечного, ещё не внесённого в панель — после сохранения строка появится в таблице планирования; ниже подставится закреплённый соц. работник.</p>
             <div class="mb-3 mt-3">
                 <label class="form-label" for="{{ assign_form.recipient.id_for_label }}">{{ assign_form.recipient.label }}</label>
                 {{ assign_form.recipient }}
@@ -46,21 +46,8 @@
                 {% for err in assign_form.recipient.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
             </div>
 
-            <div class="section-title"><i class="bi bi-postcard"></i> Таб. № и ФИО</div>
-            <p class="section-lead mb-0">Колонки «Таб. №» и «Подопечный» в таблице — для контроля, как на панели.</p>
-            <div class="row g-3 mb-3 mt-3">
-                <div class="col-md-6">
-                    <label class="form-label" for="assign_recipient_emp_id">Таб. №</label>
-                    <input type="text" class="form-control" id="assign_recipient_emp_id" value="" readonly tabindex="-1" autocomplete="off">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label" for="assign_recipient_fullname">Подопечный (отображение)</label>
-                    <input type="text" class="form-control" id="assign_recipient_fullname" value="" readonly tabindex="-1" autocomplete="off">
-                </div>
-            </div>
-
             <div class="section-title"><i class="bi bi-person-badge"></i> Соц. работник</div>
-            <p class="section-lead mb-0">Колонка «Соц. работник». При выборе подопучного поле можно уточнить; по умолчанию подставляется закреплённый работник.</p>
+            <p class="section-lead mb-0">Колонка «Соц. работник». При выборе подопечного поле можно уточнить; по умолчанию подставляется закреплённый работник.</p>
             <div class="mb-3 mt-3">
                 <label class="form-label" for="{{ assign_form.social_worker.id_for_label }}">{{ assign_form.social_worker.label }}</label>
                 {{ assign_form.social_worker }}
@@ -132,8 +119,6 @@
     }
     var selR = document.getElementById('id_recipient');
     var selW = document.getElementById('id_social_worker');
-    var emp = document.getElementById('assign_recipient_emp_id');
-    var name = document.getElementById('assign_recipient_fullname');
     var freqEl = document.getElementById('id_recipient_visit_frequency');
     var daysEl = document.getElementById('id_recipient_visit_days');
     var vpwEl = document.getElementById('vpAssignVpwValue');
@@ -206,17 +191,13 @@
     }
 
     function syncRecipient() {
-        if (!selR || !emp || !name) return;
+        if (!selR) return;
         var pk = selR.value;
         var m = pk ? RECIPIENT_META[pk] : null;
         if (!m) {
-            emp.value = '';
-            name.value = '';
             if (selW) selW.value = '';
             return;
         }
-        emp.value = m.employee_id || '';
-        name.value = m.full_name || '';
         if (selW && m.worker_pk) selW.value = m.worker_pk;
     }
 
