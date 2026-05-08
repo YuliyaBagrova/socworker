@@ -1105,11 +1105,6 @@
     .sw-safety-layout .sw-table-card .page-link {
         border-radius: 8px;
     }
-    .sw-safety-modal .modal-content {
-        border-radius: 16px;
-        border: 1px solid rgba(99, 102, 241, 0.12);
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
-    }
     /* «Снять отметку» — та же палитра и разметка, что на панели «Прохождение медосмотра» (.mc-clear-modal) */
     .sw-safety-page .mc-clear-modal .modal-content {
         border-radius: 18px;
@@ -1507,17 +1502,18 @@
     <span id="safetyCsvIdFields"></span>
 </form>
 
-<div class="modal fade sw-safety-modal" id="safetyPdfModal" tabindex="-1" aria-labelledby="safetyPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="safetyPdfModal" tabindex="-1" aria-labelledby="safetyPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="safetyPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="safetyPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт (с учётом фильтров выше).</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт (с учётом фильтров выше).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="tb_pdf_scope_choice" id="tbPdfScopeAll" value="all" checked>
@@ -1531,27 +1527,28 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="safetyPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="safetyPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade sw-safety-modal" id="safetyCsvModal" tabindex="-1" aria-labelledby="safetyCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="safetyCsvModal" tabindex="-1" aria-labelledby="safetyCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="safetyCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="safetyCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="tb_csv_scope_choice" id="tbCsvScopeAll" value="all" checked>
@@ -1565,10 +1562,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="safetyCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="safetyCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

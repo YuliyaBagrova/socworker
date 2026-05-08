@@ -166,6 +166,67 @@ def _inventory_report_order_qs(qs, sort_order: str):
     return qs.order_by('inventory_number')
 
 
+def _export_request_data(request):
+    """Поля фильтров из GET или из POST (формы PDF/CSV)."""
+    return request.POST if request.method == 'POST' else request.GET
+
+
+def _social_workers_filtered_qs(request):
+    """Те же фильтры, что на панели списка соцработников."""
+    data = _export_request_data(request)
+    search = (data.get('search') or '').strip()
+    status = (data.get('status') or '').strip()
+    qs = SocialWorker.objects.all()
+    if search:
+        qs = qs.filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(middle_name__icontains=search) |
+            Q(employee_id__icontains=search) |
+            Q(phone__icontains=search)
+        )
+    if status:
+        qs = qs.filter(status=status)
+    return qs
+
+
+def _recipients_filtered_qs(request):
+    """Те же фильтры, что на панели получателей услуг."""
+    data = _export_request_data(request)
+    search = (data.get('search') or '').strip()
+    living = (data.get('living') or '').strip()
+    qs = ServiceRecipient.objects.select_related('social_worker', 'location')
+    if search:
+        qs = qs.filter(
+            Q(employee_id__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(middle_name__icontains=search) |
+            Q(address__icontains=search) |
+            Q(phone__icontains=search)
+        )
+    if living:
+        qs = qs.filter(living_status=living)
+    return qs
+
+
+def _inventory_units_filtered_qs(request):
+    """Те же фильтры, что на панели инвентаризации."""
+    from inventory.models import InventoryUnit
+
+    data = _export_request_data(request)
+    responsible_raw = (data.get('responsible') or '').strip()
+    name_raw = (data.get('name') or '').strip()
+    qs = InventoryUnit.objects.select_related('responsible')
+    if responsible_raw.isdigit():
+        qs = qs.filter(responsible_id=int(responsible_raw))
+    if name_raw:
+        qs = qs.filter(
+            Q(name__icontains=name_raw) | Q(inventory_number__icontains=name_raw)
+        )
+    return qs
+
+
 def _register_fonts():
     """Register a Cyrillic-capable font; fall back to Helvetica if unavailable."""
     font_name = 'CyrFont'
@@ -2048,7 +2109,9 @@ def report_pdf(request, report_type):
 
     if report_type == 'social_workers':
         tab_sort = _report_tab_sort_param(request)
-        workers_ordered_qs = _apply_tab_employee_sort(SocialWorker.objects.all(), tab_sort)
+        workers_ordered_qs = _apply_tab_employee_sort(
+            _social_workers_filtered_qs(request), tab_sort,
+        )
         subtitle_suffix = ''
         filename = 'social_workers_report.pdf'
 
@@ -2108,7 +2171,7 @@ def report_pdf(request, report_type):
     elif report_type == 'recipients':
         tab_sort = _report_tab_sort_param(request)
         recipients_ordered_qs = _apply_tab_employee_sort(
-            ServiceRecipient.objects.select_related('social_worker', 'location'),
+            _recipients_filtered_qs(request),
             tab_sort,
         )
         subtitle_suffix = ''
@@ -2184,6 +2247,7 @@ def report_pdf(request, report_type):
         if request.method == 'POST':
             sort = request.POST.get('sort', 'all')
             scope = request.POST.get('scope', 'all')
+            search = request.POST.get('search', '').strip()
 
             if scope == 'selected':
                 tokens = request.POST.getlist('row_ids')
@@ -2214,6 +2278,21 @@ def report_pdf(request, report_type):
                 pairs_qs = ServiceRecipient.objects.filter(
                     social_worker__isnull=False,
                 ).select_related('social_worker')
+                if sort == 'worker' and search:
+                    pairs_qs = pairs_qs.filter(
+                        Q(social_worker__last_name__icontains=search) |
+                        Q(social_worker__first_name__icontains=search) |
+                        Q(social_worker__middle_name__icontains=search) |
+                        Q(social_worker__phone__icontains=search)
+                    )
+                elif sort == 'recipient' and search:
+                    pairs_qs = pairs_qs.filter(
+                        Q(last_name__icontains=search) |
+                        Q(first_name__icontains=search) |
+                        Q(middle_name__icontains=search) |
+                        Q(phone__icontains=search) |
+                        Q(address__icontains=search)
+                    )
                 if sort == 'recipient':
                     pairs_qs = pairs_qs.order_by('last_name', 'first_name')
                 else:
@@ -2223,6 +2302,8 @@ def report_pdf(request, report_type):
                     )
                 pairs = list(pairs_qs)
                 subtitle = 'Закреплённые лица'
+                if search:
+                    subtitle += f' (поиск: {search})'
         else:
             sort = request.GET.get('sort', 'all')
             search = request.GET.get('search', '').strip()
@@ -2404,7 +2485,6 @@ def report_pdf(request, report_type):
         filename = 'services_all_report.pdf'
 
     elif report_type == 'inventory':
-        from inventory.models import InventoryUnit
         from inventory.permissions import has_inventory_access
 
         if not has_inventory_access(request.user):
@@ -2412,7 +2492,7 @@ def report_pdf(request, report_type):
             return redirect('accounts:report_select')
 
         inv_sort = request.POST.get('sort') or request.GET.get('sort', 'inv_asc')
-        units_base_qs = InventoryUnit.objects.select_related('responsible')
+        units_base_qs = _inventory_units_filtered_qs(request)
         units_ordered_qs = _inventory_report_order_qs(units_base_qs, inv_sort)
         subtitle_suffix = ''
         filename = 'inventory_report.pdf'

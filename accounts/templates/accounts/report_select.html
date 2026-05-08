@@ -1,12 +1,19 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}Отчёты - SocWorker{% endblock %}
 {% block body_attrs %} class="sw-reports-page"{% endblock %}
 
 {% block inline_css %}
+    /* Тот же фон, что на странице «О пользователе» */
     body.sw-reports-page {
         min-height: 100vh;
-        background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 42%, #eef2ff 100%);
+        background-color: #f8fafc;
+        background-image: url("{% static 'img/profile-page-bg.png' %}");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
     body.sw-reports-page .main-content {
         max-width: 100%;
@@ -453,381 +460,484 @@
 </div>
 
 <!-- Подтверждение: только на этой странице -->
-<div class="modal fade" id="confirmPdfSocialWorkers" tabindex="-1" aria-labelledby="confirmPdfSocialWorkersLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfSocialWorkers" tabindex="-1" aria-labelledby="confirmPdfSocialWorkersLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfSocialWorkersLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfSocialWorkersLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfSocialWorkers'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfRecipients" tabindex="-1" aria-labelledby="confirmPdfRecipientsLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfRecipients" tabindex="-1" aria-labelledby="confirmPdfRecipientsLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfRecipientsLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfRecipientsLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_pdf' 'recipients' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfRecipients'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfAssigned" tabindex="-1" aria-labelledby="confirmPdfAssignedLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfAssigned" tabindex="-1" aria-labelledby="confirmPdfAssignedLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfAssignedLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfAssignedLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_pdf' 'assigned' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfAssigned'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfServicesAll" tabindex="-1" aria-labelledby="confirmPdfServicesAllLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfServicesAll" tabindex="-1" aria-labelledby="confirmPdfServicesAllLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfServicesAllLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfServicesAllLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_pdf' 'services_all' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfServicesAll'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfVisitPlanning" tabindex="-1" aria-labelledby="confirmPdfVisitPlanningLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfVisitPlanning" tabindex="-1" aria-labelledby="confirmPdfVisitPlanningLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfVisitPlanningLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfVisitPlanningLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать отчёт по всем данным планирования (без фильтров на панели)?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать отчёт по всем данным планирования (без фильтров на панели)?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:visit_planning_pdf' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfVisitPlanning'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfWorkload" tabindex="-1" aria-labelledby="confirmPdfWorkloadLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfWorkload" tabindex="-1" aria-labelledby="confirmPdfWorkloadLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfWorkloadLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfWorkloadLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать учёт нагрузки за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать учёт нагрузки за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:workload_panel_pdf' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfWorkload'));if(m)m.hide();">
                     <input type="hidden" name="year" value="{{ report_year }}">
                     <input type="hidden" name="month" value="{{ report_month }}">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <input type="hidden" name="sort" value="surname">
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfMedical" tabindex="-1" aria-labelledby="confirmPdfMedicalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfMedical" tabindex="-1" aria-labelledby="confirmPdfMedicalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfMedicalLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfMedicalLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:medical_checkup_panel_pdf' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfMedical'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirmPdfSafety" tabindex="-1" aria-labelledby="confirmPdfSafetyLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfSafety" tabindex="-1" aria-labelledby="confirmPdfSafetyLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfSafetyLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfSafetyLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь существующий список?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь существующий список?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:safety_briefing_panel_pdf' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfSafety'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% if show_inventory_reports %}
-<div class="modal fade" id="confirmPdfInventory" tabindex="-1" aria-labelledby="confirmPdfInventoryLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfInventory" tabindex="-1" aria-labelledby="confirmPdfInventoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmPdfInventoryLabel">Подтверждение</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="confirmPdfInventoryLabel">Скачать PDF-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Вы действительно хотите скачать весь список единиц учёта?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Вы действительно хотите скачать весь список единиц учёта?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_pdf' 'inventory' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmPdfInventory'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-primary">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать PDF
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% endif %}
 
-<!-- CSV: подтверждение скачивания всего списка -->
-<div class="modal fade" id="confirmCsvSocialWorkers" tabindex="-1" aria-labelledby="confirmCsvSocialWorkersLabel" aria-hidden="true">
+<!-- CSV -->
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvSocialWorkers" tabindex="-1" aria-labelledby="confirmCsvSocialWorkersLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvSocialWorkersLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvSocialWorkersLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь список социальных работников в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь список социальных работников в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvSocialWorkers'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvRecipients" tabindex="-1" aria-labelledby="confirmCsvRecipientsLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvRecipients" tabindex="-1" aria-labelledby="confirmCsvRecipientsLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvRecipientsLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvRecipientsLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь список получателей услуг в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь список получателей услуг в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_csv' 'recipients' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvRecipients'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvAssigned" tabindex="-1" aria-labelledby="confirmCsvAssignedLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvAssigned" tabindex="-1" aria-labelledby="confirmCsvAssignedLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvAssignedLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvAssignedLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь список закреплений в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь список закреплений в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_csv' 'assigned' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvAssigned'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvServicesAll" tabindex="-1" aria-labelledby="confirmCsvServicesAllLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvServicesAll" tabindex="-1" aria-labelledby="confirmCsvServicesAllLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvServicesAllLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvServicesAllLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт» в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт» в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_csv' 'services_all' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvServicesAll'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvVisitPlanning" tabindex="-1" aria-labelledby="confirmCsvVisitPlanningLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvVisitPlanning" tabindex="-1" aria-labelledby="confirmCsvVisitPlanningLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvVisitPlanningLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvVisitPlanningLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать отчёт планирования в CSV по всем данным (без фильтров на панели)?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать отчёт планирования в CSV по всем данным (без фильтров на панели)?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:visit_planning_csv' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvVisitPlanning'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvWorkload" tabindex="-1" aria-labelledby="confirmCsvWorkloadLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvWorkload" tabindex="-1" aria-labelledby="confirmCsvWorkloadLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvWorkloadLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvWorkloadLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать учёт нагрузки в CSV за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать учёт нагрузки в CSV за <strong>{{ report_month }}.{{ report_year }}</strong> по всем работникам?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:workload_panel_csv' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvWorkload'));if(m)m.hide();">
                     <input type="hidden" name="year" value="{{ report_year }}">
                     <input type="hidden" name="month" value="{{ report_month }}">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <input type="hidden" name="sort" value="surname">
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvMedical" tabindex="-1" aria-labelledby="confirmCsvMedicalLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvMedical" tabindex="-1" aria-labelledby="confirmCsvMedicalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvMedicalLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvMedicalLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь список медосмотра в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь список медосмотра в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:medical_checkup_panel_csv' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvMedical'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="confirmCsvSafety" tabindex="-1" aria-labelledby="confirmCsvSafetyLabel" aria-hidden="true">
+
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvSafety" tabindex="-1" aria-labelledby="confirmCsvSafetyLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvSafetyLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvSafetyLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь журнал инструктажей в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь журнал инструктажей в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:safety_briefing_panel_csv' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvSafety'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% if show_inventory_reports %}
-<div class="modal fade" id="confirmCsvInventory" tabindex="-1" aria-labelledby="confirmCsvInventoryLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvInventory" tabindex="-1" aria-labelledby="confirmCsvInventoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="confirmCsvInventoryLabel">Подтверждение CSV</h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="confirmCsvInventoryLabel">Скачать CSV-отчёт?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="mb-0">Скачать весь список единиц учёта в CSV?</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-0">Скачать весь список единиц учёта в CSV?</p>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Нет</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                 <form method="get" action="{% url 'accounts:report_csv' 'inventory' %}" target="_blank" class="d-inline"
                       onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('confirmCsvInventory'));if(m)m.hide();">
-                    <button type="submit" class="btn btn-success">Да</button>
+                    <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                        <i class="bi bi-download me-1"></i>Скачать CSV
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% endif %}
 {% endblock %}

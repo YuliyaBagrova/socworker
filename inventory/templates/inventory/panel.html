@@ -311,6 +311,8 @@
 <form id="invPanelPdfForm" method="post" action="{% url 'accounts:report_pdf' 'inventory' %}" target="_blank" class="d-none">
     {% csrf_token %}
     <input type="hidden" name="sort" value="{{ filter_sort }}">
+    <input type="hidden" name="responsible" value="{{ filter_responsible }}">
+    <input type="hidden" name="name" value="{{ filter_name }}">
     <input type="hidden" name="scope" id="invPanelPdfScope" value="all">
     <span id="invPanelPdfIdFields"></span>
 </form>
@@ -318,26 +320,29 @@
 <form id="invPanelCsvForm" method="post" action="{% url 'accounts:report_csv' 'inventory' %}" target="_blank" class="d-none">
     {% csrf_token %}
     <input type="hidden" name="sort" value="{{ filter_sort }}">
+    <input type="hidden" name="responsible" value="{{ filter_responsible }}">
+    <input type="hidden" name="name" value="{{ filter_name }}">
     <input type="hidden" name="scope" id="invPanelCsvScope" value="all">
     <span id="invPanelCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="invPdfModal" tabindex="-1" aria-labelledby="invPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="invPdfModal" tabindex="-1" aria-labelledby="invPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="invPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="invPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="inv_pdf_scope_choice" id="invPdfScopeAll" value="all" checked>
-                        <label class="form-check-label fw-semibold" for="invPdfScopeAll">Все единицы учёта организации</label>
-                        <div class="small text-muted ms-4">Полный список из базы (как на панели «Социальные работники»)</div>
+                        <label class="form-check-label fw-semibold" for="invPdfScopeAll">Все единицы по текущим фильтрам</label>
+                        <div class="small text-muted ms-4">Ответственный и поиск по названию/инв. №, как на панели</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="inv_pdf_scope_choice" id="invPdfScopeSelected" value="selected">
@@ -346,32 +351,33 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="invPanelPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="invPanelPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="invCsvModal" tabindex="-1" aria-labelledby="invCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="invCsvModal" tabindex="-1" aria-labelledby="invCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="invCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="invCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="inv_csv_scope_choice" id="invCsvScopeAll" value="all" checked>
-                        <label class="form-check-label fw-semibold" for="invCsvScopeAll">Все единицы учёта организации</label>
-                        <div class="small text-muted ms-4">Полный список из базы</div>
+                        <label class="form-check-label fw-semibold" for="invCsvScopeAll">Все единицы по текущим фильтрам</label>
+                        <div class="small text-muted ms-4">Ответственный и поиск по названию/инв. №</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="inv_csv_scope_choice" id="invCsvScopeSelected" value="selected">
@@ -380,10 +386,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="invPanelCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="invPanelCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

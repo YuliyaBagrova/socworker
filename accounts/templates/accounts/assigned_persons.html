@@ -839,6 +839,7 @@
     {% csrf_token %}
     <input type="hidden" name="scope" id="assignedPdfScope" value="all">
     <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="search" value="{{ search }}">
     <span id="assignedPdfRowFields"></span>
 </form>
 
@@ -846,27 +847,29 @@
     {% csrf_token %}
     <input type="hidden" name="scope" id="assignedCsvScope" value="all">
     <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="search" value="{{ search }}">
     <span id="assignedCsvRowFields"></span>
 </form>
 
-<div class="modal fade" id="assignedPdfModal" tabindex="-1" aria-labelledby="assignedPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="assignedPdfModal" tabindex="-1" aria-labelledby="assignedPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="assignedPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="assignedPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт. Порядок колонок соответствует текущей вкладке (весь список / по работникам / по подопечным).</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт. Порядок колонок соответствует текущей вкладке (весь список / по работникам / по подопечным).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="assigned_pdf_scope_choice" id="assignedPdfScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="assignedPdfScopeAll">
                             Весь список закреплений
                         </label>
-                        <div class="small text-muted ms-4">Все пары «работник — подопечный» из базы</div>
+                        <div class="small text-muted ms-4">Все пары «работник — подопечный» с учётом поиска и текущей вкладки</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="assigned_pdf_scope_choice" id="assignedPdfScopeSelected" value="selected">
@@ -877,32 +880,33 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="assignedPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="assignedPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="assignedCsvModal" tabindex="-1" aria-labelledby="assignedCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="assignedCsvModal" tabindex="-1" aria-labelledby="assignedCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="assignedCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="assignedCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл (порядок колонок — как на текущей вкладке).</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл (порядок колонок — как на текущей вкладке).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="assigned_csv_scope_choice" id="assignedCsvScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="assignedCsvScopeAll">Весь список закреплений</label>
-                        <div class="small text-muted ms-4">Все пары из базы</div>
+                        <div class="small text-muted ms-4">То же, что полный список на экране (с поиском)</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="assigned_csv_scope_choice" id="assignedCsvScopeSelected" value="selected">
@@ -911,10 +915,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="assignedCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="assignedCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

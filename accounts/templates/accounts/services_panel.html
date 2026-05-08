@@ -695,11 +695,6 @@
         margin-bottom: 0.5rem;
         display: block;
     }
-    .sw-modal-services .modal-content {
-        border-radius: 16px;
-        border: 1px solid rgba(102, 126, 234, 0.15);
-        box-shadow: 0 20px 50px rgba(45, 38, 82, 0.15);
-    }
     /* Расширенная справка «Услуги» — секции и сетка в изумрудной палитре панели */
     body.sw-services-page .sw-sv-guide-intro {
         margin: 0 0 1.25rem;
@@ -930,24 +925,25 @@
         </div>
     </section>
 
-    <div class="modal fade sw-modal-services" id="servicesAllCsvModal" tabindex="-1" aria-labelledby="servicesAllCsvModalLabel" aria-hidden="true">
+    <div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="servicesAllCsvModal" tabindex="-1" aria-labelledby="servicesAllCsvModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius:14px;">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title" id="servicesAllCsvModalLabel">
-                        <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                    </h5>
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <div class="sw-report-confirm-modal__title-wrap">
+                        <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                        <h5 class="modal-title" id="servicesAllCsvModalLabel">Выгрузить в CSV?</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body pt-2">
-                    <p class="text-muted mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт»?</p>
+                <div class="modal-body">
+                    <p class="sw-report-confirm-modal__hint mb-0">Скачать сводную таблицу всех связок «работник — населённый пункт»?</p>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
                     <form method="get" action="{% url 'accounts:report_csv' 'services_all' %}" target="_blank" class="d-inline"
                           onsubmit="var m=bootstrap.Modal.getInstance(document.getElementById('servicesAllCsvModal'));if(m)m.hide();">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-download"></i> Сформировать CSV
+                        <button type="submit" class="btn sw-report-confirm-modal__btn-confirm">
+                            <i class="bi bi-download me-1"></i>Сформировать CSV
                         </button>
                     </form>
                 </div>

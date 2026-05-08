@@ -2002,6 +2002,209 @@
         color: #64748b;
         font-size: 0.9rem;
     }
+    /* Модальное окно «Напоминания о задачах» — в духе карточки формы «Запланировать визит» */
+    body.vp-planning-page #taskReminderModal .modal-content.vp-task-reminder-modal-content {
+        border: 1px solid rgba(251, 146, 60, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.96);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 24px 64px rgba(154, 52, 18, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-header {
+        padding: 1.1rem 1.35rem;
+        border-bottom: 1px solid rgba(251, 146, 60, 0.22);
+        background: linear-gradient(180deg, rgba(255, 247, 237, 0.55) 0%, rgba(255, 255, 255, 0.35) 100%);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-title {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #9a3412;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 38%, #a3e635 72%, #65a30d 100%);
+        box-shadow:
+            0 5px 18px rgba(234, 88, 12, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body {
+        padding: 1.35rem 1.5rem 1.5rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-lead {
+        font-size: 0.8125rem;
+        color: #78716c;
+        line-height: 1.5;
+        margin-bottom: 1rem !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #9a3412;
+        padding: 0.5rem 0.75rem;
+        margin: 0 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #f97316;
+        background: linear-gradient(90deg, rgba(255, 247, 237, 0.95) 0%, rgba(254, 243, 199, 0.35) 72%, transparent 100%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title i {
+        color: #ea580c;
+        font-size: 1.05rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title + .vp-task-reminder-section-title {
+        margin-top: 1.25rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1.25rem;
+        border: 1px solid #e0e3e7;
+        border-radius: 14px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+        --bs-table-bg: transparent;
+        --bs-table-accent-bg: transparent;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.45rem;
+        border: 1px solid #cdd1d6;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        color: #3c4043;
+        background: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:nth-child(odd) td {
+        background: #fafbfc;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:nth-child(even) td {
+        background: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:hover td {
+        background: #f0edff !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet .col-desc {
+        text-align: left;
+        max-width: 14rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-empty {
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        border: 1px dashed rgba(251, 146, 60, 0.35);
+        background: rgba(255, 247, 237, 0.5);
+        color: #78716c !important;
+        margin-bottom: 1.25rem !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-label {
+        color: #57534e;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-control,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-select,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body textarea.form-control {
+        border-color: rgba(251, 146, 60, 0.4);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-control:focus,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-select:focus,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body textarea.form-control:focus {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.25);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-primary.vp-assign-btn-save {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow: 0 4px 18px rgba(102, 126, 234, 0.4);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-primary.vp-assign-btn-save:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 6px 22px rgba(118, 75, 162, 0.38);
+        color: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-primary {
+        border-color: rgba(102, 126, 234, 0.45);
+        color: #4338ca;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-primary:hover {
+        background: rgba(245, 243, 255, 0.85);
+        border-color: #667eea;
+        color: #312e81;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-danger {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(220, 53, 69, 0.35);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer {
+        padding: 0.85rem 1.35rem 1.1rem;
+        border-top: 1px solid rgba(251, 146, 60, 0.22);
+        background: rgba(255, 247, 237, 0.35);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer .vp-assign-btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.15rem;
+        border-color: rgba(251, 146, 60, 0.45);
+        color: #57534e;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer .vp-assign-btn-cancel:hover {
+        background: rgba(255, 247, 237, 0.95);
+        border-color: #fb923c;
+        color: #9a3412;
+    }
 {% endblock %}
 
 {% block content %}
@@ -2657,37 +2860,41 @@
 
 <div class="modal fade" id="taskReminderModal" tabindex="-1" aria-labelledby="taskReminderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="taskReminderModalLabel"><i class="bi bi-bell"></i> Напоминания о задачах</h5>
+        <div class="modal-content vp-task-reminder-modal-content">
+            <div class="modal-header vp-task-reminder-modal-header">
+                <h5 class="modal-title vp-task-reminder-modal-title" id="taskReminderModalLabel">
+                    <span class="vp-task-reminder-modal-title__icon" aria-hidden="true"><i class="bi bi-bell"></i></span>
+                    <span>Напоминания о задачах</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body">
-                <p class="small text-muted mb-3">
+            <div class="modal-body vp-task-reminder-modal-body">
+                <p class="vp-task-reminder-lead">
                     Показаны записи, по которым наступило время напомнить работнику: от <strong>двух календарных дней до даты выполнения</strong> до самой этой даты включительно
                     (в том числе <strong>запланированные визиты</strong> с датой в этом окне и ваши <strong>ручные задачи</strong>).
                 </p>
                 {% if active_task_reminders %}
-                    <div class="table-responsive mb-4">
-                        <table class="table table-sm table-hover align-middle mb-0">
-                            <thead class="table-light">
+                    <div class="vp-task-reminder-section-title mt-3"><i class="bi bi-list-ul" aria-hidden="true"></i> Активные напоминания</div>
+                    <div class="vp-task-reminder-sheet-wrap">
+                        <table class="table align-middle mb-0 vp-task-reminder-sheet">
+                            <thead>
                                 <tr>
-                                    <th>Тип</th>
-                                    <th>Дата</th>
-                                    <th>Сотрудник</th>
-                                    <th>Подопечный</th>
-                                    <th>Описание</th>
-                                    <th></th>
+                                    <th scope="col">Тип</th>
+                                    <th scope="col">Дата</th>
+                                    <th scope="col">Сотрудник</th>
+                                    <th scope="col">Подопечный</th>
+                                    <th scope="col" class="col-desc">Описание</th>
+                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for row in active_task_reminders %}
                                     <tr>
-                                        <td>{% if row.kind == 'planned' %}<span class="badge bg-primary-subtle text-primary border">Визит</span>{% else %}<span class="badge bg-secondary-subtle text-secondary border">Задача</span>{% endif %}</td>
+                                        <td>{% if row.kind == 'planned' %}<span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle">Визит</span>{% else %}<span class="badge rounded-pill bg-secondary-subtle text-secondary border">Задача</span>{% endif %}</td>
                                         <td>{{ row.task_date|date:"d.m.Y" }}</td>
                                         <td class="small"><a href="{% url 'accounts:social_worker_detail' row.social_worker.pk %}">{{ row.social_worker.get_full_name }}</a></td>
                                         <td class="small">{% if row.recipient %}<a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>{% else %}—{% endif %}</td>
-                                        <td class="small text-break">{{ row.description }}</td>
+                                        <td class="small text-break col-desc">{{ row.description }}</td>
                                         <td class="text-nowrap">
                                             {% if row.planned_visit %}
                                                 <a href="{% url 'accounts:planned_visit_edit' row.planned_visit.pk %}?next={{ planning_next_quoted }}" class="btn btn-sm btn-outline-primary">Изменить</a>
@@ -2705,15 +2912,14 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted small mb-4">Сейчас нет записей в окне напоминаний (при текущих фильтрах).</p>
+                    <p class="vp-task-reminder-empty small mb-0 mt-3">Сейчас нет записей в окне напоминаний (при текущих фильтрах).</p>
                 {% endif %}
-                <hr class="my-3">
-                <h6 class="fw-semibold mb-3">Добавить напоминание</h6>
+                <div class="vp-task-reminder-section-title mt-3"><i class="bi bi-plus-circle" aria-hidden="true"></i> Добавить напоминание</div>
                 <form method="post" action="{% url 'accounts:visit_task_reminder_create' %}">
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ planning_back_url }}">
                     {% if task_reminder_form.non_field_errors %}
-                        <div class="alert alert-danger">{{ task_reminder_form.non_field_errors }}</div>
+                        <div class="alert alert-danger rounded-3 mb-3">{{ task_reminder_form.non_field_errors }}</div>
                     {% endif %}
                     {% for field in task_reminder_form.visible_fields %}
                         <div class="mb-3">
@@ -2722,11 +2928,11 @@
                             {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary">Сохранить напоминание</button>
+                    <button type="submit" class="btn btn-primary vp-assign-btn-save"><i class="bi bi-check-circle"></i> Сохранить напоминание</button>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <div class="modal-footer vp-task-reminder-modal-footer">
+                <button type="button" class="btn btn-outline-secondary vp-assign-btn-cancel" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
     </div>
@@ -2762,17 +2968,18 @@
     <span id="visitPlanningCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="visitPlanningPdfModal" tabindex="-1" aria-labelledby="visitPlanningPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="visitPlanningPdfModal" tabindex="-1" aria-labelledby="visitPlanningPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="visitPlanningPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="visitPlanningPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт (подопечные, визиты на сегодня/завтра, напоминания).</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт (подопечные, визиты на сегодня/завтра, напоминания).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="vp_pdf_scope_choice" id="vpPdfScopeAll" value="all" checked>
@@ -2786,27 +2993,28 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="visitPlanningPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="visitPlanningPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="visitPlanningCsvModal" tabindex="-1" aria-labelledby="visitPlanningCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="visitPlanningCsvModal" tabindex="-1" aria-labelledby="visitPlanningCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="visitPlanningCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="visitPlanningCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="vp_csv_scope_choice" id="vpCsvScopeAll" value="all" checked>
@@ -2820,10 +3028,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="visitPlanningCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="visitPlanningCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

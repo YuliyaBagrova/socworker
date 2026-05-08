@@ -1,4 +1,5 @@
 from functools import wraps
+from itertools import groupby
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
@@ -16,6 +17,8 @@ from .forms import (
     InventoryStaffForm,
     InventoryUnitForm,
 )
+
+from accounts.models import UserProfile
 
 from .inv_user_sql import staff_rows_for_template
 from .models import Department, InventoryUnit
@@ -104,6 +107,45 @@ def inventory_logout(request):
     logout(request)
     messages.info(request, 'Вы вышли из раздела «Инвентаризация».')
     return redirect('inventory:login')
+
+
+def public_inventory_responsible_list(request):
+    """Публичный список ответственных и закреплённого за ними инвентаря (без авторизации в разделе)."""
+    units = list(
+        InventoryUnit.objects.select_related('responsible').order_by(
+            'responsible__last_name',
+            'responsible__first_name',
+            'responsible__username',
+            'inventory_number',
+        )
+    )
+    user_ids = {u.responsible_id for u in units if u.responsible_id}
+    avatar_by_user_id = {}
+    if user_ids:
+        for prof in UserProfile.objects.filter(user_id__in=user_ids).only(
+            'user_id',
+            'avatar',
+        ):
+            if prof.avatar:
+                avatar_by_user_id[prof.user_id] = prof.avatar.url
+
+    responsible_groups = []
+    for _, grp in groupby(units, key=lambda u: u.responsible_id):
+        chunk = list(grp)
+        if chunk:
+            uid = chunk[0].responsible_id
+            responsible_groups.append(
+                {
+                    'user': chunk[0].responsible,
+                    'units': chunk,
+                    'avatar_url': avatar_by_user_id.get(uid),
+                },
+            )
+    return render(
+        request,
+        'inventory/responsible_public_list.html',
+        {'responsible_groups': responsible_groups},
+    )
 
 
 @inventory_access_required

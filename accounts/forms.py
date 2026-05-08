@@ -765,4 +765,29 @@ class WorkloadRecordForm(forms.ModelForm):
             cleaned['social_worker'] = rec.social_worker
         if not self.errors.get('recipient') and rec and not loc and rec.location_id:
             cleaned['location'] = rec.location
+
+        sw_final = cleaned.get('social_worker')
+        rec_final = cleaned.get('recipient')
+        year = cleaned.get('period_year')
+        month = cleaned.get('period_month')
+        if (
+            not self.errors
+            and rec_final
+            and sw_final
+            and year is not None
+            and month is not None
+        ):
+            qs = WorkloadRecord.objects.filter(
+                social_worker=sw_final,
+                recipient=rec_final,
+                period_year=year,
+                period_month=month,
+            )
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error(
+                    'recipient',
+                    'Подопечный уже есть в таблице нагрузки за выбранный месяц у этого сотрудника.',
+                )
         return cleaned

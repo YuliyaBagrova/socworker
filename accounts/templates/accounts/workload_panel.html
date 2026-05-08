@@ -805,12 +805,6 @@
         color: #4f46e5;
         font-size: 1.1rem;
     }
-    .sw-wl-matrix-card__hint {
-        margin: 0;
-        font-size: 0.75rem;
-        color: #64748b;
-        font-weight: 500;
-    }
     .workload-sheet-wrap {
         overflow-x: auto;
         border-radius: 0 0 14px 14px;
@@ -981,15 +975,6 @@
         background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
         color: #422006 !important;
     }
-    .sw-modal-workload .modal-content {
-        border-radius: 16px;
-        border: 1px solid rgba(99, 102, 241, 0.18);
-        box-shadow: 0 20px 50px rgba(30, 27, 75, 0.18);
-    }
-    .sw-modal-workload .form-check {
-        border-color: rgba(199, 210, 254, 0.85) !important;
-        background: rgba(248, 250, 252, 0.65);
-    }
 {% endblock %}
 
 {% block content %}
@@ -1008,7 +993,7 @@
                     <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
                         <i class="bi bi-filetype-csv"></i> CSV
                     </button>
-                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}" class="btn btn-primary sw-toolbar-btn">
+                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}&wl_sort={{ wl_sort }}" class="btn btn-primary sw-toolbar-btn">
                         <i class="bi bi-plus-circle"></i> Добавить строку
                     </a>
                 </div>
@@ -1045,13 +1030,14 @@
                         <ol class="sw-wl-help-ol">
                             <li>Укажите <strong>год</strong> и <strong>месяц</strong> журнала.</li>
                             <li>При необходимости выберите <strong>работника</strong> — таблица покажет только его группу строк и итоги. <span class="sw-wl-help-kbd">↺</span> сбрасывает отбор к умолчанию.</li>
+                            <li><strong>Сортировка</strong> задаёт порядок строк и влияет на нумерацию и на выгрузку PDF/CSV (при «вся таблица»). Нажмите кнопку с иконкой лупы <strong>«Найти»</strong>, чтобы применить год, месяц, работника и сортировку.</li>
                         </ol>
                     </section>
 
                     <section class="sw-wl-help-section" aria-labelledby="wl-guide-table">
                         <h3 id="wl-guide-table" class="sw-wl-help-h"><i class="bi bi-table" aria-hidden="true"></i>Структура журнала</h3>
                         <p class="sw-wl-help-p">
-                            Строки журнала упорядочены по фамилии и имени лица в строке — подопечного или (если подопечный не указан) социального работника. После <strong>последней</strong> строки каждого социального работника в этом порядке выводится <strong>ИТОГО</strong> по минутам, часам, коэффициенту нагрузки и ставке для этого работника.
+                            Порядок строк: в режимах <strong>«Фамилия подопечного»</strong>, <strong>«по мин./макс. коэффициенту»</strong> и <strong>«по мин./макс. ставке»</strong> сортировка действует <strong>по всей таблице</strong> (по значению в строке). Строка <strong>ИТОГО</strong> — сразу после последней строки этого соц. работника в выбранном порядке.
                         </p>
                         <div class="sw-wl-help-grid" role="list">
                             <div class="sw-wl-help-card" role="listitem">
@@ -1064,7 +1050,7 @@
                             </div>
                             <div class="sw-wl-help-card" role="listitem">
                                 <p class="sw-wl-help-card__title">Время и итоги</p>
-                                <p class="sw-wl-help-card__text">Длительность одного посещения (мин.), всего минут и часов за месяц, норма рабочего времени (часов), коэффициент нагрузки и ставка по строке.</p>
+                                <p class="sw-wl-help-card__text">Длительность одного посещения (мин.), всего минут и часов за месяц, норма рабочего времени (часов), коэффициент нагрузки по строке. <strong>Ставка в таблице показывается только в строке ИТОГО</strong> — по сумме коэффициентов нагрузки работника.</p>
                             </div>
                             <div class="sw-wl-help-card" role="listitem">
                                 <p class="sw-wl-help-card__title">Галочка</p>
@@ -1126,7 +1112,7 @@
                     <input type="number" name="month" id="wl_month" class="form-control sw-wl-filter-field"
                            value="{{ month }}" min="1" max="12">
                 </div>
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-lg-4">
                     <label for="wl_worker" class="sw-filter-label d-block">Работник</label>
                     <div class="sw-select-wrap">
                         <select name="worker" id="wl_worker" class="form-select sw-status-select sw-select-native">
@@ -1134,6 +1120,20 @@
                             {% for w in workers %}
                                 <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
                             {% endfor %}
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <label for="wl_sort" class="sw-filter-label d-block">Сортировка</label>
+                    <div class="sw-select-wrap">
+                        <select name="wl_sort" id="wl_sort" class="form-select sw-status-select sw-select-native"
+                                title="Сортировка применится после нажатия кнопки «Найти» (лупа)">
+                            <option value="surname" {% if wl_sort == 'surname' %}selected{% endif %}>Фамилия подопечного (А–Я)</option>
+                            <option value="load_asc" {% if wl_sort == 'load_asc' %}selected{% endif %}>По мин. коэффициенту нагрузки</option>
+                            <option value="load_desc" {% if wl_sort == 'load_desc' %}selected{% endif %}>По макс. коэффициенту нагрузки</option>
+                            <option value="rate_asc" {% if wl_sort == 'rate_asc' %}selected{% endif %}>По мин. ставке</option>
+                            <option value="rate_desc" {% if wl_sort == 'rate_desc' %}selected{% endif %}>По макс. ставке</option>
                         </select>
                         <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                     </div>
@@ -1155,7 +1155,6 @@
     <div class="sw-wl-matrix-card">
         <div class="sw-wl-matrix-card__head">
             <h2><i class="bi bi-table" aria-hidden="true"></i> Журнал за {{ month }}.{{ year }}</h2>
-            <p class="sw-wl-matrix-card__hint d-none d-md-block mb-0">Отметьте строки в первом столбце для выгрузки PDF/CSV</p>
         </div>
         <div class="p-0 workload-sheet-wrap">
             <table class="workload-sheet">
@@ -1216,11 +1215,11 @@
                                 <td></td>
                                 <td>
                                     <div class="sw-actions-cell">
-                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}?wl_sort={{ wl_sort }}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
                                             <i class="bi bi-pencil" aria-hidden="true"></i>
                                             <span class="visually-hidden">Редактировать</span>
                                         </a>
-                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}?wl_sort={{ wl_sort }}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                             <span class="visually-hidden">Удалить</span>
                                         </a>
@@ -1246,7 +1245,7 @@
                             <td colspan="14" class="text-center py-5" style="color: #64748b;">
                                 <i class="bi bi-inbox d-block fs-1 mb-2 opacity-50"></i>
                                 Нет записей за выбранный период.
-                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}" class="fw-semibold">Добавить строку</a>
+                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}&wl_sort={{ wl_sort }}" class="fw-semibold">Добавить строку</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -1262,6 +1261,7 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ wl_sort }}">
     <span id="workloadPdfIdFields"></span>
 </form>
 
@@ -1271,20 +1271,22 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ wl_sort }}">
     <span id="workloadCsvIdFields"></span>
 </form>
 
-<div class="modal fade sw-modal-workload" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="workloadPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="workloadPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие строки учёта включить в отчёт за <strong>{{ month }}.{{ year }}</strong>.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие строки учёта включить в отчёт за <strong>{{ month }}.{{ year }}</strong> (порядок соответствует текущей сортировке в таблице).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="wl_pdf_scope_choice" id="wlPdfScopeAll" value="all" checked>
@@ -1298,27 +1300,28 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="workloadPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="workloadPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade sw-modal-workload" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="workloadCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="workloadCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие строки учёта включить в файл за <strong>{{ month }}.{{ year }}</strong>.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие строки учёта включить в файл за <strong>{{ month }}.{{ year }}</strong> (порядок соответствует текущей сортировке в таблице).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="wl_csv_scope_choice" id="wlCsvScopeAll" value="all" checked>
@@ -1332,10 +1335,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="workloadCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="workloadCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

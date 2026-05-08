@@ -1332,6 +1332,8 @@
 <form id="socialWorkersPdfForm" method="post" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
     <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="hidden" name="scope" id="socialWorkersPdfScope" value="all">
     <span id="socialWorkersPdfIdFields"></span>
 </form>
@@ -1339,28 +1341,31 @@
 <form id="socialWorkersCsvForm" method="post" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
     <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="hidden" name="scope" id="socialWorkersCsvScope" value="all">
     <span id="socialWorkersCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="socialWorkersPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="socialWorkersPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="swPdfScopeAll">
                             Весь список социальных работников
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и фильтра по статусу на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeSelected" value="selected">
@@ -1371,34 +1376,35 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="socialWorkersPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="socialWorkersPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="socialWorkersCsvModal" tabindex="-1" aria-labelledby="socialWorkersCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="socialWorkersCsvModal" tabindex="-1" aria-labelledby="socialWorkersCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="socialWorkersCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="socialWorkersCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="swCsvScopeAll">
                             Весь список социальных работников
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и фильтра по статусу на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeSelected" value="selected">
@@ -1409,10 +1415,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="socialWorkersCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="socialWorkersCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>

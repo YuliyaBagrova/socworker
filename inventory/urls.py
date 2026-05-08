@@ -14,6 +14,11 @@ urlpatterns = [
     path('login/', views.inventory_login, name='login'),
     path('register/', views.inventory_register, name='register'),
     path('logout/', views.inventory_logout, name='logout'),
+    path(
+        'responsible-list/',
+        views.public_inventory_responsible_list,
+        name='public_responsible_list',
+    ),
     path('', views.panel, name='panel'),
     path('units/', views.unit_list, name='unit_list'),
     path('units/add/', views.unit_create, name='unit_create'),
