@@ -2,6 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
 from . import views
+from . import admin_portal_views
 from .forms import StyledPasswordChangeForm
 
 app_name = 'accounts'
@@ -11,6 +12,31 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path(
+        'admin-portal/login/',
+        admin_portal_views.admin_portal_login,
+        name='admin_portal_login',
+    ),
+    path(
+        'admin-portal/register/',
+        admin_portal_views.admin_portal_register,
+        name='admin_portal_register',
+    ),
+    path(
+        'admin-portal/logout/',
+        admin_portal_views.admin_portal_logout,
+        name='admin_portal_logout',
+    ),
+    path(
+        'admin-portal/user/<int:pk>/delete/',
+        admin_portal_views.admin_portal_user_delete,
+        name='admin_portal_user_delete',
+    ),
+    path(
+        'admin-portal/',
+        admin_portal_views.admin_portal_panel,
+        name='admin_portal_panel',
+    ),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('profile/', views.profile_view, name='profile'),
     path(

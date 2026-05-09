@@ -219,6 +219,43 @@ def staff_rows_for_template() -> List[dict]:
         return []
 
 
+def inventory_staff_users_for_admin_panel():
+    """
+    Пользователи с назначенной ролью инвентаризации — для панели администратора.
+    Возвращает список словарей: id, username, email, is_active, first_name, last_name,
+    role_code, role_name, department_name.
+    """
+    try:
+        with connection.cursor() as c:
+            c.execute(
+                """
+                SELECT u.id, u.username, u.email, u.is_active, u.first_name, u.last_name,
+                       r.code, r.name, d.name
+                FROM auth_user u
+                LEFT JOIN inv_roles r ON r.id = u.inv_role_id
+                LEFT JOIN inventory_department d ON d.id = u.inv_department_id
+                WHERE u.inv_role_id IS NOT NULL
+                ORDER BY u.last_name, u.first_name, u.username
+                """
+            )
+            rows = []
+            for row in c.fetchall():
+                rows.append({
+                    'id': row[0],
+                    'username': row[1] or '',
+                    'email': row[2] or '',
+                    'is_active': bool(row[3]),
+                    'first_name': row[4] or '',
+                    'last_name': row[5] or '',
+                    'role_code': row[6] or '',
+                    'role_name': row[7] or '',
+                    'department_name': row[8] or '',
+                })
+            return rows
+    except _DB_READ_ERRORS:
+        return []
+
+
 def responsible_row_for_csv(responsible_id: int) -> tuple:
     """ФИО, название отделения для CSV."""
     try:

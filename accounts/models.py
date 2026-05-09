@@ -43,6 +43,11 @@ class UserProfile(models.Model):
         verbose_name='Фото профиля',
         help_text='Необязательно. JPG, PNG или WebP, до 2 МБ.',
     )
+    admin_panel_access = models.BooleanField(
+        default=False,
+        verbose_name='Доступ к панели администратора',
+        help_text='Разрешён вход в раздел управления учётными записями инвентаризации (код регистрации).',
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

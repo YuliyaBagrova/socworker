@@ -1,14 +1,30 @@
 {% extends 'accounts/base.html' %}
 
-{% block title %}Регистрация — СоцПомощник{% endblock %}
+{% block title %}Регистрация — Панель Администратора{% endblock %}
 
 {% block header_title %}Регистрация{% endblock %}
-{% block header_subtitle %}Создайте учётную запись для входа в систему{% endblock %}
+{% block header_subtitle %}Создайте учётную запись администратора портала (управление учётными записями инвентаризации){% endblock %}
 
 {% block content %}
-<form method="post" action="{% url 'accounts:register' %}">
+<div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+    <a href="{% url 'accounts:admin_portal_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill text-decoration-none">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Назад к входу
+    </a>
+    <a href="{% url 'accounts:dashboard' %}" class="btn btn-link btn-sm text-muted px-2 text-decoration-none">
+        На главную панель
+    </a>
+</div>
+{% if user.is_authenticated %}
+<div class="alert alert-info small py-2 mb-3">
+    Вы вошли как <strong>{{ user.get_username }}</strong>. Эта форма создаёт <strong>отдельную</strong> учётную запись с доступом к «Панели Администратора»; после успешной регистрации сессия переключится на нового пользователя.
+</div>
+{% endif %}
+<form method="post" action="{% url 'accounts:admin_portal_register' %}">
     {% csrf_token %}
-    
+    {% if request.GET.next %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    {% endif %}
+
     <div class="mb-3">
         <label for="{{ form.username.id_for_label }}" class="form-label">
             <i class="bi bi-person"></i> {{ form.username.label }}
@@ -86,6 +102,21 @@
         {% endif %}
     </div>
 
+    <div class="mb-3">
+        <label for="{{ form.access_code.id_for_label }}" class="form-label">
+            <i class="bi bi-shield-lock"></i> {{ form.access_code.label }}
+        </label>
+        <div class="input-group password-input-group">
+            {{ form.access_code }}
+            <button type="button" class="btn btn-outline-secondary password-toggle-btn" aria-label="Показать код аутентификации" tabindex="0">
+                <i class="bi bi-eye"></i>
+            </button>
+        </div>
+        {% if form.access_code.errors %}
+            <div class="text-danger small">{{ form.access_code.errors }}</div>
+        {% endif %}
+    </div>
+
     {% if form.non_field_errors %}
         <div class="alert alert-danger">
             {{ form.non_field_errors }}
@@ -101,5 +132,5 @@
 {% endblock %}
 
 {% block footer %}
-<p class="mb-0">Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a></p>
+<p class="mb-0">Уже есть аккаунт? <a href="{% url 'accounts:admin_portal_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">Войти</a></p>
 {% endblock %}

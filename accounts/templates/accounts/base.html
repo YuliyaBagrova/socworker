@@ -1,130 +1,304 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SocWorker{% endblock %}</title>
+    <title>{% block title %}СоцПомощник{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        :root {
+            --auth-accent: #a78bfa;
+            --auth-accent-soft: rgba(167, 139, 250, 0.35);
+            --auth-dark: #141022;
+        }
+
+        * { box-sizing: border-box; }
+
+        body.auth-body {
+            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 1rem;
+            padding: 1.25rem;
+            color: #e8e9f0;
+            background-color: var(--auth-dark);
+            background-image:
+                radial-gradient(ellipse 140% 90% at 95% -25%, rgba(118, 75, 162, 0.42), transparent 52%),
+                radial-gradient(ellipse 100% 70% at -5% 105%, rgba(102, 126, 234, 0.38), transparent 52%),
+                radial-gradient(ellipse 70% 50% at 45% 50%, rgba(91, 76, 168, 0.18), transparent 68%),
+                linear-gradient(158deg, #161428 0%, #221e3d 42%, #18162e 100%);
+            background-attachment: fixed;
         }
+
         .auth-container {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            padding: 2.5rem;
-            max-width: 440px;
+            position: relative;
+            z-index: 1;
             width: 100%;
+            max-width: 460px;
+            padding: 2.35rem 2.25rem 2rem;
+            border-radius: 22px;
+            background: rgba(42, 38, 72, 0.42);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 28px 90px rgba(15, 10, 35, 0.65),
+                0 2px 0 rgba(255, 255, 255, 0.06) inset;
+            -webkit-backdrop-filter: blur(22px) saturate(1.35);
+            backdrop-filter: blur(22px) saturate(1.35);
         }
+
         .auth-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.85rem;
         }
-        .auth-header .logo-circle {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .auth-logo-ring {
+            width: 4.75rem;
+            height: 4.75rem;
+            margin: 0 auto 1.05rem;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: linear-gradient(
+                155deg,
+                rgba(255, 255, 255, 0.32) 0%,
+                rgba(255, 255, 255, 0.08) 48%,
+                rgba(210, 195, 255, 0.14) 100%
+            );
+            box-shadow:
+                0 12px 36px rgba(35, 25, 70, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.38);
         }
-        .auth-header .logo-circle i {
-            font-size: 1.6rem;
-            color: #fff;
+
+        .auth-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform: scale(1.08);
+            transform-origin: center center;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
         }
+
         .auth-header h2 {
-            color: #1a1a2e;
+            margin: 0 0 0.4rem;
             font-weight: 700;
-            font-size: 1.4rem;
-            margin-bottom: 0.35rem;
+            font-size: 1.5rem;
+            letter-spacing: -0.03em;
+            color: #fff;
+            text-shadow: 0 2px 18px rgba(167, 139, 250, 0.25);
         }
+
         .auth-header p {
-            color: #80868b;
             margin: 0;
             font-size: 0.9rem;
+            line-height: 1.45;
+            color: rgba(226, 232, 240, 0.76);
         }
-        .form-control, .form-select {
-            border-radius: 10px;
-            border: 1px solid #dde1e6;
-            padding: 0.65rem 0.85rem;
-            font-size: 0.9rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+
+        .auth-container .form-label {
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: rgba(226, 232, 240, 0.9);
+            margin-bottom: 0.38rem;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+
+        .auth-container .form-label i {
+            opacity: 0.82;
+            margin-right: 0.15rem;
         }
-        .form-label {
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #5f6368;
-            margin-bottom: 0.35rem;
+
+        .auth-container .form-control,
+        .auth-container .form-select {
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: #f1f5f9;
+            padding: 0.68rem 0.95rem;
+            font-size: 0.92rem;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .auth-container .form-control::placeholder {
+            color: rgba(186, 190, 215, 0.42);
+        }
+
+        .auth-container .form-control:focus,
+        .auth-container .form-select:focus {
+            border-color: rgba(167, 139, 250, 0.55);
+            background: rgba(255, 255, 255, 0.09);
+            color: #fff;
+            box-shadow: 0 0 0 3px var(--auth-accent-soft);
+        }
+
+        .auth-container .form-text {
+            color: rgba(186, 190, 215, 0.58);
+            font-size: 0.78rem;
+            margin-top: 0.35rem;
+        }
+
+        .auth-container .btn-primary {
             border: none;
-            padding: 0.7rem;
+            padding: 0.72rem 1rem;
             font-weight: 600;
             font-size: 0.95rem;
-            border-radius: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #7c6fdb 0%, #667eea 38%, #764ba2 100%);
+            box-shadow:
+                0 8px 28px rgba(102, 126, 234, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
         }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+
+        .auth-container .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow:
+                0 12px 36px rgba(118, 75, 162, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
-        .alert { border-radius: 10px; border: none; }
+
+        .auth-container .btn-primary:active {
+            transform: translateY(0);
+        }
+
         .auth-footer {
             text-align: center;
-            margin-top: 0.5rem;
-            padding-top: 0.65rem;
-            border-top: 1px solid #f0f2f5;
+            margin-top: 0.6rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .auth-footer a {
-            color: #667eea;
+            color: var(--auth-accent);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: color 0.15s ease;
         }
-        .auth-footer a:hover { text-decoration: underline; }
-        .errorlist { list-style: none; padding: 0; margin: 0.4rem 0 0; }
-        .errorlist li { color: #dc3545; font-size: 0.8rem; }
+
+        .auth-footer a:hover {
+            color: #ddd6fe;
+            text-decoration: underline;
+        }
+
+        .auth-container .alert {
+            border-radius: 12px;
+            border: 1px solid transparent;
+        }
+
+        .auth-container .alert-danger {
+            background: rgba(220, 53, 69, 0.18);
+            border-color: rgba(248, 113, 113, 0.35);
+            color: #fecaca;
+        }
+
+        .auth-container .alert-success {
+            background: rgba(34, 197, 94, 0.14);
+            border-color: rgba(74, 222, 128, 0.35);
+            color: #bbf7d0;
+        }
+
+        .auth-container .alert .btn-close {
+            filter: invert(1) grayscale(100%) brightness(1.15);
+            opacity: 0.65;
+        }
+
+        .auth-container .alert .btn-close:hover {
+            opacity: 0.95;
+        }
+
+        .auth-container .alert-info {
+            background: rgba(59, 130, 246, 0.14);
+            border-color: rgba(147, 197, 253, 0.38);
+            color: #dbeafe;
+        }
+
+        .auth-container .alert-warning {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(253, 224, 71, 0.35);
+            color: #fef3c7;
+        }
+
+        .auth-container .alert-error {
+            background: rgba(220, 53, 69, 0.18);
+            border-color: rgba(248, 113, 113, 0.35);
+            color: #fecaca;
+        }
+
+        .auth-container .text-danger,
+        .auth-container .text-danger.small {
+            color: #fca5a5 !important;
+        }
+
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0.4rem 0 0;
+        }
+
+        .errorlist li {
+            color: #fca5a5;
+            font-size: 0.8rem;
+        }
 
         .password-input-group .form-control {
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
         }
+
         .password-input-group .password-toggle-btn {
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
-            border-color: #dde1e6;
-            color: #5f6368;
+            border-color: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(226, 232, 240, 0.88);
         }
+
         .password-input-group .password-toggle-btn:hover {
-            background: #f5f6f8;
-            color: #1a1a2e;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.22);
+            color: #fff;
+        }
+
+        .auth-container .btn-outline-secondary {
+            border-radius: 999px;
+            border-color: rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(248, 250, 252, 0.92);
+            font-weight: 500;
+        }
+
+        .auth-container .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: #fff;
+        }
+
+        .auth-container .btn-link.text-muted {
+            color: rgba(196, 200, 230, 0.72) !important;
+        }
+
+        .auth-container .btn-link.text-muted:hover {
+            color: var(--auth-accent) !important;
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="auth-body">
     <div class="auth-container">
         <div class="auth-header">
-            <div class="logo-circle">
-                <i class="bi bi-shield-lock-fill"></i>
+            <div class="auth-logo-ring" aria-hidden="true">
+                <img src="{% static 'img/logo_white_transparent.png' %}" alt="" class="auth-logo-img" width="58" height="58" decoding="async">
             </div>
-            <h2>{% block header_title %}SocWorker{% endblock %}</h2>
-            <p>{% block header_subtitle %}Система управления социальными работниками{% endblock %}</p>
+            <h2>{% block header_title %}СоцПомощник{% endblock %}</h2>
+            <p>{% block header_subtitle %}Учёт и сопровождение социальной помощи{% endblock %}</p>
         </div>
 
         {% if messages %}

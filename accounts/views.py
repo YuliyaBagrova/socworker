@@ -46,6 +46,7 @@ from .models import (
     UserProfile,
     WorkloadRecord,
 )
+from .admin_portal_permissions import has_admin_panel_access
 from .tab_numbering import compact_service_recipient_employee_ids, compact_social_worker_employee_ids
 from .visit_schedule import (
     RU_MONTHS,
@@ -396,9 +397,11 @@ def dashboard_view(request):
 
 
 def profile_interface_role(request):
-    """Подпись роли на «О пользователе»: администратор, управляющий инвентарём или заведующий."""
+    """Подпись роли на «О пользователе»."""
     user = request.user
-    if user.is_staff or user.is_superuser:
+    if user.is_superuser or user.is_staff:
+        return {'label': 'Администратор', 'variant': 'admin'}
+    if has_admin_panel_access(user):
         return {'label': 'Администратор', 'variant': 'admin'}
     if has_inventory_access(user):
         return {'label': 'Управляющий инвентарём', 'variant': 'inventory'}
@@ -456,6 +459,7 @@ def profile_view(request):
         'avatar_initials': initials,
         'profile_role_label': role['label'],
         'profile_role_variant': role['variant'],
+        'profile_hide_extras': profile.admin_panel_access,
     })
 
 

@@ -13,7 +13,7 @@ from .models import (
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'updated_at')
+    list_display = ('user', 'admin_panel_access', 'updated_at')
     search_fields = ('user__username', 'user__email')
     raw_id_fields = ('user',)
 

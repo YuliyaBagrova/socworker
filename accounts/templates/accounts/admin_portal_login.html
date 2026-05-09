@@ -1,25 +1,25 @@
 {% extends 'accounts/base.html' %}
 
-{% block title %}Вход — СоцПомощник{% endblock %}
+{% block title %}Вход — Панель Администратора{% endblock %}
 
-{% block header_title %}Вход{% endblock %}
-{% block header_subtitle %}Введите email и пароль{% endblock %}
+{% block header_title %}Панель Администратора{% endblock %}
+{% block header_subtitle %}Введите email, пароль и код доступа{% endblock %}
 
 {% block content %}
 <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
     <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill text-decoration-none">
         <i class="bi bi-arrow-left" aria-hidden="true"></i> На главную панель
     </a>
-    <a href="{% url 'inventory:register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-link btn-sm text-muted px-2 text-decoration-none">
+    <a href="{% url 'accounts:admin_portal_register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="btn btn-link btn-sm text-muted px-2 text-decoration-none">
         Регистрация
     </a>
 </div>
-<form method="post" action="{% url 'inventory:login' %}">
+<form method="post" action="{% url 'accounts:admin_portal_login' %}">
     {% csrf_token %}
     {% if request.GET.next %}
     <input type="hidden" name="next" value="{{ request.GET.next }}">
     {% endif %}
-    
+
     <div class="mb-3">
         <label for="{{ form.username.id_for_label }}" class="form-label">
             <i class="bi bi-envelope"></i> {{ form.username.label }}
@@ -75,5 +75,5 @@
 {% endblock %}
 
 {% block footer %}
-<p class="mb-0">Нет аккаунта? <a href="{% url 'inventory:register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">Зарегистрироваться</a></p>
+<p class="mb-0">Нет аккаунта администратора? <a href="{% url 'accounts:admin_portal_register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">Зарегистрироваться</a></p>
 {% endblock %}

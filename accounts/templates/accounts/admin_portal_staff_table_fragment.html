@@ -1,0 +1,88 @@
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold sw-ap-card-title-row{% if section_header_align_right %} sw-ap-card-title-row--end{% endif %}">
+        <i class="bi {{ section_icon }} sw-ap-card-title-icon" aria-hidden="true"></i>
+        <span>{{ section_title }}</span>
+    </div>
+    {% if ap_filter_section %}
+    <div class="sw-filter-dash mb-0 border-0 rounded-0 border-bottom sw-admin-portal-filter-dash">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+                <span class="sw-page-title__label">Поиск и сортировка</span>
+            </h2>
+            {% include 'accounts/admin_portal_staff_filters.html' %}
+        </div>
+    </div>
+    {% endif %}
+    {% if section_hint %}
+    <div class="card-body py-2 border-bottom small text-muted">{{ section_hint }}</div>
+    {% endif %}
+    <div class="card-body p-0">
+        <div class="sw-ap-sheet-wrap">
+            <table class="sw-sheet mb-0">
+                <thead>
+                    <tr>
+                        <th class="col-narrow">Логин</th>
+                        <th class="col-text-left">Email</th>
+                        <th class="col-text-left">ФИО</th>
+                        <th class="col-narrow">Роль</th>
+                        <th class="col-narrow">Статус</th>
+                        {% if readonly_actions %}
+                        <th class="text-center col-narrow text-muted">Действия</th>
+                        {% else %}
+                        <th class="text-center col-narrow">Действия</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr class="data-row">
+                            <td class="col-narrow sw-ap-col-login"><code class="sw-ap-login-code">{{ row.username }}</code></td>
+                            <td class="col-text-left">{{ row.email|default:"—" }}</td>
+                            <td class="col-text-left">{% if row.last_name or row.first_name %}{{ row.last_name }} {{ row.first_name }}{% else %}—{% endif %}</td>
+                            <td class="col-narrow">{{ row.role_name|default:"—" }}</td>
+                            <td class="col-narrow">
+                                {% if row.is_active %}
+                                    <span class="badge bg-success">Активен</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Заблокирован</span>
+                                {% endif %}
+                            </td>
+                            {% if readonly_actions %}
+                            <td class="text-center col-narrow small text-muted">Только просмотр</td>
+                            {% else %}
+                            <td class="text-center col-narrow">
+                                <div class="sw-actions-cell" role="group" aria-label="Действия для {{ row.username }}">
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                                        <input type="hidden" name="action" value="toggle_active">
+                                        <input type="hidden" name="user_id" value="{{ row.id }}">
+                                        {% if row.is_active %}
+                                        <button type="submit" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Заблокировать вход в приложение">
+                                            <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Заблокировать</span>
+                                        </button>
+                                        {% else %}
+                                        <button type="submit" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Разблокировать вход в приложение">
+                                            <i class="bi bi-unlock-fill" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Разблокировать</span>
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                    <a href="{% url 'accounts:admin_portal_user_delete' row.id %}?next={{ admin_portal_panel_return_enc }}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить учётную запись">
+                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Удалить</span>
+                                    </a>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr class="data-row"><td colspan="6" class="text-center text-muted py-4">{{ empty_message }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_nav_profile',
+                'accounts.context_processors.admin_portal_shell',
                 'inventory.context_processors.inventory_nav',
             ],
         },
@@ -147,6 +148,12 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 INVENTORY_AUTHENTICATION_CODE = os.environ.get(
     'INVENTORY_AUTHENTICATION_CODE',
     os.environ.get('INVENTORY_PORTAL_ACCESS_CODE', 'admin'),
+)
+
+# Вход и регистрация в «Панели администратора» (управление учётными записями инвентаризации).
+ADMIN_PANEL_AUTHENTICATION_CODE = os.environ.get(
+    'ADMIN_PANEL_AUTHENTICATION_CODE',
+    'administrator',
 )
 
 # Default primary key field type
