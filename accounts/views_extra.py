@@ -30,6 +30,10 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
 
+from .inv_report_gate import (
+    reject_inv_manager_soc_report,
+    reject_inv_manager_unless_inventory_report,
+)
 from .forms import WorkloadRecordForm
 from .models import (
     PlannedVisit,
@@ -428,6 +432,9 @@ def _csv_response(filename: str, header: list[str], rows: list[list]):
 @login_required
 def report_csv(request, report_type):
     """CSV-выгрузка отчётов (те же типы, что и для PDF)."""
+    rej = reject_inv_manager_unless_inventory_report(request, report_type)
+    if rej:
+        return rej
     from .views import (
         _apply_tab_employee_sort,
         _inventory_report_order_qs,
@@ -854,6 +861,9 @@ def _medical_worker_row(w: SocialWorker, today: date):
 
 @login_required
 def medical_checkup_panel_pdf(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:medical_checkup_panel')
     scope = request.POST.get('scope', 'all')
@@ -888,6 +898,9 @@ def medical_checkup_panel_pdf(request):
 
 @login_required
 def medical_checkup_panel_csv(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:medical_checkup_panel')
     scope = request.POST.get('scope', 'all')
@@ -933,6 +946,9 @@ def _safety_records_filtered(worker, title_q, sort_order='surname'):
 
 @login_required
 def safety_briefing_panel_pdf(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:safety_briefing_panel')
     scope = request.POST.get('scope', 'all')
@@ -970,6 +986,9 @@ def safety_briefing_panel_pdf(request):
 
 @login_required
 def safety_briefing_panel_csv(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:safety_briefing_panel')
     scope = request.POST.get('scope', 'all')
@@ -1070,6 +1089,9 @@ def _visit_planning_consistency_cell(r: ServiceRecipient) -> str:
 
 @login_required
 def visit_planning_pdf(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:visit_planning')
     scope = request.POST.get('scope', 'all')
@@ -1107,6 +1129,9 @@ def visit_planning_pdf(request):
 
 @login_required
 def visit_planning_csv(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method != 'POST':
         return redirect('accounts:visit_planning')
     scope = request.POST.get('scope', 'all')
@@ -1342,6 +1367,9 @@ def workload_record_delete(request, pk):
 
 @login_required
 def workload_export_csv(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     year = request.GET.get('year', '').strip()
     month = request.GET.get('month', '').strip()
     worker = request.GET.get('worker', '').strip()
@@ -1424,6 +1452,9 @@ def _workload_pdf_csv_rows(
 
 @login_required
 def workload_panel_pdf(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method not in ('GET', 'POST'):
         return redirect('accounts:workload_panel')
     data = request.POST if request.method == 'POST' else request.GET
@@ -1471,6 +1502,9 @@ def workload_panel_pdf(request):
 
 @login_required
 def workload_panel_csv(request):
+    rej = reject_inv_manager_soc_report(request)
+    if rej:
+        return rej
     if request.method not in ('GET', 'POST'):
         return redirect('accounts:workload_panel')
     data = request.POST if request.method == 'POST' else request.GET

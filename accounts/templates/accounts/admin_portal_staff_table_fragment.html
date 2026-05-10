@@ -27,6 +27,7 @@
                         <th class="col-text-left">ФИО</th>
                         <th class="col-narrow">Роль</th>
                         <th class="col-narrow">Статус</th>
+                        <th class="text-center sw-ap-col-password">Пароль</th>
                         {% if readonly_actions %}
                         <th class="text-center col-narrow text-muted">Действия</th>
                         {% else %}
@@ -46,6 +47,21 @@
                                     <span class="badge bg-success">Активен</span>
                                 {% else %}
                                     <span class="badge bg-secondary">Заблокирован</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center sw-ap-col-password"{% if not row.portal_password or row.portal_password == "—" %} title="Подсказка заполняется при первом успешном входе или регистрации (общий вход, вход в «Инвентаризация»), а также после смены пароля здесь («Пароль») или создания пользователя в панели. Старый пароль по хешу не восстановить."{% endif %}>
+                                {% if row.portal_password and row.portal_password != "—" %}
+                                <div class="sw-ap-pw-cell-row">
+                                    <span class="sw-ap-plain-pw mb-0">
+                                        <span class="sw-ap-pw-plain">{{ row.portal_password }}</span>
+                                        <span class="sw-ap-pw-masked d-none" aria-hidden="true">••••••••</span>
+                                    </span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 sw-ap-pw-eye" title="Показать или скрыть пароль" aria-label="Показать или скрыть пароль" aria-pressed="true">
+                                        <i class="bi bi-eye-fill fs-6" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">—</span>
                                 {% endif %}
                             </td>
                             {% if readonly_actions %}
@@ -79,7 +95,7 @@
                             {% endif %}
                         </tr>
                     {% empty %}
-                        <tr class="data-row"><td colspan="6" class="text-center text-muted py-4">{{ empty_message }}</td></tr>
+                        <tr class="data-row"><td colspan="7" class="text-center text-muted py-4">{{ empty_message }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

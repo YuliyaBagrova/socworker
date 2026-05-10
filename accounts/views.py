@@ -6,9 +6,10 @@ from datetime import datetime, date, timedelta
 from urllib.parse import quote, urlencode
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import IntegerField, Q
@@ -24,6 +25,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from .admin_password_audit import remember_plaintext_password_if_missing_for_panel_tables
 from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -35,6 +37,7 @@ from .forms import (
     VisitTaskReminderForm,
     SafetyBriefingRecordForm,
     UserProfileAvatarForm,
+    StyledPasswordChangeForm,
 )
 from .models import (
     SocialWorker,
@@ -47,6 +50,8 @@ from .models import (
     WorkloadRecord,
 )
 from .admin_portal_permissions import has_admin_panel_access
+from .admin_password_audit import record_self_password_change_for_admin_notifications
+from .inv_report_gate import reject_inv_manager_unless_inventory_report
 from .tab_numbering import compact_service_recipient_employee_ids, compact_social_worker_employee_ids
 from .visit_schedule import (
     RU_MONTHS,
@@ -61,7 +66,7 @@ from .visit_schedule import (
     week_start_monday,
 )
 
-from inventory.permissions import has_inventory_access
+from inventory.permissions import has_inventory_access, is_inventory_manager_interface_user
 
 MEDICAL_CHECKUP_VALID_DAYS = 365
 
@@ -255,6 +260,9 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            remember_plaintext_password_if_missing_for_panel_tables(
+                user, form.cleaned_data.get('password1') or '',
+            )
             messages.success(request, f'Аккаунт успешно создан для {user.username}!')
             login(request, user)
             return redirect('accounts:dashboard')
@@ -264,6 +272,21 @@ def register_view(request):
         form = CustomUserCreationForm()
     
     return render(request, 'accounts/register.html', {'form': form})
+
+
+class SocworkerPasswordChangeView(PasswordChangeView):
+    """Смена пароля: подсказка администратору портала для заведующих и управляющих инвентаризацией."""
+
+    template_name = 'accounts/password_change_form.html'
+    form_class = StyledPasswordChangeForm
+    success_url = reverse_lazy('accounts:password_change_done')
+
+    def form_valid(self, form):
+        user = self.request.user
+        new_pw = form.cleaned_data['new_password1']
+        response = super().form_valid(form)
+        record_self_password_change_for_admin_notifications(user, new_pw)
+        return response
 
 
 def login_view(request):
@@ -403,7 +426,7 @@ def profile_interface_role(request):
         return {'label': 'Администратор', 'variant': 'admin'}
     if has_admin_panel_access(user):
         return {'label': 'Администратор', 'variant': 'admin'}
-    if has_inventory_access(user):
+    if is_inventory_manager_interface_user(user):
         return {'label': 'Управляющий инвентарём', 'variant': 'inventory'}
     return {'label': 'Заведующий отделением', 'variant': 'department'}
 
@@ -452,6 +475,8 @@ def profile_view(request):
         avatar_form = UserProfileAvatarForm(instance=profile)
 
     role = profile_interface_role(request)
+    # «Управляющий инвентарём» — в «Дополнительно» без соцработнических разделов.
+    suppress_soc_extras = role['variant'] == 'inventory'
     return render(request, 'accounts/profile.html', {
         'user': request.user,
         'socworker_profile': profile,
@@ -460,6 +485,7 @@ def profile_view(request):
         'profile_role_label': role['label'],
         'profile_role_variant': role['variant'],
         'profile_hide_extras': profile.admin_panel_access,
+        'profile_suppress_soc_extras': suppress_soc_extras,
     })
 
 
@@ -2068,6 +2094,9 @@ def report_select(request):
 @login_required
 def report_pdf(request, report_type):
     """Генерация PDF-отчёта"""
+    rej = reject_inv_manager_unless_inventory_report(request, report_type)
+    if rej:
+        return rej
     font_name = _register_fonts()
 
     buf = io.BytesIO()

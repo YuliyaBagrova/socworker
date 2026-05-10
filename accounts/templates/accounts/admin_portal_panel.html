@@ -1,5 +1,4 @@
 {% extends 'accounts/base_dashboard.html' %}
-{% load static %}
 {% block title %}Панель Администратора{% endblock %}
 {% block body_attrs %} class="sw-admin-portal-shell-page sw-admin-portal-panel-page"{% endblock %}
 
@@ -208,6 +207,49 @@
         color: #312e81;
         border-color: rgba(102, 126, 234, 0.5);
         box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify {
+        color: #b45309;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 251, 235, 0.93) 100%);
+        border-color: rgba(245, 158, 11, 0.34);
+        border-left: 3px solid #f59e0b;
+        box-shadow: 0 2px 12px rgba(245, 158, 11, 0.12);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify:hover {
+        color: #92400e;
+        border-color: rgba(217, 119, 6, 0.48);
+        box-shadow: 0 8px 22px rgba(245, 158, 11, 0.2);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify .sw-ap-notify-badge {
+        position: absolute;
+        top: -0.35rem;
+        right: -0.2rem;
+        min-width: 1.15rem;
+        height: 1.15rem;
+        padding: 0 0.35rem;
+        font-size: 0.62rem;
+        font-weight: 700;
+        line-height: 1.15rem;
+        color: #fff;
+        text-align: center;
+        border-radius: 999px;
+        background: linear-gradient(155deg, #fde68a 0%, #f59e0b 44%, #d97706 92%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.35),
+            0 2px 8px rgba(180, 83, 9, 0.35);
+        pointer-events: none;
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-auth-code {
+        color: #047857;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.94) 100%);
+        border-color: rgba(16, 185, 129, 0.38);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.12);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-auth-code:hover {
+        color: #065f46;
+        border-color: rgba(5, 150, 105, 0.5);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.2);
     }
     .sw-toolbar-btn.btn-primary {
         border: none;
@@ -887,6 +929,14 @@
         max-width: 16rem;
         white-space: normal;
     }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password,
+    body.sw-admin-portal-panel-page .sw-sheet th.sw-ap-col-password {
+        max-width: min(42rem, 96vw);
+        min-width: 7rem;
+        white-space: normal !important;
+        vertical-align: middle;
+        text-align: center !important;
+    }
     body.sw-admin-portal-panel-page .sw-sheet .col-narrow {
         white-space: nowrap;
     }
@@ -897,6 +947,50 @@
         border-radius: 4px;
         font-size: 0.8125rem;
         font-weight: 600;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        max-width: 100%;
+        vertical-align: middle;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-plain-pw {
+        color: #3c4043;
+        background-color: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        font: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        text-align: center;
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: baseline;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-masked {
+        letter-spacing: inherit;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row .sw-ap-pw-eye {
+        flex-shrink: 0;
+        color: #64748b;
+        line-height: 1;
+        text-decoration: none;
+        opacity: 0.92;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row .sw-ap-pw-eye:hover {
+        color: #475569;
+        opacity: 1;
     }
     body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell {
         display: flex;
@@ -971,26 +1065,27 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.3),
             0 8px 18px rgba(245, 158, 11, 0.32);
     }
+    /* Разблокировать — голубой/индиго, как колонка «Просмотр» у «Соц. работники» */
     body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view {
         background:
             radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
-            linear-gradient(155deg, #fecdd3 0%, #f87171 35%, #e11d48 78%, #881337 100%);
+            linear-gradient(155deg, #a5b4fc 0%, #6366f1 38%, #4f46e5 82%, #4338ca 100%);
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.32),
-            0 2px 6px rgba(155, 28, 42, 0.22),
-            0 8px 18px rgba(220, 48, 58, 0.28);
+            0 2px 6px rgba(67, 56, 202, 0.22),
+            0 8px 18px rgba(99, 102, 241, 0.3);
     }
     body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view:hover {
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.38),
-            0 4px 10px rgba(155, 28, 42, 0.26),
-            0 12px 26px rgba(220, 48, 58, 0.32);
+            0 4px 10px rgba(67, 56, 202, 0.28),
+            0 12px 26px rgba(99, 102, 241, 0.38);
     }
     body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view:focus-visible {
         box-shadow:
-            0 0 0 3px rgba(251, 100, 118, 0.55),
+            0 0 0 3px rgba(165, 180, 252, 0.65),
             inset 0 1px 0 rgba(255, 255, 255, 0.32),
-            0 8px 18px rgba(220, 48, 58, 0.28);
+            0 8px 18px rgba(99, 102, 241, 0.32);
     }
     body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-kbd {
         display: inline-block;
@@ -1012,6 +1107,803 @@
             padding: 1.1rem 1.2rem 1.25rem;
         }
     }
+
+    /* Окно «Новый пароль» — структура как «Напоминание о задаче», палитра панели */
+    body.sw-admin-portal-panel-page #adminSetPasswordModal.sw-ap-pwd-modal .modal-dialog.sw-ap-pwd-modal__dialog {
+        max-width: 520px;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__content {
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255, 252, 252, 0.98);
+        border: 1px solid rgba(232, 72, 86, 0.28);
+        box-shadow:
+            0 4px 22px rgba(90, 22, 32, 0.14),
+            0 18px 48px rgba(40, 10, 18, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 1.25rem 1.5rem 0.85rem;
+        border-bottom: none;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+        line-height: 1.25;
+        color: #1c191a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__title > i {
+        color: #e11d48;
+        font-size: 1.35rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header .btn-close {
+        opacity: 0.45;
+        margin: 0;
+        padding: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header .btn-close:hover {
+        opacity: 0.85;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card {
+        margin: 0 1.5rem 0;
+        padding: 0.35rem 0 1.1rem;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #450a0a;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-control,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-select {
+        border-radius: 10px;
+        border-color: rgba(225, 29, 72, 0.18);
+        background: rgba(255, 253, 253, 0.95);
+        color: #1c191a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-control:focus,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-select:focus {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field:focus-within .form-control {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: rgba(225, 29, 72, 0.22);
+        color: #9f1239;
+        background: rgba(255, 253, 253, 0.95);
+        font-weight: 600;
+        padding: 0.375rem 0.65rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.15s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle:hover {
+        border-color: rgba(225, 29, 72, 0.38);
+        background: #fff;
+        color: #881337;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field:focus-within .sw-ap-pwd-modal__pwd-toggle {
+        border-color: rgba(225, 29, 72, 0.45);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle:focus-visible {
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        outline: none;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .small,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .text-muted {
+        color: #64748b !important;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .small strong {
+        color: #1c191a;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.65rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(232, 72, 86, 0.15);
+        background: linear-gradient(180deg, rgba(255, 249, 249, 0.5) 0%, rgba(255, 252, 252, 0.85) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(225, 29, 72, 0.35);
+        color: #7f1d2d;
+        background: rgba(255, 255, 255, 0.98);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .sw-ap-pwd-modal__submit {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.5rem 1.15rem;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 40%, #9f1239 100%);
+        box-shadow:
+            0 4px 18px rgba(225, 29, 72, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .sw-ap-pwd-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(190, 18, 60, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    /* Окно «Уведомления» — те же блоки что «Новый пароль», палитра как кнопка блокировки (янтарь) */
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal.sw-ap-pwd-modal .modal-dialog.sw-ap-pwd-modal__dialog {
+        max-width: 520px;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__content {
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255, 253, 250, 0.98);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        box-shadow:
+            0 4px 22px rgba(146, 64, 14, 0.12),
+            0 18px 48px rgba(69, 26, 3, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 1.25rem 1.5rem 0.85rem;
+        border-bottom: none;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+        line-height: 1.25;
+        color: #1c191a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__title > i {
+        color: #d97706;
+        font-size: 1.35rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header .btn-close {
+        opacity: 0.45;
+        margin: 0;
+        padding: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header .btn-close:hover {
+        opacity: 0.85;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__card {
+        margin: 0 1.5rem 0;
+        padding: 0.35rem 0 1.1rem;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+        max-height: min(52vh, 22rem);
+        overflow-y: auto;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row {
+        border-radius: 12px;
+        border: 1px solid rgba(245, 158, 11, 0.22);
+        background: rgba(255, 253, 248, 0.95);
+        padding: 0.75rem 0.85rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__meta {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 0.2rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__role {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #b45309;
+        text-transform: none;
+        letter-spacing: 0.01em;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row code.sw-ap-plain-pw {
+        display: inline-block;
+        margin-top: 0.35rem;
+        color: #1c191a;
+        background-color: rgba(253, 230, 138, 0.28);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        padding: 0.18rem 0.5rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        font-family: ui-monospace, monospace;
+        word-break: break-all;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        color: #78350f;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 247, 237, 0.95) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.42);
+        white-space: nowrap;
+        transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0;
+        padding: 0.65rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(245, 158, 11, 0.22);
+        background: linear-gradient(180deg, rgba(255, 251, 235, 0.55) 0%, rgba(255, 252, 250, 0.9) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(217, 119, 6, 0.45);
+        color: #78350f;
+        background: rgba(255, 255, 255, 0.98);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .sw-ap-notify-modal__clear {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.5rem 1.05rem;
+        background: linear-gradient(135deg, #fde68a 0%, #f59e0b 42%, #d97706 92%);
+        box-shadow:
+            0 4px 18px rgba(217, 119, 6, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        margin-right: auto;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .sw-ap-notify-modal__clear:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(180, 83, 9, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    }
+
+    /* «Код аутентификации» — полноэкранно как «Редактировать соцработника», зелёная гамма */
+    body.sw-admin-portal-panel-page #adminAuthCodesModal.sw-ap-auth-codes-modal .modal-dialog {
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(16, 185, 129, 0.16), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(5, 150, 105, 0.12), transparent 54%),
+            linear-gradient(175deg, #ecfdf5 0%, #d1fae5 32%, #ecfccb 70%, #e7f6ef 100%);
+        box-shadow: none;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal #adminAuthCodesForm {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__page {
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        padding: 1.25rem 1.25rem 1.75rem;
+        box-sizing: border-box;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin: 0 0 1.25rem;
+        padding: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title-icon {
+        flex-shrink: 0;
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.28rem;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399 0%, #10b981 48%, #047857 100%);
+        box-shadow:
+            0 6px 22px rgba(5, 150, 105, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(108deg, #064e3b 0%, #047857 38%, #059669 72%, #10b981 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title {
+            color: #047857;
+            background: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        color: #047857;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(236, 253, 245, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(5, 150, 105, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__back-btn:hover {
+        color: #065f46;
+        border-color: rgba(5, 150, 105, 0.62);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.2);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__sheet {
+        border-radius: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        background: rgba(255, 255, 255, 0.86);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(6, 78, 59, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__card {
+        padding: 1.5rem 1.5rem 1.25rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #065f46;
+        padding-bottom: 0.5rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #10b981;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(209, 250, 229, 0.75) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title i {
+        color: #059669;
+        font-size: 1.05rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__admin-panel-section {
+        margin-top: 1.35rem;
+        padding: 1rem 1rem 1rem;
+        border: 1.5px solid rgba(220, 38, 38, 0.55);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(254, 242, 242, 0.72) 0%, rgba(255, 255, 255, 0.35) 55%, transparent 100%);
+        box-shadow:
+            0 0 0 1px rgba(254, 202, 202, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title--admin-panel {
+        color: #991b1b;
+        border-left-color: #dc2626;
+        margin-top: 0;
+        background: linear-gradient(90deg, rgba(254, 226, 226, 0.88) 0%, transparent 88%);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title--admin-panel i {
+        color: #dc2626;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-label {
+        color: #064e3b;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-control {
+        border-color: rgba(16, 185, 129, 0.32);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-control:focus {
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footnote {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.35rem;
+        line-height: 1.4;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(16, 185, 129, 0.2);
+        background: linear-gradient(180deg, rgba(236, 253, 245, 0.45) 0%, rgba(255, 255, 255, 0.88) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(120, 113, 108, 0.32);
+        color: #57534e;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .btn-outline-secondary:hover {
+        background: rgba(236, 253, 245, 0.95);
+        border-color: #a8a29e;
+        color: #44403c;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .sw-ap-auth-codes-modal__submit {
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        color: #fff;
+        padding: 0.52rem 1.35rem;
+        background: linear-gradient(135deg, #34d399 0%, #10b981 42%, #047857 100%);
+        box-shadow:
+            0 4px 18px rgba(5, 150, 105, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .sw-ap-auth-codes-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(4, 120, 87, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    /* «Добавить пользователя» — полноэкранно, отступы и каркас как страница «Добавить работника» */
+    body.sw-admin-portal-panel-page #adminAddUserModal.sw-ap-add-user-modal .modal-dialog {
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(225, 52, 62, 0.12), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(120, 80, 90, 0.08), transparent 54%),
+            linear-gradient(175deg, #fff8f8 0%, #fdf2f2 35%, #faf5f5 70%, #f5f0f0 100%);
+        box-shadow: none;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal #adminAddUserForm {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__page {
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        padding: 1.25rem 1.25rem 1.75rem;
+        box-sizing: border-box;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin: 0 0 1.25rem;
+        padding: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title-icon {
+        flex-shrink: 0;
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.28rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb7185 0%, #e11d48 48%, #9f1239 100%);
+        box-shadow:
+            0 6px 22px rgba(225, 29, 72, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(108deg, #1c191a 0%, #450a0a 38%, #9f1239 72%, #e11d48 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title {
+            color: #7f1d2d;
+            background: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(225, 29, 72, 0.38);
+        color: #9f1239;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 249, 249, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(90, 22, 32, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn:hover {
+        color: #881337;
+        border-color: rgba(225, 29, 72, 0.55);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(90, 22, 32, 0.14);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn i {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__sheet {
+        border: 1px solid rgba(232, 72, 86, 0.28);
+        border-radius: 20px;
+        background: rgba(255, 252, 252, 0.96);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(90, 22, 32, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__sheet:hover {
+        box-shadow:
+            0 14px 42px rgba(90, 22, 32, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card {
+        margin: 0;
+        padding: 1.75rem 1.75rem 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #881337;
+        padding-bottom: 0.45rem;
+        margin-top: 1.35rem;
+        margin-bottom: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #e11d48;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(255, 241, 242, 0.85) 0%, transparent 90%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title.sw-ap-add-user-modal__section-title--first {
+        margin-top: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title.sw-ap-add-user-modal__section-title--tight-after {
+        margin-top: 1.1rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title i {
+        color: #e11d48;
+        font-size: 1.05rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-label {
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: #590d1d;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-control,
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-select {
+        border-radius: 10px;
+        border-color: rgba(225, 29, 72, 0.2);
+        background: rgba(255, 253, 253, 0.96);
+        color: #1c191a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-control:focus,
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-select:focus {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field:focus-within .form-control {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: rgba(225, 29, 72, 0.22);
+        color: #9f1239;
+        background: rgba(255, 253, 253, 0.96);
+        font-weight: 600;
+        padding: 0.375rem 0.65rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.15s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle:hover {
+        border-color: rgba(225, 29, 72, 0.38);
+        background: #fff;
+        color: #881337;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field:focus-within .sw-ap-add-user-modal__pwd-toggle {
+        border-color: rgba(225, 29, 72, 0.45);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle:focus-visible {
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.14);
+        outline: none;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .alert {
+        border-radius: 12px;
+        border: none;
+        margin-bottom: 0.85rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        margin: 1.25rem 0 0;
+        padding: 0.875rem 1.75rem 1.25rem;
+        border: none;
+        border-top: 1px solid rgba(232, 72, 86, 0.18);
+        background: transparent;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(225, 29, 72, 0.35);
+        color: #7f1d2d;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .sw-ap-add-user-modal__submit {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.52rem 1.2rem;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 40%, #9f1239 100%);
+        box-shadow:
+            0 4px 18px rgba(225, 29, 72, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .sw-ap-add-user-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(190, 18, 60, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
 {% endblock %}
 
 {% block content %}
@@ -1019,6 +1911,13 @@
 
 <div class="page-header flex-wrap mb-0 justify-content-end">
     <div class="sw-toolbar-group">
+        <button type="button" class="btn position-relative sw-toolbar-btn sw-toolbar-btn-notify" id="adminToolbarNotifyBtn" data-bs-toggle="modal" data-bs-target="#adminPasswordNotifyModal" aria-label="Уведомления о смене пароля">
+            <i class="bi bi-bell-fill"></i> Уведомления
+            {% if password_notify_count %}<span class="sw-ap-notify-badge">{{ password_notify_count }}</span>{% endif %}
+        </button>
+        <button type="button" class="btn position-relative sw-toolbar-btn sw-toolbar-btn-auth-code" id="adminToolbarAuthCodesBtn" data-bs-toggle="modal" data-bs-target="#adminAuthCodesModal" aria-label="Код аутентификации">
+            <i class="bi bi-shield-lock-fill"></i> Код аутентификации
+        </button>
         {% if password_pick_users %}
         <button type="button" class="btn btn-outline-primary position-relative sw-toolbar-btn" id="adminToolbarPasswordBtn" data-bs-toggle="modal" data-bs-target="#adminSetPasswordModal">
             <i class="bi bi-key-fill"></i> Пароль
@@ -1058,11 +1957,11 @@
                 <section class="sw-workers-guide-section" aria-labelledby="ap-guide-add">
                     <h3 id="ap-guide-add" class="sw-workers-guide-h"><i class="bi bi-person-plus-fill" aria-hidden="true"></i>Добавление пользователя</h3>
                     <p class="sw-workers-guide-p">
-                        Нажмите <strong>«Добавить пользователя»</strong> над блоком справки (справа, как «Добавить работника» у соцработников) — откроется окно с формой. Кнопка <strong>«Пароль»</strong> рядом открывает смену пароля для выбранной учётной записи из списка. Заполните поля формы и нажмите <strong>«Создать»</strong>.
+                        Нажмите <strong>«Добавить пользователя»</strong> над блоком справки (справа, как «Добавить работника» у соцработников) — откроется <strong>полноэкранная форма</strong>. Кнопка <strong>«Пароль»</strong> рядом открывает смену пароля для выбранной учётной записи из списка. Заполните поля формы и нажмите <strong>«Создать»</strong>.
                         После сохранения список таблиц обновится; при ошибках проверки подсветятся поля и текст уведомления.
                     </p>
                     <div class="sw-workers-guide-tip">
-                        <strong>Совет:</strong> телефон в формате РБ можно ввести с маской; пароли должны соответствовать требованиям формы (минимальная длина и совпадение при подтверждении).
+                        <strong>Совет:</strong> пароли должны соответствовать требованиям формы (минимальная длина и совпадение при подтверждении).
                     </div>
                 </section>
 
@@ -1073,7 +1972,7 @@
                         Они работают с соцработниками и смежными разделами, но <strong>не</strong> получают роль инвентаризации из этой панели.
                     </p>
                     <ul class="sw-workers-guide-list-rich">
-                        <li><strong>Блокировка / разблокировка</strong> — значок замка в оранжевом круге или открытого замка в тёмно-сером круге (временно запретить или снова разрешить вход).</li>
+                        <li><strong>Блокировка / разблокировка</strong> — значок замка в оранжевом круге (запретить вход) или открытого замка в голубом круге (снова разрешить вход).</li>
                         <li><strong>Смена пароля</strong> — кнопка <strong>«Пароль»</strong> над справкой: выберите учётную запись в окне и задайте новый пароль.</li>
                         <li><strong>Удаление</strong> — красный круг с корзиной, как у соцработников; действие необратимо после подтверждения.</li>
                         <li>У заведующих нет роли инвентаризации из этой панели — отдельная кнопка снятия роли для них не показывается.</li>
@@ -1121,50 +2020,111 @@
 {% include 'accounts/admin_portal_staff_table_fragment.html' with rows=other_inv_rows section_title='Другие роли инвентаризации' section_icon='bi-people' empty_message=other_empty_message readonly_actions=True ap_filter_section='other' ap_filter_default_url=other_filter_default_url %}
 {% endif %}
 
-<div class="modal fade" id="adminAddUserModal" tabindex="-1" aria-labelledby="adminAddUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow" style="border-radius: 14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-semibold" id="adminAddUserModalLabel"><i class="bi bi-person-plus me-2"></i>Добавить пользователя</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <form method="post" novalidate id="adminAddUserForm">
+<div class="modal fade sw-ap-add-user-modal" id="adminAddUserModal" tabindex="-1" aria-labelledby="adminAddUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0 sw-ap-add-user-modal__content rounded-0">
+            <form method="post" novalidate id="adminAddUserForm" class="d-flex flex-column h-100">
                 {% csrf_token %}
                 {% include 'accounts/admin_portal_ap_post_hidden.html' %}
                 <input type="hidden" name="action" value="create_staff">
-                <div class="modal-body pt-2">
-                    <div class="row g-3 align-items-start">
-                        {% for field in create_form %}
-                            <div class="col-md-6">
-                                <label class="form-label mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {{ field }}
-                                {% for err in field.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                <div class="sw-ap-add-user-modal__scroll">
+                    <div class="sw-ap-add-user-modal__page">
+                        <div class="sw-ap-add-user-modal__header">
+                            <div class="sw-ap-add-user-modal__title-wrap">
+                                <span class="sw-ap-add-user-modal__title-icon" aria-hidden="true"><i class="bi bi-person-plus-fill"></i></span>
+                                <h2 class="sw-ap-add-user-modal__title" id="adminAddUserModalLabel">Добавить пользователя</h2>
                             </div>
-                        {% endfor %}
+                            <button type="button" class="sw-ap-add-user-modal__back-btn" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-left-circle-fill"></i> Назад к панели
+                            </button>
+                        </div>
+                        <div class="sw-ap-add-user-modal__sheet">
+                            <div class="sw-ap-add-user-modal__card">
+                                {% if create_form.non_field_errors %}
+                                    <div class="alert alert-danger">{{ create_form.non_field_errors }}</div>
+                                {% endif %}
+                                <div class="sw-ap-add-user-modal__section-title sw-ap-add-user-modal__section-title--first">
+                                    <i class="bi bi-key" aria-hidden="true"></i>
+                                    Логин и пароль
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ create_form.username.id_for_label }}">{{ create_form.username.label }}</label>
+                                    {{ create_form.username }}
+                                    {% for err in create_form.username.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                </div>
+                                <div class="row g-3 mb-0">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.password1.id_for_label }}">{{ create_form.password1.label }}</label>
+                                        <div class="input-group sw-ap-add-user-modal__pwd-field">
+                                            {{ create_form.password1 }}
+                                            <button type="button" class="btn btn-outline-secondary sw-ap-add-user-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        {% for err in create_form.password1.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.password2.id_for_label }}">{{ create_form.password2.label }}</label>
+                                        <div class="input-group sw-ap-add-user-modal__pwd-field">
+                                            {{ create_form.password2 }}
+                                            <button type="button" class="btn btn-outline-secondary sw-ap-add-user-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        {% for err in create_form.password2.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="sw-ap-add-user-modal__section-title sw-ap-add-user-modal__section-title--tight-after">
+                                    <i class="bi bi-briefcase" aria-hidden="true"></i>
+                                    ФИО, должность и роль
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.full_name.id_for_label }}">{{ create_form.full_name.label }}</label>
+                                        {{ create_form.full_name }}
+                                        {% for err in create_form.full_name.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.position.id_for_label }}">{{ create_form.position.label }}</label>
+                                        {{ create_form.position }}
+                                        {% for err in create_form.position.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label" for="{{ create_form.role.id_for_label }}">{{ create_form.role.label }}</label>
+                                    {{ create_form.role }}
+                                    {% for err in create_form.role.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="sw-ap-add-user-modal__footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn sw-ap-add-user-modal__submit"><i class="bi bi-check2-circle me-1"></i>Создать</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-check2-circle me-1"></i>Создать</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="adminSetPasswordModal" tabindex="-1" aria-labelledby="adminSetPasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-semibold" id="adminSetPasswordModalLabel">Новый пароль</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
+<div class="modal fade sw-ap-pwd-modal" id="adminSetPasswordModal" tabindex="-1" aria-labelledby="adminSetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered sw-ap-pwd-modal__dialog">
+        <div class="modal-content border-0 sw-ap-pwd-modal__content">
             <form method="post" id="adminSetPasswordForm" novalidate>
                 {% csrf_token %}
                 {% include 'accounts/admin_portal_ap_post_hidden.html' %}
                 <input type="hidden" name="action" value="set_password">
                 <input type="hidden" name="user_id" id="adminSetPasswordUserId" value="">
-                <div class="modal-body pt-2">
+                <div class="sw-ap-pwd-modal__header">
+                    <h2 class="sw-ap-pwd-modal__title" id="adminSetPasswordModalLabel">
+                        <i class="bi bi-key-fill" aria-hidden="true"></i>
+                        <span>Новый пароль</span>
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="sw-ap-pwd-modal__card">
                     {% if password_pick_users %}
                     <div class="mb-3" id="adminPasswordAccountPicker">
                         <label class="form-label" for="adminPasswordUserPick">Учётная запись</label>
@@ -1181,16 +2141,131 @@
                     </p>
                     <div class="mb-3">
                         <label class="form-label" for="adminNewPassword">Новый пароль</label>
-                        <input type="password" class="form-control" name="new_password" id="adminNewPassword" autocomplete="new-password" required minlength="8">
+                        <div class="input-group sw-ap-pwd-modal__pwd-field">
+                            <input type="password" class="form-control" name="new_password" id="adminNewPassword" autocomplete="new-password" required minlength="8">
+                            <button type="button" class="btn btn-outline-secondary sw-ap-pwd-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label" for="adminNewPasswordConfirm">Подтверждение</label>
-                        <input type="password" class="form-control" name="new_password_confirm" id="adminNewPasswordConfirm" autocomplete="new-password" required minlength="8">
+                        <div class="input-group sw-ap-pwd-modal__pwd-field">
+                            <input type="password" class="form-control" name="new_password_confirm" id="adminNewPasswordConfirm" autocomplete="new-password" required minlength="8">
+                            <button type="button" class="btn btn-outline-secondary sw-ap-pwd-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Сохранить пароль</button>
+                <div class="sw-ap-pwd-modal__footer">
+                    <button type="submit" class="btn sw-ap-pwd-modal__submit">Сохранить</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sw-ap-pwd-modal" id="adminPasswordNotifyModal" tabindex="-1" aria-labelledby="adminPasswordNotifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered sw-ap-pwd-modal__dialog">
+        <div class="modal-content border-0 sw-ap-pwd-modal__content">
+            <div class="sw-ap-pwd-modal__header">
+                <h2 class="sw-ap-pwd-modal__title" id="adminPasswordNotifyModalLabel">
+                    <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                    <span>Уведомления о смене пароля</span>
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="sw-ap-pwd-modal__card">
+                {% if password_notifications %}
+                <div class="sw-ap-notify-stack">
+                    {% for n in password_notifications %}
+                    <div class="sw-ap-notify-row">
+                        <div class="sw-ap-notify-row__top">
+                            <div class="min-w-0">
+                                <div class="sw-ap-notify-row__role">{{ n.role_label }}</div>
+                                <div class="fw-semibold text-break">{{ n.username }}</div>
+                                <div class="sw-ap-notify-row__meta">{{ n.created_at|date:"d.m.Y H:i" }}</div>
+                                <code class="sw-ap-plain-pw">{{ n.new_password_plaintext }}</code>
+                            </div>
+                            <form method="post" class="m-0 align-self-start flex-shrink-0">
+                                {% csrf_token %}
+                                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                                <input type="hidden" name="action" value="dismiss_password_notification">
+                                <input type="hidden" name="notification_id" value="{{ n.pk }}">
+                                <button type="submit" class="sw-ap-notify-row__hide">Скрыть</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="small text-muted mb-0">Нет активных уведомлений.</p>
+                {% endif %}
+            </div>
+            <div class="sw-ap-pwd-modal__footer">
+                {% if password_notifications %}
+                <form method="post" class="m-0">
+                    {% csrf_token %}
+                    {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                    <input type="hidden" name="action" value="dismiss_all_password_notifications">
+                    <button type="submit" class="btn sw-ap-notify-modal__clear">Очистить все</button>
+                </form>
+                {% endif %}
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sw-ap-auth-codes-modal" id="adminAuthCodesModal" tabindex="-1" aria-labelledby="adminAuthCodesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0 rounded-0 sw-ap-auth-codes-modal__content">
+            <form method="post" id="adminAuthCodesForm" novalidate>
+                {% csrf_token %}
+                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                <input type="hidden" name="action" value="update_authentication_codes">
+                <div class="sw-ap-auth-codes-modal__scroll">
+                    <div class="sw-ap-auth-codes-modal__page">
+                        <div class="sw-ap-auth-codes-modal__header">
+                            <div class="sw-ap-auth-codes-modal__title-wrap">
+                                <span class="sw-ap-auth-codes-modal__title-icon" aria-hidden="true"><i class="bi bi-shield-lock-fill"></i></span>
+                                <h2 class="sw-ap-auth-codes-modal__title" id="adminAuthCodesModalLabel">Код аутентификации</h2>
+                            </div>
+                            <button type="button" class="sw-ap-auth-codes-modal__back-btn" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-left-circle-fill"></i> Назад к панели
+                            </button>
+                        </div>
+                        <div class="sw-ap-auth-codes-modal__sheet">
+                            <div class="sw-ap-auth-codes-modal__card">
+                                <div class="sw-ap-auth-codes-modal__section-title">
+                                    <i class="bi bi-box-seam" aria-hidden="true"></i>
+                                    Раздел «Инвентаризация»
+                                </div>
+                                <div class="mb-3 mb-lg-4">
+                                    <label class="form-label" for="id_inventory_auth_code">Секретный код</label>
+                                    <input type="text" class="form-control" name="inventory_auth_code" id="id_inventory_auth_code" maxlength="512" autocomplete="off" value="{{ effective_inventory_auth_code }}">
+                                    <p class="sw-ap-auth-codes-modal__footnote mb-0">Очистите поле и сохраните, чтобы снова использовать значение из настроек сервера (переменная окружения).</p>
+                                </div>
+                                <div class="sw-ap-auth-codes-modal__admin-panel-section">
+                                    <div class="sw-ap-auth-codes-modal__section-title sw-ap-auth-codes-modal__section-title--admin-panel">
+                                        <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                        Панель администратора
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label" for="id_admin_panel_auth_code">Секретный код</label>
+                                        <input type="text" class="form-control" name="admin_panel_auth_code" id="id_admin_panel_auth_code" maxlength="512" autocomplete="off" value="{{ effective_admin_panel_auth_code }}">
+                                        <p class="sw-ap-auth-codes-modal__footnote mb-0">Очистите поле и сохраните, чтобы снова использовать значение из настроек сервера.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sw-ap-auth-codes-modal__footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn sw-ap-auth-codes-modal__submit"><i class="bi bi-check2-circle me-1"></i>Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1200,7 +2275,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'accounts/js/belarus_phone_mask.js' %}"></script>
 <script>
 (function () {
     var modal = document.getElementById('adminSetPasswordModal');
@@ -1214,9 +2288,35 @@
     function clearPasswordFields() {
         var p1 = document.getElementById('adminNewPassword');
         var p2 = document.getElementById('adminNewPasswordConfirm');
-        if (p1) p1.value = '';
-        if (p2) p2.value = '';
+        if (p1) {
+            p1.value = '';
+            p1.type = 'password';
+        }
+        if (p2) {
+            p2.value = '';
+            p2.type = 'password';
+        }
+        modal.querySelectorAll('.sw-ap-pwd-modal__pwd-toggle').forEach(function (btn) {
+            var ic = btn.querySelector('i');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-label', 'Показать пароль');
+            if (ic) ic.className = 'bi bi-eye';
+        });
     }
+
+    modal.querySelectorAll('.sw-ap-pwd-modal__pwd-field').forEach(function (wrap) {
+        var inp = wrap.querySelector('input');
+        var btn = wrap.querySelector('.sw-ap-pwd-modal__pwd-toggle');
+        var icon = btn && btn.querySelector('i');
+        if (!inp || !btn) return;
+        btn.addEventListener('click', function () {
+            var show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+            btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+            if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
 
     if (pick && uidInput) {
         pick.addEventListener('change', function () {
@@ -1260,6 +2360,70 @@
             }
         });
     }
+})();
+</script>
+<script>
+(function () {
+    var root = document.querySelector('body.sw-admin-portal-panel-page');
+    if (!root) return;
+    root.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('.sw-ap-pw-eye');
+        if (!btn || !root.contains(btn)) return;
+        var wrap = btn.closest('td.sw-ap-col-password');
+        if (!wrap) return;
+        var plain = wrap.querySelector('.sw-ap-pw-plain');
+        var masked = wrap.querySelector('.sw-ap-pw-masked');
+        var icon = btn.querySelector('i');
+        if (!plain || !masked || !icon) return;
+        var hidden = plain.classList.contains('d-none');
+        if (hidden) {
+            plain.classList.remove('d-none');
+            masked.classList.add('d-none');
+            icon.className = 'bi bi-eye-fill fs-6';
+            btn.setAttribute('aria-pressed', 'true');
+        } else {
+            plain.classList.add('d-none');
+            masked.classList.remove('d-none');
+            icon.className = 'bi bi-eye-slash-fill fs-6';
+            btn.setAttribute('aria-pressed', 'false');
+        }
+    });
+})();
+</script>
+<script>
+(function () {
+    var modal = document.getElementById('adminAddUserModal');
+    if (!modal) return;
+
+    function resetAddUserPwdToggles() {
+        modal.querySelectorAll('.sw-ap-add-user-modal__pwd-field input').forEach(function (inp) {
+            inp.type = 'password';
+        });
+        modal.querySelectorAll('.sw-ap-add-user-modal__pwd-toggle').forEach(function (btn) {
+            var ic = btn.querySelector('i');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-label', 'Показать пароль');
+            if (ic) ic.className = 'bi bi-eye';
+        });
+    }
+
+    modal.querySelectorAll('.sw-ap-add-user-modal__pwd-field').forEach(function (wrap) {
+        var inp = wrap.querySelector('input');
+        var btn = wrap.querySelector('.sw-ap-add-user-modal__pwd-toggle');
+        var icon = btn && btn.querySelector('i');
+        if (!inp || !btn) return;
+        btn.addEventListener('click', function () {
+            var show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+            btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+            if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
+
+    modal.addEventListener('show.bs.modal', function () {
+        resetAddUserPwdToggles();
+    });
 })();
 </script>
 {% if create_form.errors %}

@@ -1,9 +1,8 @@
 from django.contrib.auth import views as auth_views
-from django.urls import path, reverse_lazy
+from django.urls import path
 
 from . import views
 from . import admin_portal_views
-from .forms import StyledPasswordChangeForm
 
 app_name = 'accounts'
 
@@ -41,11 +40,7 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path(
         'password/change/',
-        auth_views.PasswordChangeView.as_view(
-            template_name='accounts/password_change_form.html',
-            form_class=StyledPasswordChangeForm,
-            success_url=reverse_lazy('accounts:password_change_done'),
-        ),
+        views.SocworkerPasswordChangeView.as_view(),
         name='password_change',
     ),
     path(

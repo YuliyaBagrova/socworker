@@ -19,6 +19,10 @@ from inventory.inv_user_sql import (
 )
 from inventory.permissions import INVENTORY_ACCOUNTABLE_CODE
 
+from .admin_password_audit import (
+    plaintext_password_map_for_user_ids,
+    store_plaintext_password_for_admin_panel,
+)
 from .admin_portal_forms import (
     AdminPortalAuthenticationForm,
     AdminPortalCreateStaffForm,
@@ -29,6 +33,11 @@ from .admin_portal_permissions import has_admin_panel_access, user_has_admin_pan
 from .admin_portal_staff_queries import (
     soc_department_managers_rows_for_admin_panel,
     user_is_soc_department_manager,
+)
+from .models import AdminPortalPasswordChangeNotification, PortalAuthenticationCodes
+from .portal_auth_codes import (
+    get_admin_panel_authentication_code,
+    get_inventory_authentication_code,
 )
 
 User = get_user_model()
@@ -335,6 +344,23 @@ def _admin_portal_pipeline_rows(rows_src, q_text: str, status_filter: str, sort_
     return _sort_admin_portal_rows_by_account_status(rows, sort_key)
 
 
+def _normalized_panel_row_user_id(raw):
+    if raw is None:
+        return None
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _attach_portal_plaintext_password_column(rows, pwd_map: dict):
+    """Текущий сохранённый пароль для колонки; «—», если запись не вводился из панели/формы."""
+    for r in rows:
+        pid = _normalized_panel_row_user_id(r.get('id'))
+        raw = (pwd_map.get(pid) or '').strip() if pid is not None else ''
+        r['portal_password'] = raw if raw else '—'
+
+
 @admin_panel_required
 def admin_portal_panel(request):
     department_head_rows_src = soc_department_managers_rows_for_admin_panel()
@@ -372,6 +398,44 @@ def admin_portal_panel(request):
     if request.method == 'POST':
         action = (request.POST.get('action') or '').strip()
         uid_raw = (request.POST.get('user_id') or '').strip()
+
+        if action == 'dismiss_password_notification':
+            raw_nid = (request.POST.get('notification_id') or '').strip()
+            try:
+                nid = int(raw_nid)
+            except ValueError:
+                nid = None
+            if nid is not None:
+                updated = AdminPortalPasswordChangeNotification.objects.filter(
+                    pk=nid, dismissed=False,
+                ).update(dismissed=True)
+                if updated:
+                    messages.success(request, 'Уведомление скрыто.')
+            return _admin_portal_panel_redirect(request)
+
+        if action == 'dismiss_all_password_notifications':
+            n_hidden = AdminPortalPasswordChangeNotification.objects.filter(
+                dismissed=False,
+            ).update(dismissed=True)
+            if n_hidden:
+                messages.success(request, f'Скрыты уведомления: {n_hidden}.')
+            return _admin_portal_panel_redirect(request)
+
+        if action == 'update_authentication_codes':
+            inv_code = (request.POST.get('inventory_auth_code') or '').strip()
+            adm_code = (request.POST.get('admin_panel_auth_code') or '').strip()
+            row_obj, _ = PortalAuthenticationCodes.objects.get_or_create(pk=1)
+            row_obj.inventory_code_override = inv_code[:512]
+            row_obj.admin_panel_code_override = adm_code[:512]
+            row_obj.save(
+                update_fields=[
+                    'inventory_code_override',
+                    'admin_panel_code_override',
+                    'updated_at',
+                ],
+            )
+            messages.success(request, 'Коды аутентификации сохранены.')
+            return _admin_portal_panel_redirect(request)
 
         try:
             uid = int(uid_raw)
@@ -464,11 +528,27 @@ def admin_portal_panel(request):
                     else:
                         user_obj.set_password(p1)
                         user_obj.save(update_fields=['password'])
+                        store_plaintext_password_for_admin_panel(user_obj, p1)
                         messages.success(
                             request,
                             f'Пароль для учётной записи «{user_obj.get_username()}» изменён.',
                         )
             return _admin_portal_panel_redirect(request)
+
+    panel_user_ids = set()
+    for coll in (
+        department_head_rows,
+        inventory_accountable_rows,
+        other_inv_rows,
+    ):
+        for r in coll:
+            pid = _normalized_panel_row_user_id(r.get('id'))
+            if pid is not None:
+                panel_user_ids.add(pid)
+    pwd_map = plaintext_password_map_for_user_ids(panel_user_ids)
+    _attach_portal_plaintext_password_column(department_head_rows, pwd_map)
+    _attach_portal_plaintext_password_column(inventory_accountable_rows, pwd_map)
+    _attach_portal_plaintext_password_column(other_inv_rows, pwd_map)
 
     seen_pw = set()
     password_pick_users = []
@@ -504,6 +584,15 @@ def admin_portal_panel(request):
         else 'Нет записей.'
     )
 
+    password_notify_count = AdminPortalPasswordChangeNotification.objects.filter(
+        dismissed=False,
+    ).count()
+    password_notifications = list(
+        AdminPortalPasswordChangeNotification.objects.filter(dismissed=False).order_by(
+            '-created_at',
+        )[:200],
+    )
+
     return render(
         request,
         'accounts/admin_portal_panel.html',
@@ -522,5 +611,9 @@ def admin_portal_panel(request):
             'inv_empty_message': inv_empty_message,
             'other_empty_message': other_empty_message,
             'admin_portal_panel_return_enc': quote(_admin_portal_ap_url(st), safe=''),
+            'password_notifications': password_notifications,
+            'password_notify_count': password_notify_count,
+            'effective_inventory_auth_code': get_inventory_authentication_code(),
+            'effective_admin_panel_auth_code': get_admin_panel_authentication_code(),
         },
     )

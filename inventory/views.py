@@ -18,6 +18,7 @@ from .forms import (
     InventoryUnitForm,
 )
 
+from accounts.admin_password_audit import remember_plaintext_password_if_missing_for_panel_tables
 from accounts.models import UserProfile
 
 from .inv_user_sql import staff_rows_for_template
@@ -91,6 +92,9 @@ def inventory_register(request):
             except RuntimeError as e:
                 messages.error(request, str(e))
             else:
+                remember_plaintext_password_if_missing_for_panel_tables(
+                    user, form.cleaned_data.get('password1') or '',
+                )
                 messages.success(
                     request,
                     'Учётная запись создана. Вам назначена роль «Ответственный за инвентарь».',

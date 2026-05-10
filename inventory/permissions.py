@@ -46,6 +46,24 @@ def has_inventory_access(user) -> bool:
     return inv_role_id_for_user(user.pk) is not None
 
 
+def is_inventory_manager_interface_user(user) -> bool:
+    """
+    Роль «Управляющий инвентарём» в UI: только код инвентаризации inventory_accountable,
+    без Django admin / панели администратора приложения.
+    Заведующий отделением (department_head) с доступом к инвентаризации сюда не входит.
+    """
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser or user.is_staff:
+        return False
+    from accounts.admin_portal_permissions import has_admin_panel_access
+
+    if has_admin_panel_access(user):
+        return False
+    code = inv_role_code_for_user(user.pk)
+    return code == INVENTORY_ACCOUNTABLE_CODE
+
+
 def can_create_inventory_unit(user) -> bool:
     """Создавать единицу учёта может любой пользователь с доступом к разделу."""
     return has_inventory_access(user)

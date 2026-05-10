@@ -1,11 +1,11 @@
 from django import forms
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db.models import Case, IntegerField, Value, When
 from accounts.belarus_phone import BY_PHONE_EXAMPLE, normalize_belarus_phone
 from accounts.forms import CustomAuthenticationForm, CustomUserCreationForm
+from accounts.portal_auth_codes import get_inventory_authentication_code
 
 from .inv_user_sql import (
     inv_inventory_fields_for_user,
@@ -142,7 +142,7 @@ class InventoryAuthenticationForm(CustomAuthenticationForm):
 
     def clean(self):
         code = (self.data.get('access_code') or '').strip()
-        expected = getattr(settings, 'INVENTORY_AUTHENTICATION_CODE', 'admin')
+        expected = get_inventory_authentication_code()
         if code != expected:
             raise ValidationError('Неверный код аутентификации.')
         return super().clean()
@@ -162,7 +162,7 @@ class InventoryRegistrationForm(CustomUserCreationForm):
 
     def clean_access_code(self):
         code = (self.cleaned_data.get('access_code') or '').strip()
-        expected = getattr(settings, 'INVENTORY_AUTHENTICATION_CODE', 'admin')
+        expected = get_inventory_authentication_code()
         if code != expected:
             raise ValidationError('Неверный код аутентификации.')
         return code

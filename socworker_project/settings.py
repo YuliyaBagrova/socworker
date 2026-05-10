@@ -144,13 +144,14 @@ LOGIN_REDIRECT_URL = '/accounts/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Секретный код аутентификации для раздела «Инвентаризация» (только сервер/начальник).
-# Задаётся переменными окружения; в интерфейсе не показывается.
+# Значение по умолчанию — переменные окружения; администратор портала может переопределить код в интерфейсе (сохраняется в БД).
 INVENTORY_AUTHENTICATION_CODE = os.environ.get(
     'INVENTORY_AUTHENTICATION_CODE',
     os.environ.get('INVENTORY_PORTAL_ACCESS_CODE', 'admin'),
 )
 
 # Вход и регистрация в «Панели администратора» (управление учётными записями инвентаризации).
+# Значение по умолчанию из окружения; при необходимости переопределяется из панели администратора (БД).
 ADMIN_PANEL_AUTHENTICATION_CODE = os.environ.get(
     'ADMIN_PANEL_AUTHENTICATION_CODE',
     'administrator',

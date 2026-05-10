@@ -6,6 +6,7 @@
 {% block header_subtitle %}Введите email и пароль{% endblock %}
 
 {% block content %}
+{% include 'accounts/includes/auth_portal_gateway_icons.html' %}
 <form method="post" action="{% url 'accounts:login' %}">
     {% csrf_token %}
     

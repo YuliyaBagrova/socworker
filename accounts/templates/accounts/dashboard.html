@@ -3,7 +3,7 @@
 
 {% block title %}Главная - SocWorker{% endblock %}
 
-{% block body_attrs %} class="dash-bg-page"{% endblock %}
+{% block body_attrs %} class="dash-bg-page{% if sw_inventory_manager_interface %} dash-page--inv-manager{% endif %}"{% endblock %}
 
 {% block inline_css %}
     /* Фон страницы: фото + насыщенные переливы (фиолет, бирюза, тёплый акцент) */
@@ -320,6 +320,42 @@
         width: 100%;
         gap: 0.5rem;
     }
+    /* Управляющий инвентарём: серая плёнка (шапка — отдельные стили .sw-nav-pill--blocked) */
+    body.dash-page--inv-manager .dash-inv-glass-lock {
+        position: relative;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+    body.dash-page--inv-manager .dash-inv-glass-lock:hover {
+        background: inherit;
+        color: inherit;
+        filter: none;
+        box-shadow: inherit;
+        transform: none;
+    }
+    body.dash-page--inv-manager .dash-side-link.dash-inv-glass-lock:hover {
+        background: transparent;
+        color: #3c4043;
+    }
+    body.dash-page--inv-manager .dash-home .sw-toolbar-btn.btn-primary.dash-inv-glass-lock:hover {
+        color: #fff;
+        filter: none;
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.dash-page--inv-manager .dash-inv-glass-lock::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: rgba(72, 74, 82, 0.34);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        pointer-events: auto;
+        z-index: 2;
+        cursor: not-allowed;
+    }
     .dash-plan-today-badge {
         font-size: 0.72rem;
         font-weight: 700;
@@ -475,7 +511,8 @@
                             Управление базой социальных работников: добавление, редактирование и просмотр карточек.
                             Всего в базе: <strong>{{ worker_count }}</strong>.
                         </p>
-                        <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-primary sw-toolbar-btn">
+                        <a href="{% url 'accounts:social_workers_list' %}" class="btn btn-primary sw-toolbar-btn{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}"
+                           {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                             Перейти к списку <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -492,7 +529,8 @@
                             База подопечных: закрепления, категории, визиты и связь с социальными работниками.
                             Сейчас в учёте: <strong>{{ recipient_count }}</strong> человек.
                         </p>
-                        <a href="{% url 'accounts:recipients_list' %}" class="btn btn-primary sw-toolbar-btn">
+                        <a href="{% url 'accounts:recipients_list' %}" class="btn btn-primary sw-toolbar-btn{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}"
+                           {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                             Перейти к списку <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -509,7 +547,8 @@
                             Учёт времени, коэффициентов и ставок, сводки по месяцам и выгрузка в отчёты.
                             За {{ dash_month }}.{{ dash_year }} в журнале: <strong>{{ workload_rows_month }}</strong> строк.
                         </p>
-                        <a href="{% url 'accounts:workload_panel' %}" class="btn btn-primary sw-toolbar-btn">
+                        <a href="{% url 'accounts:workload_panel' %}" class="btn btn-primary sw-toolbar-btn{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}"
+                           {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                             Открыть панель <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -525,7 +564,8 @@
                         <p class="text-muted mb-3">
                             Населённые пункты и карточки услуг по подопечным: удобно сверять закрепления и адреса визитов.
                         </p>
-                        <a href="{% url 'accounts:services_panel' %}" class="btn btn-primary sw-toolbar-btn">
+                        <a href="{% url 'accounts:services_panel' %}" class="btn btn-primary sw-toolbar-btn{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}"
+                           {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                             Открыть панель <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -545,7 +585,8 @@
                         <p class="text-muted mb-3">
                             Календарь запланированных визитов и задач с напоминаниями по срокам для социальных работников.
                         </p>
-                        <a href="{% url 'accounts:visit_planning' %}?tab=calendar&amp;cal=day&amp;ref={{ dash_today|date:'Y-m-d' }}" class="btn btn-primary sw-toolbar-btn">
+                        <a href="{% url 'accounts:visit_planning' %}?tab=calendar&amp;cal=day&amp;ref={{ dash_today|date:'Y-m-d' }}" class="btn btn-primary sw-toolbar-btn{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}"
+                           {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                             Открыть календарь <i class="bi bi-arrow-right"></i>
                         </a>
                     </div>
@@ -570,24 +611,29 @@
                     <a class="dash-side-link" href="{% url 'accounts:report_select' %}">
                         <i class="bi bi-file-earmark-plus"></i> Новый отчёт
                     </a>
-                    <a class="dash-side-link dash-cal-link" href="{% url 'accounts:visit_planning' %}?tab=calendar&amp;cal=day&amp;ref={{ dash_today|date:'Y-m-d' }}"
-                       title="Открыть календарь на сегодня; цифра — визиты и задачи на сегодня">
+                    <a class="dash-side-link dash-cal-link{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}" href="{% url 'accounts:visit_planning' %}?tab=calendar&amp;cal=day&amp;ref={{ dash_today|date:'Y-m-d' }}"
+                       title="{% if sw_inventory_manager_interface %}Раздел недоступен для роли «Управляющий инвентарём»{% else %}Открыть календарь на сегодня; цифра — визиты и задачи на сегодня{% endif %}"
+                       {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true"{% endif %}>
                         <span class="d-flex align-items-center gap-2 min-w-0">
                             <i class="bi bi-calendar3 flex-shrink-0"></i>
                             <span class="text-truncate">Календарь и планирование</span>
                         </span>
                         <span class="dash-plan-today-badge badge rounded-pill {% if planning_today_count %}bg-danger text-white badge-lit{% else %}bg-light text-secondary border{% endif %}">{{ planning_today_count }}</span>
                     </a>
-                    <a class="dash-side-link" href="{% url 'accounts:recipients_list' %}">
+                    <a class="dash-side-link{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}" href="{% url 'accounts:recipients_list' %}"
+                       {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                         <i class="bi bi-person-lines-fill"></i> Подопечные
                     </a>
-                    <a class="dash-side-link" href="{% url 'accounts:workload_panel' %}?year={{ dash_year }}&month={{ dash_month }}">
+                    <a class="dash-side-link{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}" href="{% url 'accounts:workload_panel' %}?year={{ dash_year }}&month={{ dash_month }}"
+                       {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                         <i class="bi bi-calculator"></i> Расчёт нагрузки за месяц
                     </a>
-                    <a class="dash-side-link" href="{% url 'accounts:medical_checkup_panel' %}">
+                    <a class="dash-side-link{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}" href="{% url 'accounts:medical_checkup_panel' %}"
+                       {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                         <i class="bi bi-heart-pulse"></i> Медосмотр
                     </a>
-                    <a class="dash-side-link" href="{% url 'accounts:safety_briefing_panel' %}">
+                    <a class="dash-side-link{% if sw_inventory_manager_interface %} dash-inv-glass-lock{% endif %}" href="{% url 'accounts:safety_briefing_panel' %}"
+                       {% if sw_inventory_manager_interface %}tabindex="-1" aria-disabled="true" title="Раздел недоступен для роли «Управляющий инвентарём»"{% endif %}>
                         <i class="bi bi-shield-check"></i> Техника безопасности
                     </a>
                     <a class="dash-side-link" href="{% url 'inventory:panel' %}">

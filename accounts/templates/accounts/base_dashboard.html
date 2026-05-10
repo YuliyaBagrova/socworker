@@ -417,6 +417,38 @@
         }
         .top-nav-main .nav-pill.active i { color: var(--accent); }
 
+        /* Инвентаризация: лёгкая плёнка без размытия (как на соседних кнопках шапки) */
+        .top-nav-main .nav-pill.sw-nav-pill--blocked {
+            position: relative;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(255, 255, 255, 0.16);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:focus-visible {
+            outline: none;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(230, 235, 243, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+            cursor: not-allowed;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
         .top-navbar .user-area {
             position: relative;
             z-index: 2;
@@ -1437,38 +1469,45 @@
                    href="{% url 'accounts:dashboard' %}">
                     <i class="bi bi-house-door-fill"></i> Главная
                 </a>
-                <a class="nav-pill {% if 'social_worker' in request.resolver_match.url_name or 'assigned_persons' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:social_workers_list' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'social_worker' in request.resolver_match.url_name or 'assigned_persons' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:social_workers_list' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-people-fill"></i> Соц. работники
                 </a>
-                <a class="nav-pill {% if 'recipient' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:recipients_list' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'recipient' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:recipients_list' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-person-heart"></i> Получатели услуг
                 </a>
-                <a class="nav-pill {% if 'services' in request.resolver_match.url_name or 'location' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:services_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'services' in request.resolver_match.url_name or 'location' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:services_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-briefcase-fill"></i> Услуги
                 </a>
-                <a class="nav-pill {% if 'visit_planning' in request.resolver_match.url_name or 'planned_visit' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'visit_planning' in request.resolver_match.url_name or 'planned_visit' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-calendar-week"></i> Планирование визитов
                 </a>
             </div>
             <div class="top-nav-main top-nav-row-secondary">
-                <a class="nav-pill {% if 'workload' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:workload_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'workload' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:workload_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-calculator"></i> Расчёт нагрузки
                 </a>
                 <a class="nav-pill {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
                    href="{% url 'inventory:panel' %}">
                     <i class="bi bi-box-seam"></i> Инвентаризация
                 </a>
-                <a class="nav-pill {% if request.resolver_match.url_name == 'medical_checkup_panel' %}active{% endif %}"
-                   href="{% url 'accounts:medical_checkup_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if request.resolver_match.url_name == 'medical_checkup_panel' %}active{% endif %}"
+                   href="{% url 'accounts:medical_checkup_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-heart-pulse"></i> Прохождение медосмотра
                 </a>
-                <a class="nav-pill {% if 'safety_briefing' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:safety_briefing_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'safety_briefing' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:safety_briefing_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-shield-check"></i> Техника безопасности
                 </a>
             </div>
@@ -1819,6 +1858,31 @@
             handle.addEventListener('pointerup', endDrag);
             handle.addEventListener('pointercancel', endDrag);
         }
+
+        (function setupBlockedUiNavLinks() {
+            function blockedAnchorFromTarget(t) {
+                return t && t.closest ? t.closest('a.sw-nav-pill--blocked, a.dash-inv-glass-lock') : null;
+            }
+            document.addEventListener('click', function (ev) {
+                var a = blockedAnchorFromTarget(ev.target);
+                if (!a) return;
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+            }, true);
+            document.addEventListener('auxclick', function (ev) {
+                if (ev.button !== 1) return;
+                var a = blockedAnchorFromTarget(ev.target);
+                if (!a) return;
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+            }, true);
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                var t = ev.target;
+                if (!t || !t.matches || !t.matches('a.sw-nav-pill--blocked, a.dash-inv-glass-lock')) return;
+                ev.preventDefault();
+            }, true);
+        })();
 
         document.addEventListener('DOMContentLoaded', function () {
             setupDraggableUserMenu();

@@ -227,8 +227,36 @@
         </div>
     </header>
 
-    <div class="row sw-reports-grid justify-content-center">
-    <!-- Соц. работники -->
+    <div class="row sw-reports-grid justify-content-start">
+    {% if show_inventory_reports %}
+    <!-- Инвентаризация (для роли «Управляющий инвентарём» на странице остаётся только этот блок, слева в ряду) -->
+    <div class="col-md-6 col-lg-3">
+        <article class="sw-report-tile">
+            <div class="sw-report-tile__pad">
+                <div class="sw-report-tile__icon sw-report-tile__icon--inventory" aria-hidden="true">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h2 class="sw-report-tile__title">Инвентаризация</h2>
+                <p class="sw-report-tile__lead">
+                    Выгрузить единицы учёта с инвентарными номерами, названием, стоимостью и ответственными.
+                </p>
+                <div class="sw-report-tile__actions">
+                    <button type="button" class="btn btn-sm sw-toolbar-btn sw-report-btn-pdf" data-bs-toggle="modal" data-bs-target="#confirmPdfInventory">
+                        <i class="bi bi-download"></i> Скачать PDF
+                    </button>
+                    <button type="button" class="btn btn-sm sw-toolbar-btn sw-report-btn-csv" data-bs-toggle="modal" data-bs-target="#confirmCsvInventory">
+                        <i class="bi bi-filetype-csv"></i> Скачать CSV
+                    </button>
+                    <a href="{% url 'inventory:panel' %}#inv-panel-table" class="panel-link">
+                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
+                    </a>
+                </div>
+            </div>
+        </article>
+    </div>
+    {% endif %}
+    {% if not sw_inventory_manager_interface %}
+    <!-- Социальные работники -->
     <div class="col-md-6 col-lg-3">
         <article class="sw-report-tile">
             <div class="sw-report-tile__pad">
@@ -429,37 +457,12 @@
             </div>
         </article>
     </div>
-    {% if show_inventory_reports %}
-    <!-- Инвентаризация -->
-    <div class="col-md-6 col-lg-3">
-        <article class="sw-report-tile">
-            <div class="sw-report-tile__pad">
-                <div class="sw-report-tile__icon sw-report-tile__icon--inventory" aria-hidden="true">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-                <h2 class="sw-report-tile__title">Инвентаризация</h2>
-                <p class="sw-report-tile__lead">
-                    Выгрузить единицы учёта с инвентарными номерами, названием, стоимостью и ответственными.
-                </p>
-                <div class="sw-report-tile__actions">
-                    <button type="button" class="btn btn-sm sw-toolbar-btn sw-report-btn-pdf" data-bs-toggle="modal" data-bs-target="#confirmPdfInventory">
-                        <i class="bi bi-download"></i> Скачать PDF
-                    </button>
-                    <button type="button" class="btn btn-sm sw-toolbar-btn sw-report-btn-csv" data-bs-toggle="modal" data-bs-target="#confirmCsvInventory">
-                        <i class="bi bi-filetype-csv"></i> Скачать CSV
-                    </button>
-                    <a href="{% url 'inventory:panel' %}#inv-panel-table" class="panel-link">
-                        <i class="bi bi-funnel"></i> Выгрузить выбранные на панели
-                    </a>
-                </div>
-            </div>
-        </article>
-    </div>
     {% endif %}
     </div>
 </div>
 
 <!-- Подтверждение: только на этой странице -->
+{% if not sw_inventory_manager_interface %}
 <div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfSocialWorkers" tabindex="-1" aria-labelledby="confirmPdfSocialWorkersLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -671,6 +674,7 @@
     </div>
 </div>
 
+{% endif %}
 {% if show_inventory_reports %}
 <div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="confirmPdfInventory" tabindex="-1" aria-labelledby="confirmPdfInventoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -700,6 +704,7 @@
 
 {% endif %}
 
+{% if not sw_inventory_manager_interface %}
 <!-- CSV -->
 <div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvSocialWorkers" tabindex="-1" aria-labelledby="confirmCsvSocialWorkersLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -912,6 +917,7 @@
     </div>
 </div>
 
+{% endif %}
 {% if show_inventory_reports %}
 <div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="confirmCsvInventory" tabindex="-1" aria-labelledby="confirmCsvInventoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

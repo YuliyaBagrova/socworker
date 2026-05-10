@@ -288,6 +288,86 @@
         .auth-container .btn-link.text-muted:hover {
             color: var(--auth-accent) !important;
         }
+
+        /* Быстрый переход: Панель администратора / Инвентаризация */
+        .auth-portal-gateway {
+            text-align: center;
+            margin: 0 0 1.35rem;
+            padding-bottom: 1.05rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-portal-gateway__hint {
+            margin: 0 0 0.65rem;
+            font-size: 0.74rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            color: rgba(226, 232, 240, 0.48);
+            line-height: 1.3;
+        }
+
+        .auth-portal-gateway__row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .auth-portal-gateway__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(248, 250, 252, 0.95);
+            text-decoration: none;
+            font-size: 1.28rem;
+            line-height: 1;
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease,
+                color 0.15s ease;
+        }
+
+        .auth-portal-gateway__btn:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.26);
+            box-shadow:
+                0 10px 24px rgba(15, 10, 35, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+
+        .auth-portal-gateway__btn:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 3px var(--auth-accent-soft),
+                0 10px 24px rgba(15, 10, 35, 0.35);
+            border-color: rgba(167, 139, 250, 0.45);
+        }
+
+        .auth-portal-gateway__btn--admin:hover {
+            border-color: rgba(251, 113, 133, 0.45);
+            background: rgba(251, 113, 133, 0.12);
+        }
+
+        .auth-portal-gateway__btn--inv:hover {
+            border-color: rgba(45, 212, 191, 0.4);
+            background: rgba(45, 212, 191, 0.1);
+            color: #ecfdf8;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>

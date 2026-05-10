@@ -1,11 +1,16 @@
 from django import forms
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
-from accounts.forms import CustomAuthenticationForm, CustomUserCreationForm
+from .admin_password_audit import store_plaintext_password_for_admin_panel
+from .forms import CustomAuthenticationForm, CustomUserCreationForm
+from .portal_auth_codes import get_admin_panel_authentication_code
 from accounts.models import UserProfile
 from inventory.forms import InventoryStaffForm
+from inventory.inv_user_sql import update_auth_user_inventory
 from inventory.models import InvRole
+
+User = get_user_model()
 
 ALLOWED_ADMIN_PORTAL_STAFF_ROLE_CODES = ('inventory_accountable', 'department_head')
 
@@ -24,7 +29,7 @@ class AdminPortalAuthenticationForm(CustomAuthenticationForm):
 
     def clean(self):
         code = (self.data.get('access_code') or '').strip()
-        expected = getattr(settings, 'ADMIN_PANEL_AUTHENTICATION_CODE', 'administrator')
+        expected = get_admin_panel_authentication_code()
         if code != expected:
             raise ValidationError('Неверный код аутентификации для панели администратора.')
         return super().clean()
@@ -44,7 +49,7 @@ class AdminPortalRegistrationForm(CustomUserCreationForm):
 
     def clean_access_code(self):
         code = (self.cleaned_data.get('access_code') or '').strip()
-        expected = getattr(settings, 'ADMIN_PANEL_AUTHENTICATION_CODE', 'administrator')
+        expected = get_admin_panel_authentication_code()
         if code != expected:
             raise ValidationError('Неверный код аутентификации для панели администратора.')
         return code
@@ -69,3 +74,32 @@ class AdminPortalCreateStaffForm(InventoryStaffForm):
         self.fields['role'].queryset = InvRole.objects.filter(
             code__in=ALLOWED_ADMIN_PORTAL_STAFF_ROLE_CODES,
         ).order_by('name')
+        del self.fields['department']
+        del self.fields['phone']
+
+    def save(self):
+        data = self.cleaned_data
+        user = User.objects.create_user(
+            username=data['username'],
+            password=data['password1'],
+            email='',
+        )
+        role = data['role']
+        parts = (data.get('full_name') or '').strip().split(None, 1)
+        if len(parts) >= 2:
+            ln, fn = parts[0], parts[1]
+        elif parts:
+            ln, fn = parts[0], ''
+        else:
+            ln, fn = '', ''
+        update_auth_user_inventory(
+            user.pk,
+            inv_role_id=role.pk,
+            inv_department_id=None,
+            inv_position=(data.get('position') or '').strip(),
+            inv_phone='',
+            last_name=ln,
+            first_name=fn,
+        )
+        store_plaintext_password_for_admin_panel(user, data['password1'])
+        return user
