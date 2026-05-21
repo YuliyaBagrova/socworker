@@ -321,29 +321,92 @@
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
         background: #fff;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+    /* «Найти» / сброс — как панель «Инвентаризация»; иконка — bi-search */
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .wk-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .wk-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit {
         border: none;
         border-radius: 12px;
         font-weight: 700;
-        font-size: 0.9rem;
         letter-spacing: 0.03em;
-        padding: 0.62rem 1rem;
-        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
         box-shadow:
-            0 4px 18px rgba(99, 102, 241, 0.38),
+            0 4px 18px rgba(102, 126, 234, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
         transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn,
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset.wk-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn i,
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset.wk-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit:hover {
         color: #fff;
         transform: translateY(-2px);
-        filter: brightness(1.06);
+        filter: brightness(1.04);
         box-shadow:
-            0 10px 28px rgba(102, 126, 234, 0.42),
+            0 8px 28px rgba(118, 75, 162, 0.38),
             inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash .btn.btn-primary.wk-filter-submit:active {
         transform: translateY(0);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-filter-dash a.wk-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     .sw-sheet-wrap {
         overflow-x: auto;
@@ -570,6 +633,382 @@
     .sw-workers-layout .sw-table-card .pagination-wrap {
         flex-shrink: 0;
     }
+    /* Справка — структура как «Прохождение медосмотра», палитра панели */
+    body.sw-workers-page .sw-workers-page-guide {
+        flex-shrink: 0;
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-page-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 243, 255, 0.72) 42%, rgba(237, 233, 254, 0.55) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        box-shadow:
+            0 4px 6px -1px rgba(45, 38, 82, 0.06),
+            0 12px 28px -8px rgba(102, 126, 234, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-workers-page .sw-filter-dash.sw-workers-page-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #a5b4fc 0%, #667eea 48%, #5b21b6 100%);
+        opacity: 0.95;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #5b21b6;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 233, 254, 0.9) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #3d2f5c;
+        margin: 0;
+        line-height: 1.3;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        background: rgba(102, 126, 234, 0.14);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__toggle:hover {
+        background: rgba(102, 126, 234, 0.22);
+        border-color: rgba(79, 70, 229, 0.45);
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.4);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(91, 33, 182, 0.12);
+        border-color: rgba(91, 33, 182, 0.4);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    body.sw-workers-page .sw-workers-page-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 243, 255, 0.65) 50%, rgba(237, 233, 254, 0.5) 100%);
+        border: 1px solid rgba(199, 210, 254, 0.65);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 4px 20px rgba(45, 38, 82, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    body.sw-workers-page #swWorkersGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(102, 126, 234, 0.75);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__lead strong {
+        color: #3d2f5c;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #667eea, #7c3aed);
+        box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.6);
+    }
+    body.sw-workers-page .sw-workers-page-guide .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #4c1d95;
+    }
+    /* Расширенная справка — секции, сетка, акценты */
+    body.sw-workers-page .sw-workers-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.85) 45%, rgba(224, 231, 255, 0.55) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.35);
+        box-shadow: 0 2px 16px rgba(67, 56, 202, 0.06);
+    }
+    body.sw-workers-page .sw-workers-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4338ca;
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-workers-page .sw-workers-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-workers-page .sw-workers-guide-intro__text strong {
+        color: #312e81;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(199, 210, 254, 0.55);
+    }
+    body.sw-workers-page .sw-workers-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-workers-page .sw-workers-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #3730a3;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-workers-page .sw-workers-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+        box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28);
+    }
+    body.sw-workers-page .sw-workers-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-workers-page .sw-workers-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-workers-page .sw-workers-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-workers-page .sw-workers-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(199, 210, 254, 0.55);
+        box-shadow: 0 2px 10px rgba(30, 27, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-workers-page .sw-workers-guide-card:hover {
+        border-color: rgba(129, 140, 248, 0.65);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    }
+    body.sw-workers-page .sw-workers-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-workers-page .sw-workers-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-workers-page .sw-workers-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #eab308;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-workers-page .sw-workers-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-workers-page .sw-workers-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.55) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.4);
+        border-left: 4px solid #6366f1;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #312e81;
+    }
+    body.sw-workers-page .sw-workers-guide-tip strong {
+        color: #1e1b4b;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399, #059669);
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+    body.sw-workers-page .sw-workers-guide-list-rich > li strong {
+        color: #3730a3;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-workers-page .sw-workers-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-workers-page .sw-workers-guide-ol li::marker {
+        color: #6366f1;
+        font-weight: 700;
+    }
+    body.sw-workers-page .sw-workers-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #4338ca;
+        background: rgba(238, 242, 255, 0.95);
+        border: 1px solid rgba(165, 180, 252, 0.75);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-workers-page .sw-workers-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-workers-page .sw-workers-page-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
+    /* Плавный scroll к таблице: учёт фиксированной шапки */
+    body.sw-workers-page #sw-panel-export-table {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -599,7 +1038,113 @@
     </div>
 </div>
 
-<div class="sw-filter-dash mb-0">
+<div class="sw-filter-dash mb-0 sw-services-guide sw-workers-page-guide">
+    <div class="sw-filter-dash-inner sw-services-guide__inner">
+        <div class="sw-services-guide__top">
+            <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+            <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="sw-services-guide__title">Справка по разделу «Социальные работники»</span>
+                <button type="button" id="swWorkersGuideToggle" class="sw-services-guide__toggle"
+                        data-bs-toggle="collapse" data-bs-target="#swWorkersGuideCollapse"
+                        aria-expanded="false" aria-controls="swWorkersGuideCollapse">
+                    Как пользоваться
+                    <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse" id="swWorkersGuideCollapse">
+            <div class="sw-services-guide__panel">
+                <div class="sw-workers-guide-intro">
+                    <div class="sw-workers-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                    <p class="sw-workers-guide-intro__text">
+                        Панель <strong>Социальные работники</strong> — центральный реестр кадров: здесь ведётся учёт табельных номеров, контактов, статусов занятости и сведений о медосмотре.
+                        Интерфейс выполнен в едином стиле приложения: «стеклянные» карточки, фиолетово-индиго акценты и удобные фильтры, чтобы быстро находить нужного сотрудника.
+                    </p>
+                </div>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-purpose">
+                    <h3 id="sw-guide-purpose" class="sw-workers-guide-h"><i class="bi bi-bullseye" aria-hidden="true"></i>Назначение и состав данных</h3>
+                    <p class="sw-workers-guide-p">
+                        Каждая строка таблицы соответствует одному социальному работнику в базе. Карточка связана с другими разделами системы (закрепление подопечных, панель медосмотра, учёт нагрузки и отчёты), поэтому актуальность списка важна для всей учётной цепочки.
+                    </p>
+                    <div class="sw-workers-guide-grid" role="list">
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">№</p>
+                            <p class="sw-workers-guide-card__text">Уникальный порядковый номер в организации. После удаления записи номера у оставшихся сотрудников пересчитываются подряд (1, 2, 3…).</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">ФИО и год рожд.</p>
+                            <p class="sw-workers-guide-card__text">Фамилия, имя, отчество и год для быстрой идентификации. Нажмите на ФИО, чтобы открыть карточку.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Контакты</p>
+                            <p class="sw-workers-guide-card__text">Телефон в формате РБ и адрес — для связи и для согласованности с подопечными и отчётами.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Мед. осмотр</p>
+                            <p class="sw-workers-guide-card__text">Сводный статус годового контроля. Подробные сроки и назначения ведутся в разделе «Прохождение медосмотра».</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Статус</p>
+                            <p class="sw-workers-guide-card__text">Активный, отпуск, больничный и др. Используйте фильтр по статусу, чтобы видеть, кто доступен для распределения нагрузки.</p>
+                        </div>
+                        <div class="sw-workers-guide-card" role="listitem">
+                            <p class="sw-workers-guide-card__title">Действия</p>
+                            <p class="sw-workers-guide-card__text">Просмотр карточки, редактирование полей и удаление записи. Удаление необратимо для строки списка (после подтверждения).</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-filters">
+                    <h3 id="sw-guide-filters" class="sw-workers-guide-h"><i class="bi bi-sliders2" aria-hidden="true"></i>Поиск, фильтр и сортировка</h3>
+                    <ol class="sw-workers-guide-ol">
+                        <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону или фрагменту адреса.</li>
+                        <li>При необходимости выберите <strong>статус</strong> в выпадающем списке (или оставьте «Все статусы»).</li>
+                        <li>Задайте <strong>сортировку</strong>: по № по возрастанию или убыванию либо по фамилии (А–Я).</li>
+                        <li>Нажмите <span class="sw-workers-guide-kbd">Найти</span> (иконка лупы) — таблица обновится с учётом условий. Кнопка <span class="sw-workers-guide-kbd">↺</span> сбрасывает поиск, статус и сортировку к умолчанию.</li>
+                    </ol>
+                    <div class="sw-workers-guide-tip">
+                        <strong>Совет:</strong> сортировка по № удобна для сверки с бухгалтерскими или кадровыми журналами, где порядок номеров совпадает с порядком строк в приложении после пересчёта.
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-export">
+                    <h3 id="sw-guide-export" class="sw-workers-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>Выгрузка PDF и CSV</h3>
+                    <p class="sw-workers-guide-p">
+                        В шапке раздела доступны кнопки <strong>PDF</strong> и <strong>CSV</strong>. В модальном окне можно выбрать: выгрузить <em>весь список по текущим фильтрам</em> (все страницы выборки) или только строки, <em>отмеченные галочкой</em> на активной странице таблицы.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li><strong>PDF</strong> — компактная табличная вёрстка для печати и архива.</li>
+                        <li><strong>CSV</strong> — текстовый формат для Excel и внешней аналитики; разделители и кодировка подходят для типовой работы в РФ.</li>
+                    </ul>
+                    <div class="sw-workers-guide-note">
+                        <strong>Важно:</strong> перед выгрузкой убедитесь, что фильтры и поиск настроены так, как нужно для отчёта. Для «только отмеченные» сначала отметьте строки в первой колонке таблицы.
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-actions">
+                    <h3 id="sw-guide-actions" class="sw-workers-guide-h"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i>Работа со строкой и карточкой</h3>
+                    <p class="sw-workers-guide-p">
+                        Используйте кнопки в колонке «Действия»: глаз — просмотр карточки без переключения режимов списка, карандаш — форма редактирования всех полей работника, корзина — удаление с подтверждением на отдельной странице.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li>Добавление нового сотрудника — кнопка <strong>«Добавить работника»</strong> в шапке (откроется пошаговая форма в стиле приложения).</li>
+                        <li>Связь «кому закреплены подопечные» — раздел <strong>«Закреплённые лица»</strong> для наглядной матрицы работников и получателей услуг.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="sw-guide-pagination">
+                    <h3 id="sw-guide-pagination" class="sw-workers-guide-h"><i class="bi bi-layout-three-columns" aria-hidden="true"></i>Пагинация и чекбоксы</h3>
+                    <p class="sw-workers-guide-p">
+                        Таблица разбита на страницы для быстрой загрузки. Галочки в первой колонке относятся к строкам <em>текущей страницы</em>; при выгрузке «только отмеченные» перейдите по страницам и отметьте нужных сотрудников или выберите полный список в окне выгрузки.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sw-filter-dash mb-0 sw-workers-filter-dash">
     <div class="sw-filter-dash-inner">
         <h2 class="sw-page-title sw-filter-panel-heading mb-0">
             <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
@@ -634,33 +1179,29 @@
             <div class="col-12 col-lg-3">
                 <label for="sort" class="sw-filter-label d-block">Сортировка</label>
                 <div class="sw-select-wrap">
-                    <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="При смене варианта список обновится"
-                            onchange="this.form.submit()">
-                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>Таб. № (с начала: 1, 2, 3…)</option>
-                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>Таб. № (с конца: …3, 2, 1)</option>
+                    <select class="form-select sw-status-select sw-select-native" id="sort" name="sort" title="Сортировка применится после нажатия «Найти»">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
                         <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
                     </select>
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
-            <div class="col-12 col-lg-2">
-                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
-                    <i class="bi bi-search"></i> Найти
-                </button>
+            <div class="col-12 col-lg wk-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wk-filter-actions" id="wk-filter-actions">
+                    <button type="submit" class="btn btn-primary wk-filter-submit wk-filter-icon-btn" aria-label="Найти по поиску и фильтрам">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:social_workers_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="wk-filter-reset wk-filter-icon-btn" id="wk-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить поиск, статус и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-            {% if has_active_filters %}
-            <div class="col-12 pt-1">
-                <a href="{% url 'accounts:social_workers_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="bi bi-x-lg"></i> Показать всех работников
-                </a>
-                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск и фильтр по статусу</span>
-            </div>
-            {% endif %}
         </form>
     </div>
 </div>
 
-<div class="card sw-table-card">
+<div class="card sw-table-card" id="sw-panel-export-table">
     <div class="card-body p-0">
         {% if page_obj %}
             <div class="sw-sheet-wrap">
@@ -671,7 +1212,7 @@
                                 <input type="checkbox" class="form-check-input" id="socialWorkerSelectAll"
                                        aria-label="Отметить всех на странице">
                             </th>
-                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-narrow">№</th>
                             <th class="col-text-left">ФИО</th>
                             <th class="col-narrow">Год рожд.</th>
                             <th class="col-text-left">Адрес</th>
@@ -794,34 +1335,41 @@
 
 <form id="socialWorkersPdfForm" method="post" action="{% url 'accounts:report_pdf' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="hidden" name="scope" id="socialWorkersPdfScope" value="all">
     <span id="socialWorkersPdfIdFields"></span>
 </form>
 
 <form id="socialWorkersCsvForm" method="post" action="{% url 'accounts:report_csv' 'social_workers' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="hidden" name="scope" id="socialWorkersCsvScope" value="all">
     <span id="socialWorkersCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="socialWorkersPdfModal" tabindex="-1" aria-labelledby="socialWorkersPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="socialWorkersPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="socialWorkersPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="swPdfScopeAll">
                             Весь список социальных работников
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и фильтра по статусу на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_pdf_scope_choice" id="swPdfScopeSelected" value="selected">
@@ -832,34 +1380,35 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="socialWorkersPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="socialWorkersPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="socialWorkersCsvModal" tabindex="-1" aria-labelledby="socialWorkersCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="socialWorkersCsvModal" tabindex="-1" aria-labelledby="socialWorkersCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="socialWorkersCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="socialWorkersCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="swCsvScopeAll">
                             Весь список социальных работников
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и фильтра по статусу на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="sw_csv_scope_choice" id="swCsvScopeSelected" value="selected">
@@ -870,10 +1419,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="socialWorkersCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="socialWorkersCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>
@@ -886,6 +1435,84 @@
 (function () {
     const selectAll = document.getElementById('socialWorkerSelectAll');
     const modalConfirm = document.getElementById('socialWorkersPdfConfirm');
+    const tableAnchor = document.getElementById('sw-panel-export-table');
+    const SCROLL_AFTER_FILTER_KEY = 'swWorkersScrollToResults';
+
+    function scrollToExportTable() {
+        if (tableAnchor) {
+            tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var filterForm = document.querySelector('.sw-workers-filter-dash form[method="get"]');
+    if (filterForm) {
+        filterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var resetLink = document.getElementById('wk-filter-reset-link');
+    if (resetLink) {
+        resetLink.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+    document.querySelectorAll('.pagination-wrap a.page-link[href]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
+    }
+
+    document.querySelectorAll('input[name="sw_pdf_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+    document.querySelectorAll('input[name="sw_csv_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+
     if (selectAll) {
         selectAll.addEventListener('change', function () {
             document.querySelectorAll('.social-worker-select').forEach(function (cb) {
@@ -905,7 +1532,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.social-worker-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного работника в таблице или выберите «Весь список социальных работников».');
+                    var pdfModal = document.getElementById('socialWorkersPdfModal');
+                    var pdfInst = pdfModal && window.bootstrap ? bootstrap.Modal.getInstance(pdfModal) : null;
+                    if (pdfInst) {
+                        pdfInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного работника в таблице ниже или выберите «Весь список социальных работников».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {
@@ -932,7 +1567,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.social-worker-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного работника в таблице или выберите «Весь список социальных работников».');
+                    var csvModal = document.getElementById('socialWorkersCsvModal');
+                    var csvInst = csvModal && window.bootstrap ? bootstrap.Modal.getInstance(csvModal) : null;
+                    if (csvInst) {
+                        csvInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного работника в таблице ниже или выберите «Весь список социальных работников».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {

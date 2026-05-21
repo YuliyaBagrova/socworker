@@ -1,0 +1,137 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Назначить медосмотр — SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-medical-assign-page sw-form-page-enter"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/medical_assign_form_theme.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header sw-entity-form-header">
+    <h1 class="medical-assign-page-title mb-0">
+        <span class="medical-assign-page-title__icon" aria-hidden="true"><i class="bi bi-calendar2-plus"></i></span>
+        <span class="medical-assign-page-title__label">Назначить медосмотр</span>
+    </h1>
+    <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:medical_checkup_panel' %}{% endif %}" class="medical-assign-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели медосмотра
+    </a>
+</div>
+
+{% if not assignable_workers %}
+<div class="alert alert-info border-0 rounded-3 shadow-sm" style="border-left: 4px solid #22c55e !important;">
+    <p class="mb-0">Все сотрудники уже учтены в панели медосмотра. Добавьте нового соцработника в разделе «Соц. работники» или уберите сотрудника из панели, чтобы снова назначить медосмотр.</p>
+</div>
+{% else %}
+<div class="card medical-assign-form-card">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+
+            <div class="section-title"><i class="bi bi-person-plus"></i> Назначить сотрудника</div>
+            <div class="mb-3">
+                <label class="form-label" for="assign_worker_pk">Сотрудник</label>
+                <select name="worker_pk" id="assign_worker_pk" class="form-select" required>
+                    <option value="">Выберите…</option>
+                    {% for sw in assignable_workers %}
+                    <option value="{{ sw.pk }}" data-emp="{{ sw.employee_id|default:'' }}" data-fullname="{{ sw.get_full_name|escape }}">{{ sw.get_full_name }} ({{ sw.employee_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="section-title"><i class="bi bi-person-badge"></i> Данные сотрудника</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="assign_worker_emp_id">Табельный номер</label>
+                    <input type="text" class="form-control" id="assign_worker_emp_id" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="assign_worker_name">Соц. работник</label>
+                    <input type="text" class="form-control" id="assign_worker_name" value="" readonly tabindex="-1" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-clipboard2-pulse"></i> Медосмотр</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ assign_medical_form.medical_checkup.id_for_label }}" class="form-label">{{ assign_medical_form.medical_checkup.label }}</label>
+                    {{ assign_medical_form.medical_checkup }}
+                    {% if assign_medical_form.medical_checkup.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.medical_checkup.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ assign_medical_form.mc_ok_12.id_for_label }}" class="form-label">{{ assign_medical_form.mc_ok_12.label }}</label>
+                    {{ assign_medical_form.mc_ok_12 }}
+                    {% if assign_medical_form.mc_ok_12.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.mc_ok_12.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label for="{{ assign_medical_form.last_medical_checkup_date.id_for_label }}" class="form-label">{{ assign_medical_form.last_medical_checkup_date.label }}</label>
+                    {{ assign_medical_form.last_medical_checkup_date }}
+                    {% if assign_medical_form.last_medical_checkup_date.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.last_medical_checkup_date.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ assign_medical_form.valid_until.id_for_label }}" class="form-label">{{ assign_medical_form.valid_until.label }}</label>
+                    {{ assign_medical_form.valid_until }}
+                    <div class="form-text small text-muted">При заполнении «Годен до» дата последнего осмотра пересчитывается (минус 365 дн.)</div>
+                    {% if assign_medical_form.valid_until.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.valid_until.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ assign_medical_form.medical_checkup_planned_date.id_for_label }}" class="form-label">{{ assign_medical_form.medical_checkup_planned_date.label }}</label>
+                    {{ assign_medical_form.medical_checkup_planned_date }}
+                    {% if assign_medical_form.medical_checkup_planned_date.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.medical_checkup_planned_date.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ assign_medical_form.medical_notes.id_for_label }}" class="form-label">{{ assign_medical_form.medical_notes.label }}</label>
+                {{ assign_medical_form.medical_notes }}
+                {% if assign_medical_form.medical_notes.errors %}<div class="text-danger small mt-1">{{ assign_medical_form.medical_notes.errors }}</div>{% endif %}
+            </div>
+
+            {% if assign_medical_form.non_field_errors %}
+            <div class="alert alert-danger">{{ assign_medical_form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:medical_checkup_panel' %}{% endif %}" class="btn btn-outline-secondary medical-assign-btn-cancel">Отмена</a>
+                <button type="submit" class="btn btn-primary medical-assign-btn-save"><i class="bi bi-check-circle"></i> Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if assignable_workers %}
+<script>
+(function () {
+    const select = document.getElementById('assign_worker_pk');
+    const emp = document.getElementById('assign_worker_emp_id');
+    const name = document.getElementById('assign_worker_name');
+    function sync() {
+        if (!select || !emp || !name) return;
+        const opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) {
+            emp.value = '';
+            name.value = '';
+            return;
+        }
+        emp.value = opt.getAttribute('data-emp') || '';
+        name.value = opt.getAttribute('data-fullname') || '';
+    }
+    if (select) {
+        select.addEventListener('change', sync);
+        sync();
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -236,6 +236,12 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.92);
         overflow: hidden;
     }
+    /* Без записей: не растягивать «стеклянную» карточку на всю ширину — только чуть шире блока с текстом */
+    .sw-srv-table-card--empty {
+        align-self: center;
+        width: fit-content;
+        max-width: 100%;
+    }
     .sw-srv-table-wrap {
         overflow-x: auto;
         overflow-y: visible;
@@ -454,19 +460,19 @@
             <p class="sw-srv-context__title mb-0">{{ worker.get_full_name }}</p>
             <p class="sw-srv-context__meta mt-2 mb-0">
                 Место оказания услуг: <strong>{{ location.get_location_type_display }} {{ location.name }}</strong>
-                <span class="text-muted"> · таб. № работника {{ worker.employee_id }}</span>
+                <span class="text-muted"> · № работника {{ worker.employee_id }}</span>
             </p>
         </div>
     </div>
 
-    <div class="sw-srv-table-card">
+    <div class="sw-srv-table-card{% if not recipients %} sw-srv-table-card--empty{% endif %}">
         <div class="card-body p-0">
             {% if recipients %}
                 <div class="sw-srv-table-wrap">
                     <table class="sw-srv-sheet mb-0">
                         <thead>
                             <tr>
-                                <th class="col-narrow">Таб. №</th>
+                                <th class="col-narrow">№</th>
                                 <th class="col-text-left">Ф.И.О. обслуживаемого гражданина</th>
                                 <th>Год рожд.</th>
                                 <th class="col-text-left">Адрес проживания</th>

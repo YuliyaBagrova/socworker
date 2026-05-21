@@ -2,48 +2,369 @@
 
 {% block title %}{% if is_edit %}Редактирование{% else %}Новая запись{% endif %} — нагрузка{% endblock %}
 
+{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% else %} class="sw-workload-page wl-record-assign-page sw-form-page-enter"{% endif %}{% endblock %}
+
+{% block inline_css %}
+{% if is_edit %}
+{% include 'accounts/includes/sw_edit_form_theme.html' with is_edit=True %}
+{% include 'accounts/includes/workload_record_form_edit_theme.html' %}
+{% else %}
+    body.sw-workload-page {
+        min-height: 100vh;
+        background-color: #f0f9ff;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(224, 242, 254, 0.42) 45%, rgba(186, 230, 253, 0.32) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(56, 189, 248, 0.42), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(96, 165, 250, 0.3), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(14, 165, 233, 0.2), transparent 58%),
+            linear-gradient(118deg, rgba(191, 219, 254, 0.45) 0%, rgba(165, 243, 252, 0.18) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(239, 246, 255, 0.4) 0%, rgba(186, 230, 253, 0.14) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+    }
+{% include 'accounts/includes/workload_record_form_theme.html' %}
+{% endif %}
+{% endblock %}
+
 {% block content %}
-{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+<div class="wl-record-wrap">
+    {% if is_edit %}
+    <div class="page-header sw-entity-form-header">
+        <h1 class="sw-edit-page-title mb-0">
+            <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+            <span class="sw-edit-page-title__label">Редактирование записи учёта нагрузки</span>
+        </h1>
+        <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}&wl_sort={{ wl_sort }}" class="sw-edit-back-btn">
+            <i class="bi bi-arrow-left-circle-fill"></i> К панели нагрузки
+        </a>
+    </div>
+    {% else %}
+    <div class="wl-assign-form-header">
+        <h1 class="wl-assign-page-title mb-0">
+            <span class="wl-assign-page-title__icon" aria-hidden="true"><i class="bi bi-journal-plus"></i></span>
+            <span class="wl-assign-page-title__label">Новая запись учёта нагрузки</span>
+        </h1>
+        <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}&wl_sort={{ wl_sort }}" class="wl-assign-back-btn">
+            <i class="bi bi-arrow-left-circle-fill"></i> К панели нагрузки
+        </a>
+    </div>
+    {% endif %}
 
-<div class="page-header">
-    <h2><i class="bi bi-journal-plus"></i> {% if is_edit %}Редактирование записи{% else %}Новая запись учёта{% endif %}</h2>
-    <a href="{% url 'accounts:workload_records_list' %}" class="btn btn-outline-secondary btn-sm">К журналу</a>
-</div>
+    <p class="wl-assign-intro">
+        Разделы формы — по колонкам «Расчёт нагрузки». При выборе подопечного: населённый пункт и тип жилья в первую очередь по колонке «Адрес» в «Получатели услуг»; если по адресу нельзя — из полей карточки. Кратность (нед.) — из «Кратность посещения», как в планировании визитов. Год и месяц — период (ссылка с панели нагрузки или текущий месяц).
+    </p>
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-body">
-                <p class="text-muted small">
-                    После сохранения автоматически считаются: кратность за месяц (если не задана — из недели),
-                    время за месяц в минутах и часах, коэффициент нагрузки и ставка по норме времени.
-                </p>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-                            {% for err in field.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                </form>
+    {{ workload_recipients_by_worker|json_script:"wl-recipients-data" }}
+    {{ workload_worker_employee_ids|json_script:"wl-worker-emp-data" }}
 
-                {% if is_edit and record %}
-                    <hr class="my-4">
-                    <h6 class="section-title"><i class="bi bi-lightning-charge"></i> Расчётные поля</h6>
-                    <div class="row g-2 small">
-                        <div class="col-md-4"><span class="text-muted">Кратность / мес:</span> {{ record.visits_per_month }}</div>
-                        <div class="col-md-4"><span class="text-muted">Мин / мес:</span> {{ record.worked_minutes_month }}</div>
-                        <div class="col-md-4"><span class="text-muted">Час / мес:</span> {{ record.worked_hours_month }}</div>
-                        <div class="col-md-4"><span class="text-muted">Нагрузка:</span> {{ record.load_coefficient }}</div>
-                        <div class="col-md-4"><span class="text-muted">Ставка:</span> <strong>{{ record.rate }}</strong></div>
+<div class="card {% if is_edit %}sw-edit-form-card{% else %}wl-assign-form-card{% endif %} border-0">
+    <div class="card-body p-3 p-md-4">
+        <form method="post" novalidate id="wl-record-form" class="js-wl-form">
+            {% csrf_token %}
+            <input type="hidden" name="return_sort" value="{{ wl_sort }}">
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <section class="wl-form-section" aria-labelledby="wl-sec-1">
+                <div class="wl-form-section__kicker" id="wl-sec-1">Как в таблице</div>
+                <h3 class="wl-form-section__title">Социальный работник и период учёта (год / месяц)</h3>
+                <p class="wl-form-section__table-hint">Колонки периода в журнале: все строки за выбранные год и месяц.</p>
+                <div class="row g-3">
+                    <div class="col-md-4 col-xl-4">
+                        <label class="form-label" for="id_social_worker">{{ form.social_worker.label }}</label>
+                        {{ form.social_worker }}
+                        <div class="wl-col-match">Сначала выберите сотрудника — список подопечных и пункт подставятся из закреплений в базе.</div>
+                        {% for err in form.social_worker.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
                     </div>
-                {% endif %}
+                    <div class="col-md-4 col-xl-3">
+                        <label class="form-label" for="wl_worker_employee_id">Табельный номер (сотрудника) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="wl_worker_employee_id" readonly tabindex="-1" autocomplete="off" aria-readonly="true">
+                        <div class="form-text">Подставляется из карточки социального работника при выборе в поле «Работник».</div>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <label class="form-label" for="id_period_year">{{ form.period_year.label }}</label>
+                        {{ form.period_year }}
+                        {% for err in form.period_year.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <label class="form-label" for="id_period_month">{{ form.period_month.label }}</label>
+                        {{ form.period_month }}
+                        {% for err in form.period_month.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="wl-form-section" aria-labelledby="wl-sec-2">
+                <h3 class="wl-form-section__title" id="wl-sec-2">ФИО соцработника / подопечного</h3>
+                <p class="wl-form-section__table-hint">Колонка «ФИО…»: при выборе подопечного в ячейке указывается он, иначе — работник (как в таблице).</p>
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-lg-8">
+                        <label class="form-label" for="id_recipient">{{ form.recipient.label }}</label>
+                        {{ form.recipient }}
+                        <div id="wl-hint-no-recipients" class="mt-2 d-none" role="status"></div>
+                        <div id="wl-hint-multi" class="mt-2 d-none" role="status">Несколько подопечных: выберите, для кого вести эту строку.</div>
+                        {% for err in form.recipient.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="wl-form-section" aria-labelledby="wl-sec-3">
+                <h3 class="wl-form-section__title" id="wl-sec-3">Населённый пункт &amp; тип (дом / квартира)</h3>
+                <p class="wl-form-section__table-hint">Соответствуют колонкам «Населённый пункт» и «Тип» в таблице.</p>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label" for="id_location">{{ form.location.label }}</label>
+                        {{ form.location }}
+                        {% for err in form.location.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="id_housing_type">{{ form.housing_type.label }}</label>
+                        {{ form.housing_type }}
+                        {% for err in form.housing_type.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="wl-form-section" aria-labelledby="wl-sec-4">
+                <h3 class="wl-form-section__title" id="wl-sec-4">Кратности и длительность (всего за месяц в таблице)</h3>
+                <p class="wl-form-section__table-hint">Колонки «кратность (нед)», «кратность (мес)», «время 1 посещения»; итоговые минуты и часы за месяц считаются после сохранения.</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="id_visits_per_week">{{ form.visits_per_week.label }}</label>
+                        {{ form.visits_per_week }}
+                        {% for err in form.visits_per_week.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="id_visits_per_month">{{ form.visits_per_month.label }}</label>
+                        {{ form.visits_per_month }}
+                        <div class="form-text">{{ form.visits_per_month.help_text }}</div>
+                        {% for err in form.visits_per_month.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="id_visit_duration_minutes">{{ form.visit_duration_minutes.label }}</label>
+                        {{ form.visit_duration_minutes }}
+                        {% for err in form.visit_duration_minutes.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="wl-form-section" aria-labelledby="wl-sec-5">
+                <h3 class="wl-form-section__title" id="wl-sec-5">Норма времени и примечание</h3>
+                <p class="wl-form-section__table-hint">Норма в мин/мес; коэф. нагрузки в журнале считается к 168 ч.</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="id_work_time_norm_minutes">{{ form.work_time_norm_minutes.label }}</label>
+                        {{ form.work_time_norm_minutes }}
+                        <div class="form-text">{{ form.work_time_norm_minutes.help_text }}</div>
+                        {% for err in form.work_time_norm_minutes.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label" for="id_notes">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {% for err in form.notes.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end mt-4 pt-3 border-top">
+                <a href="{% url 'accounts:workload_panel' %}?year={{ wl_year }}&month={{ wl_month }}{% if wl_worker %}&worker={{ wl_worker }}{% endif %}&wl_sort={{ wl_sort }}" class="btn btn-outline-secondary{% if not is_edit %} wl-assign-btn-cancel{% endif %}">Отмена</a>
+                <button type="submit" class="btn btn-primary{% if not is_edit %} wl-assign-btn-save{% endif %}"><i class="bi bi-check-circle"></i> Сохранить</button>
             </div>
-        </div>
+        </form>
+
+        {% if is_edit and record %}
+            <hr class="my-4">
+            <h6 class="section-title"><i class="bi bi-lightning-charge"></i> Расчётные поля (колонки таблицы)</h6>
+            <div class="row g-2 small">
+                <div class="col-md-4"><span class="text-muted">Кратность / мес:</span> {{ record.visits_per_month }}</div>
+                <div class="col-md-4"><span class="text-muted">Мин / мес:</span> {{ record.worked_minutes_month }}</div>
+                <div class="col-md-4"><span class="text-muted">Час / мес:</span> {{ record.worked_hours_month }}</div>
+                <div class="col-md-4"><span class="text-muted">Нагрузка:</span> {{ record.load_coefficient }}</div>
+                <div class="col-md-4"><span class="text-muted">Ставка:</span> <strong>{{ record.rate }}</strong></div>
+            </div>
+        {% endif %}
     </div>
 </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const el = document.getElementById('wl-recipients-data');
+    const empJsonEl = document.getElementById('wl-worker-emp-data');
+    if (!el || !empJsonEl) return;
+    const WL_BY_WORKER = JSON.parse(el.textContent);
+    const WL_WORKER_EMP = JSON.parse(empJsonEl.textContent);
+    const workerSel = document.getElementById('id_social_worker');
+    const empInput = document.getElementById('wl_worker_employee_id');
+    const recSel = document.getElementById('id_recipient');
+    const locSel = document.getElementById('id_location');
+    const housingSel = document.getElementById('id_housing_type');
+    const hintNo = document.getElementById('wl-hint-no-recipients');
+    const hintMulti = document.getElementById('wl-hint-multi');
+    const IS_EDIT = {{ is_edit|yesno:"true,false" }};
+    const DEFAULT_Y = {{ workload_default_year|default:2026 }};
+    const DEFAULT_M = {{ workload_default_month|default:1 }};
+    var EDIT_RECIP_ID = null;
+    {% if wl_edit_recipient_id %}
+    EDIT_RECIP_ID = {{ wl_edit_recipient_id }};
+    {% endif %}
+    const EDIT_RECIP_NAME = "{{ wl_edit_recipient_name|default:''|escapejs }}";
+    var POST_RECIPIENT_PK = null;
+    {% if form.recipient.value %}
+    POST_RECIPIENT_PK = {{ form.recipient.value }};
+    {% endif %}
+
+    function syncWorkerEmployeeId() {
+        if (!empInput || !workerSel) return;
+        var pk = workerSel.value;
+        empInput.value = (pk && WL_WORKER_EMP[pk]) ? WL_WORKER_EMP[pk] : '';
+    }
+
+    function setHintNo(text, show) {
+        if (!hintNo) return;
+        if (show) {
+            hintNo.innerHTML = text;
+            hintNo.classList.remove('d-none');
+        } else {
+            hintNo.classList.add('d-none');
+        }
+    }
+
+    function setHintMulti(show) {
+        if (hintMulti) {
+            if (show) hintMulti.classList.remove('d-none');
+            else hintMulti.classList.add('d-none');
+        }
+    }
+
+    function listForWorker(wid) {
+        if (!wid) return [];
+        return WL_BY_WORKER[wid] || [];
+    }
+
+    function applyFromRecipientObject(r) {
+        if (!r) return;
+        if (r.location_id && locSel) {
+            locSel.value = String(r.location_id);
+        }
+        if (housingSel) {
+            if (r.housing_type === 'house' || r.housing_type === 'apartment') {
+                housingSel.value = r.housing_type;
+            } else {
+                housingSel.value = 'apartment';
+            }
+        }
+        const vwp = document.getElementById('id_visits_per_week');
+        if (vwp && r.visits_per_week != null && r.visits_per_week !== '') {
+            const n = Number(r.visits_per_week);
+            if (!Number.isNaN(n)) {
+                vwp.value = n % 1 === 0 ? String(Math.round(n)) : String(n);
+            }
+        }
+    }
+
+    function onRecipientPicked() {
+        const v = recSel && recSel.value;
+        if (!v || !workerSel) return;
+        const wid = workerSel.value;
+        const list = listForWorker(wid);
+        const r = list.find((x) => String(x.id) === String(v));
+        if (r) {
+            applyFromRecipientObject(r);
+        }
+    }
+
+    function buildRecipientOptions(preserveId) {
+        if (!workerSel || !recSel) return;
+        const wid = workerSel.value;
+        const list = listForWorker(wid);
+        const prev = preserveId != null ? String(preserveId) : (recSel.value || '');
+
+        recSel.innerHTML = '';
+        const o0 = document.createElement('option');
+        o0.value = '';
+        o0.textContent = '— не указан —';
+        recSel.appendChild(o0);
+
+        list.forEach(function (r) {
+            const o = document.createElement('option');
+            o.value = r.id;
+            o.textContent = r.name;
+            if (r.location_id) o.dataset.locationId = String(r.location_id);
+            recSel.appendChild(o);
+        });
+
+        if (IS_EDIT && EDIT_RECIP_ID && !list.some((x) => String(x.id) === String(EDIT_RECIP_ID))) {
+            const o = document.createElement('option');
+            o.value = String(EDIT_RECIP_ID);
+            o.textContent = typeof EDIT_RECIP_NAME === 'string' ? EDIT_RECIP_NAME : ('#' + EDIT_RECIP_ID);
+            o.dataset.locationId = '';
+            recSel.appendChild(o);
+        }
+
+        if (list.length === 1) {
+            recSel.value = String(list[0].id);
+            applyFromRecipientObject(list[0]);
+            setHintNo('', false);
+            setHintMulti(false);
+        } else if (list.length > 1) {
+            if (prev && list.some((x) => String(x.id) === prev)) {
+                recSel.value = prev;
+            } else {
+                recSel.value = '';
+            }
+            if (recSel.value) onRecipientPicked();
+            setHintNo('', false);
+            setHintMulti(true);
+        } else {
+            recSel.value = '';
+            if (IS_EDIT && EDIT_RECIP_ID) {
+                const o = document.createElement('option');
+                o.value = String(EDIT_RECIP_ID);
+                o.textContent = typeof EDIT_RECIP_NAME === 'string' ? EDIT_RECIP_NAME : ('#' + EDIT_RECIP_ID);
+                recSel.appendChild(o);
+                recSel.value = String(EDIT_RECIP_ID);
+            }
+            setHintMulti(false);
+            setHintNo(
+                '<i class="bi bi-exclamation-triangle me-1"></i> У выбранного сотрудника нет подопечных с закреплением в базе — укажите населённый пункт вручную. Строка может относиться только к работнику (без подопечного).',
+                !IS_EDIT
+            );
+        }
+    }
+
+    if (recSel) {
+        recSel.addEventListener('change', onRecipientPicked);
+    }
+
+    if (workerSel) {
+        workerSel.addEventListener('change', function () {
+            syncWorkerEmployeeId();
+            if (locSel) locSel.value = '';
+            if (housingSel) housingSel.value = 'apartment';
+            buildRecipientOptions();
+        });
+    }
+
+    if (workerSel && !workerSel.value) {
+        if (recSel) {
+            recSel.innerHTML = '';
+            const o0 = document.createElement('option');
+            o0.value = '';
+            o0.textContent = '— сначала выберите сотрудника вверху —';
+            recSel.appendChild(o0);
+        }
+    } else if (workerSel && workerSel.value) {
+        if (IS_EDIT) {
+            buildRecipientOptions(EDIT_RECIP_ID);
+        } else {
+            const preserve = (POST_RECIPIENT_PK != null) ? String(POST_RECIPIENT_PK) : null;
+            buildRecipientOptions(preserve);
+        }
+    }
+    syncWorkerEmployeeId();
+})();
+</script>
 {% endblock %}

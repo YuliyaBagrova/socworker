@@ -17,23 +17,9 @@
     }
     body.sw-recipients-page .main-content {
         max-width: 100%;
-        min-width: 0;
-        margin-inline: 0;
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-        padding-top: 1rem;
-        padding-bottom: 0.75rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
         background: transparent;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        min-height: calc(100vh - var(--navbar-height) - var(--below-nav-stack-height, 0px) - 8px);
-        overflow-x: hidden;
-        box-sizing: border-box;
-    }
-    body.sw-recipients-page .sw-table-card {
-        max-width: 100%;
-        min-width: 0;
     }
     .sw-workers-layout {
         --dash-glass: rgba(255, 255, 255, 0.78);
@@ -43,22 +29,10 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        min-height: calc(100vh - var(--navbar-height) - var(--below-nav-stack-height, 0px) - 2.5rem);
-    }
-    /* Получатели: блок списка растягивается на всю оставшуюся высоту окна */
-    body.sw-recipients-page .sw-workers-layout {
-        flex: 1 1 auto;
-        min-height: 0;
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
+        min-height: calc(100vh - var(--navbar-height) - 2.5rem);
     }
     body.home-return-on.sw-recipients-page .sw-workers-layout {
-        min-height: 0;
-    }
-    body.sw-recipients-page .sw-workers-page-header,
-    body.sw-recipients-page .sw-filter-dash {
-        flex-shrink: 0;
+        min-height: calc(100vh - var(--navbar-height) - 46px - 2.5rem);
     }
     .sw-workers-layout .sw-table-card {
         flex: 1 1 auto;
@@ -347,29 +321,92 @@
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
         background: #fff;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit {
+    /* «Найти» / сброс — как панель «Инвентаризация»; иконка — bi-search */
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .rec-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .rec-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .btn.btn-primary.rec-filter-submit {
         border: none;
         border-radius: 12px;
         font-weight: 700;
-        font-size: 0.9rem;
         letter-spacing: 0.03em;
-        padding: 0.62rem 1rem;
-        background: linear-gradient(135deg, #6366f1 0%, #667eea 40%, #7c3aed 100%);
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
         box-shadow:
-            0 4px 18px rgba(99, 102, 241, 0.38),
+            0 4px 18px rgba(102, 126, 234, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.22);
         transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:hover {
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .btn.btn-primary.rec-filter-submit.rec-filter-icon-btn,
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset.rec-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .btn.btn-primary.rec-filter-submit.rec-filter-icon-btn i,
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset.rec-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .btn.btn-primary.rec-filter-submit:hover {
         color: #fff;
         transform: translateY(-2px);
-        filter: brightness(1.06);
+        filter: brightness(1.04);
         box-shadow:
-            0 10px 28px rgba(102, 126, 234, 0.42),
+            0 8px 28px rgba(118, 75, 162, 0.38),
             inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
-    .sw-filter-dash .btn.btn-primary.sw-filter-submit:active {
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash .btn.btn-primary.rec-filter-submit:active {
         transform: translateY(0);
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-filter-dash a.rec-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
     }
     .sw-sheet-wrap {
         overflow-x: auto;
@@ -378,14 +415,11 @@
         border-radius: 0 0 14px 14px;
         flex: 1 1 auto;
         min-height: 12rem;
-        max-width: 100%;
-        min-width: 0;
     }
-    body.sw-recipients-page .sw-workers-layout .sw-sheet-wrap {
-        min-height: 0;
-    }
+    /* Как во вкладке «Таблица» планирования визитов: ширина по содержимому — горизонтальный скролл + sticky «Действия» */
     body.sw-recipients-page .sw-sheet {
-        max-width: 100%;
+        width: max-content;
+        min-width: 100%;
     }
     .sw-sheet {
         width: 100%;
@@ -424,6 +458,40 @@
     }
     .sw-sheet tbody tr.data-row:hover {
         background: #f0edff !important;
+    }
+    /* Колонка «Действия»: sticky справа при горизонтальной прокрутке (как планирование визитов) */
+    body.sw-recipients-page .sw-sheet thead th.vp-actions-th {
+        position: sticky;
+        right: 0;
+        top: 0;
+        z-index: 25;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        box-shadow: -4px 0 10px rgba(0, 0, 0, 0.07);
+    }
+    body.sw-recipients-page .sw-sheet tbody td.vp-actions-cell {
+        position: sticky;
+        right: 0;
+        z-index: 15;
+        vertical-align: middle;
+        box-shadow: -3px 0 8px rgba(0, 0, 0, 0.06);
+        isolation: isolate;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:nth-child(odd) td.vp-actions-cell {
+        background: #fafbfc;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:nth-child(even) td.vp-actions-cell {
+        background: #fff;
+    }
+    body.sw-recipients-page .sw-sheet tbody tr.data-row:hover td.vp-actions-cell {
+        background: #f0edff !important;
+    }
+    body.sw-recipients-page .sw-sheet td.vp-actions-cell .sw-actions-cell {
+        position: relative;
+        z-index: 1;
+    }
+    body.sw-recipients-page .sw-sheet td.vp-actions-cell .sw-actions-cell a {
+        position: relative;
+        z-index: 2;
     }
     .sw-sheet .col-text-left {
         text-align: left !important;
@@ -604,6 +672,381 @@
     .sw-workers-layout .sw-table-card .pagination-wrap {
         flex-shrink: 0;
     }
+    /* Справка — как «Прохождение медосмотра», палитра панели */
+    body.sw-recipients-page .sw-recipients-page-guide {
+        flex-shrink: 0;
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-page-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(245, 243, 255, 0.72) 42%, rgba(237, 233, 254, 0.55) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        box-shadow:
+            0 4px 6px -1px rgba(45, 38, 82, 0.06),
+            0 12px 28px -8px rgba(102, 126, 234, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-recipients-page .sw-filter-dash.sw-recipients-page-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #a5b4fc 0%, #667eea 48%, #5b21b6 100%);
+        opacity: 0.95;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #5b21b6;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 233, 254, 0.9) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.35);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #3d2f5c;
+        margin: 0;
+        line-height: 1.3;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        background: rgba(102, 126, 234, 0.14);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle:hover {
+        background: rgba(102, 126, 234, 0.22);
+        border-color: rgba(79, 70, 229, 0.45);
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.4);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(91, 33, 182, 0.12);
+        border-color: rgba(91, 33, 182, 0.4);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 243, 255, 0.65) 50%, rgba(237, 233, 254, 0.5) 100%);
+        border: 1px solid rgba(199, 210, 254, 0.65);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 4px 20px rgba(45, 38, 82, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    body.sw-recipients-page #swRecipientsGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(102, 126, 234, 0.75);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__lead strong {
+        color: #3d2f5c;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #667eea, #7c3aed);
+        box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.6);
+    }
+    body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #4c1d95;
+    }
+    /* Расширенная справка — секции, сетка (как у «Социальные работники») */
+    body.sw-recipients-page .sw-recipients-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(238, 242, 255, 0.85) 45%, rgba(224, 231, 255, 0.55) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.35);
+        box-shadow: 0 2px 16px rgba(67, 56, 202, 0.06);
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4338ca;
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-recipients-page .sw-recipients-guide-intro__text strong {
+        color: #312e81;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(199, 210, 254, 0.55);
+    }
+    body.sw-recipients-page .sw-recipients-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-recipients-page .sw-recipients-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #3730a3;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-recipients-page .sw-recipients-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #818cf8 0%, #6366f1 45%, #4f46e5 100%);
+        box-shadow: 0 3px 10px rgba(79, 70, 229, 0.28);
+    }
+    body.sw-recipients-page .sw-recipients-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-recipients-page .sw-recipients-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-recipients-page .sw-recipients-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(199, 210, 254, 0.55);
+        box-shadow: 0 2px 10px rgba(30, 27, 75, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card:hover {
+        border-color: rgba(129, 140, 248, 0.65);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    }
+    body.sw-recipients-page .sw-recipients-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5b21b6;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-recipients-page .sw-recipients-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #eab308;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-recipients-page .sw-recipients-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-recipients-page .sw-recipients-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.55) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(129, 140, 248, 0.4);
+        border-left: 4px solid #6366f1;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #312e81;
+    }
+    body.sw-recipients-page .sw-recipients-guide-tip strong {
+        color: #1e1b4b;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399, #059669);
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
+    }
+    body.sw-recipients-page .sw-recipients-guide-list-rich > li strong {
+        color: #3730a3;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-recipients-page .sw-recipients-guide-ol li::marker {
+        color: #6366f1;
+        font-weight: 700;
+    }
+    body.sw-recipients-page .sw-recipients-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #4338ca;
+        background: rgba(238, 242, 255, 0.95);
+        border: 1px solid rgba(165, 180, 252, 0.75);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-recipients-page .sw-recipients-page-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-recipients-page .sw-recipients-page-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
+    body.sw-recipients-page #recipients-panel-export-table {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -630,11 +1073,133 @@
     </div>
 </div>
 
-<div class="sw-filter-dash mb-0">
+<div class="sw-filter-dash mb-0 sw-services-guide sw-recipients-page-guide">
+    <div class="sw-filter-dash-inner sw-services-guide__inner">
+        <div class="sw-services-guide__top">
+            <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+            <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="sw-services-guide__title">Справка по разделу «Получатели услуг»</span>
+                <button type="button" id="swRecipientsGuideToggle" class="sw-services-guide__toggle"
+                        data-bs-toggle="collapse" data-bs-target="#swRecipientsGuideCollapse"
+                        aria-expanded="false" aria-controls="swRecipientsGuideCollapse">
+                    Как пользоваться
+                    <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse" id="swRecipientsGuideCollapse">
+            <div class="sw-services-guide__panel">
+                <div class="sw-recipients-guide-intro">
+                    <div class="sw-recipients-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                    <p class="sw-recipients-guide-intro__text">
+                        Панель <strong>Получатели услуг</strong> — единый реестр подопечных: табельные номера (отдельная нумерация для получателей), контакты, адрес, категория проживания и закрепление за социальным работником.
+                        Оформление совпадает с остальным приложением: «стеклянные» блоки, фиолетово-индиго акценты и понятные фильтры, чтобы быстро найти нужного человека в потоке учёта.
+                    </p>
+                </div>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-purpose">
+                    <h3 id="rec-guide-purpose" class="sw-recipients-guide-h"><i class="bi bi-bullseye" aria-hidden="true"></i>Назначение и колонки таблицы</h3>
+                    <p class="sw-recipients-guide-p">
+                        Каждая строка — один получатель услуг. Данные используются в закреплениях, панели планирования визитов, нагрузке и отчётах; актуальность карточек напрямую влияет на корректность маршрутов и выгрузок.
+                    </p>
+                    <div class="sw-recipients-guide-grid" role="list">
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Отметка</p>
+                            <p class="sw-recipients-guide-card__text">Галочка в первой колонке — для выгрузки PDF/CSV «только отмеченные» (учитываются строки текущей страницы). Заголовок колонки позволяет выбрать всех на странице.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">№</p>
+                            <p class="sw-recipients-guide-card__text">Порядковый номер получателя в организации. После удаления записей номера у оставшихся подопечных пересчитываются подряд (1, 2, 3…), без «дыр».</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">ФИО и год рожд.</p>
+                            <p class="sw-recipients-guide-card__text">Клик по ФИО открывает карточку получателя. Год рождения помогает отличать однофамильцев.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Телефон и адрес</p>
+                            <p class="sw-recipients-guide-card__text">Контакт и место жительства; адрес участвует в логике раздела «Услуги» (сопоставление с населённым пунктом), если пункт в карточке не задан.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Гр. инвал., оплата, кратность</p>
+                            <p class="sw-recipients-guide-card__text">Группа инвалидности, доля оплаты (%) и регламентируемая кратность визитов — для отчётности и планирования нагрузки.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Категория</p>
+                            <p class="sw-recipients-guide-card__text">Категория проживания (то же поле, что и в фильтре ниже). Совпадает со справочником в карточке.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Дата приёма, дни посещ., АПИ</p>
+                            <p class="sw-recipients-guide-card__text">Дата оформления обслуживания, дни посещений по графику и количество автономных пожарных извещателей (АПИ), если ведётся в вашей организации.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Примечания</p>
+                            <p class="sw-recipients-guide-card__text">Краткая выжимка из текстовых примечаний; полный текст — в карточке.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Соц. работник</p>
+                            <p class="sw-recipients-guide-card__text">Закреплённый сотрудник со ссылкой на его карточку. Прочерк — получатель пока не назначен.</p>
+                        </div>
+                        <div class="sw-recipients-guide-card" role="listitem">
+                            <p class="sw-recipients-guide-card__title">Действия</p>
+                            <p class="sw-recipients-guide-card__text">Просмотр, редактирование и удаление записи (удаление — с подтверждением на отдельной странице).</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-filters">
+                    <h3 id="rec-guide-filters" class="sw-recipients-guide-h"><i class="bi bi-sliders2" aria-hidden="true"></i>Поиск, фильтр и сортировка</h3>
+                    <ol class="sw-recipients-guide-ol">
+                        <li>Введите текст в поле поиска — по фамилии, имени, <strong>табельному номеру</strong>, телефону, адресу и другим совпадениям.</li>
+                        <li>При необходимости выберите <strong>категорию проживания</strong> (или оставьте «Все»).</li>
+                        <li>Задайте <strong>сортировку</strong>: № по возрастанию или убыванию либо фамилия (А–Я).</li>
+                        <li>Нажмите <span class="sw-recipients-guide-kbd">Найти</span> (иконка лупы) — таблица обновится. Кнопка <span class="sw-recipients-guide-kbd">↺</span> сбрасывает поиск, категорию и сортировку к значениям по умолчанию.</li>
+                    </ol>
+                    <div class="sw-recipients-guide-tip">
+                        <strong>Совет:</strong> фильтр на экране удобен для ежедневной работы; он не влияет на состав кнопок PDF/CSV при выборе «весь список» (см. следующий блок).
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-export">
+                    <h3 id="rec-guide-export" class="sw-recipients-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>Выгрузка PDF и CSV</h3>
+                    <p class="sw-recipients-guide-p">
+                        В шапке раздела доступны кнопки <strong>PDF</strong> и <strong>CSV</strong>. В модальном окне вы выбираете: включить в файл <strong>всех получателей из базы</strong> или только строки, <em>отмеченные галочкой</em> на активных страницах списка.
+                    </p>
+                    <ul class="sw-recipients-guide-list-rich">
+                        <li><strong>PDF</strong> — компактная таблица для печати и архива.</li>
+                        <li><strong>CSV</strong> — данные для Excel и внешней аналитики; структура колонок совпадает с таблицей на экране.</li>
+                    </ul>
+                    <div class="sw-recipients-guide-note">
+                        <strong>Важно:</strong> режим «весь список» в отчётах содержит <strong>всех</strong> получателей в базе, а не только ту выборку, которую вы видите после поиска и фильтра. Для выборочной выгрузки по людям отметьте их в таблице и выберите «только отмеченные».
+                    </div>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-row">
+                    <h3 id="rec-guide-row" class="sw-recipients-guide-h"><i class="bi bi-ui-checks-grid" aria-hidden="true"></i>Карточка и связь с другими разделами</h3>
+                    <p class="sw-recipients-guide-p">
+                        Кнопки в колонке «Действия» дублируют быстрый доступ: просмотр без смены режима списка, форма редактирования полей, удаление после подтверждения.
+                    </p>
+                    <ul class="sw-recipients-guide-list-rich">
+                        <li>Новый подопечный — кнопка <strong>«Добавить получателя»</strong> в шапке (форма в стиле приложения).</li>
+                        <li>Учёт нагрузки и планирование визитов используют тех же получателей: актуализируйте закрепление и адрес, чтобы связки «работник — пункт — подопечный» в разделе <strong>«Услуги»</strong> были верными.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-recipients-guide-section" aria-labelledby="rec-guide-page">
+                    <h3 id="rec-guide-page" class="sw-recipients-guide-h"><i class="bi bi-layout-three-columns" aria-hidden="true"></i>Пагинация и чекбоксы</h3>
+                    <p class="sw-recipients-guide-p">
+                        Таблица разбита на страницы по 10 записей. Галочки относятся к строкам <em>текущей страницы</em>; при выгрузке «только отмеченные» перейдите по страницам и отметьте нужных или воспользуйтесь полным списком в окне выгрузки.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sw-filter-dash mb-0 sw-recipients-filter-dash">
     <div class="sw-filter-dash-inner">
         <h2 class="sw-page-title sw-filter-panel-heading mb-0">
             <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
-            <span class="sw-page-title__label">Поиск и фильтры</span>
+            <span class="sw-page-title__label">Поиск, фильтр и сортировка</span>
         </h2>
         <form method="get" class="row g-3 align-items-end">
             {% if workload_return %}
@@ -647,19 +1212,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                     <input type="text" class="form-control sw-search-input" id="search" name="search"
-                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер, адрес…">
-                </div>
-            </div>
-            <div class="col-12 col-lg-3">
-                <label for="disability" class="sw-filter-label d-block">Группа инвалидности</label>
-                <div class="sw-select-wrap">
-                    <select class="form-select sw-status-select sw-select-native" id="disability" name="disability">
-                        <option value="">Все группы</option>
-                        {% for value, label in disability_choices %}
-                            <option value="{{ value }}" {% if disability_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                           value="{{ search_query }}" placeholder="Имя, фамилия, табельный номер, адрес, телефон…">
                 </div>
             </div>
             <div class="col-12 col-lg-3">
@@ -674,24 +1227,33 @@
                     <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
                 </div>
             </div>
-            <div class="col-12 col-lg-2">
-                <button type="submit" class="btn btn-primary w-100 sw-filter-submit">
-                    <i class="bi bi-search"></i> Найти
-                </button>
+            <div class="col-12 col-lg-3">
+                <label for="rec_sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="rec_sort" name="rec_sort"
+                            title="Сортировка применится после нажатия «Найти»">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
             </div>
-            {% if has_active_filters %}
-            <div class="col-12 pt-1">
-                <a href="{% url 'accounts:recipients_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="bi bi-x-lg"></i> Показать всех подопечных
-                </a>
-                <span class="text-muted small ms-2" style="font-size: 0.8125rem;">Сбросить поиск и фильтры</span>
+            <div class="col-12 col-lg rec-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center rec-filter-actions" id="rec-filter-actions">
+                    <button type="submit" class="btn btn-primary rec-filter-submit rec-filter-icon-btn" aria-label="Найти по поиску и фильтрам">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:recipients_list' %}{% if workload_return_append %}?{{ workload_return_append }}{% endif %}" class="rec-filter-reset rec-filter-icon-btn" id="rec-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить поиск, категорию проживания и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
-            {% endif %}
         </form>
     </div>
 </div>
 
-<div class="card sw-table-card">
+<div class="card sw-table-card" id="recipients-panel-export-table">
     <div class="card-body p-0">
         {% if page_obj %}
             <div class="sw-sheet-wrap">
@@ -702,7 +1264,7 @@
                                 <input type="checkbox" class="form-check-input" id="recipientSelectAll"
                                        aria-label="Отметить всех на странице">
                             </th>
-                            <th class="col-narrow">Таб. №</th>
+                            <th class="col-narrow">№</th>
                             <th class="col-text-left">ФИО</th>
                             <th class="col-narrow">Год рожд.</th>
                             <th class="col-narrow">Телефон</th>
@@ -716,7 +1278,7 @@
                             <th class="col-narrow">АПИ</th>
                             <th class="col-text-left">Примечания</th>
                             <th class="col-text-left">Соц. работник</th>
-                            <th class="text-center col-narrow">Действия</th>
+                            <th class="text-center col-narrow vp-actions-th">Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -749,7 +1311,7 @@
                                         <span class="text-muted">—</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="vp-actions-cell">
                                     <div class="sw-actions-cell">
                                         <a href="{% url 'accounts:recipient_detail' r.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Смотреть">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
@@ -777,12 +1339,12 @@
                         <ul class="pagination pagination-sm justify-content-center mb-0">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
@@ -792,12 +1354,12 @@
                             </li>
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if disability_filter %}&disability={{ disability_filter }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if living_filter %}&living={{ living_filter }}{% endif %}&rec_sort={{ sort_order }}{% if workload_return_append %}&{{ workload_return_append }}{% endif %}">
                                         <i class="bi bi-chevron-double-right"></i>
                                     </a>
                                 </li>
@@ -821,34 +1383,41 @@
 
 <form id="recipientsPdfForm" method="post" action="{% url 'accounts:report_pdf' 'recipients' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="living" value="{{ living_filter }}">
     <input type="hidden" name="scope" id="recipientsPdfScope" value="all">
     <span id="recipientsPdfIdFields"></span>
 </form>
 
 <form id="recipientsCsvForm" method="post" action="{% url 'accounts:report_csv' 'recipients' %}" target="_blank" class="d-none">
     {% csrf_token %}
+    <input type="hidden" name="sort" value="{{ sort_order }}">
+    <input type="hidden" name="search" value="{{ search_query }}">
+    <input type="hidden" name="living" value="{{ living_filter }}">
     <input type="hidden" name="scope" id="recipientsCsvScope" value="all">
     <span id="recipientsCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="recipientsPdfModal" tabindex="-1" aria-labelledby="recipientsPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="recipientsPdfModal" tabindex="-1" aria-labelledby="recipientsPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="recipientsPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="recipientsPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="rec_pdf_scope_choice" id="recPdfScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="recPdfScopeAll">
                             Весь список получателей
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и категории проживания на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="rec_pdf_scope_choice" id="recPdfScopeSelected" value="selected">
@@ -859,34 +1428,35 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="recipientsPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="recipientsPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="recipientsCsvModal" tabindex="-1" aria-labelledby="recipientsCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="recipientsCsvModal" tabindex="-1" aria-labelledby="recipientsCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="recipientsCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="recipientsCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="rec_csv_scope_choice" id="recCsvScopeAll" value="all" checked>
                         <label class="form-check-label fw-semibold" for="recCsvScopeAll">
                             Весь список получателей
                         </label>
-                        <div class="small text-muted ms-4">Все записи из базы</div>
+                        <div class="small text-muted ms-4">Все записи с учётом поиска и категории проживания на этой странице</div>
                     </div>
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="rec_csv_scope_choice" id="recCsvScopeSelected" value="selected">
@@ -897,10 +1467,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="recipientsCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="recipientsCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>
@@ -913,6 +1483,84 @@
 (function () {
     const selectAll = document.getElementById('recipientSelectAll');
     const pdfConfirm = document.getElementById('recipientsPdfConfirm');
+    const tableAnchor = document.getElementById('recipients-panel-export-table');
+    const SCROLL_AFTER_FILTER_KEY = 'recipientsScrollToResults';
+
+    function scrollToExportTable() {
+        if (tableAnchor) {
+            tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var recFilterForm = document.querySelector('.sw-recipients-filter-dash form[method="get"]');
+    if (recFilterForm) {
+        recFilterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var recReset = document.getElementById('rec-filter-reset-link');
+    if (recReset) {
+        recReset.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+    document.querySelectorAll('.pagination-wrap a.page-link[href]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
+    }
+
+    document.querySelectorAll('input[name="rec_pdf_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+    document.querySelectorAll('input[name="rec_csv_scope_choice"]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+            if (inp.value === 'selected') {
+                scrollToExportTable();
+            }
+        });
+    });
+
     if (selectAll) {
         selectAll.addEventListener('change', function () {
             document.querySelectorAll('.recipient-select').forEach(function (cb) {
@@ -932,7 +1580,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.recipient-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного получателя в таблице или выберите «Весь список получателей».');
+                    var pdfModal = document.getElementById('recipientsPdfModal');
+                    var pdfInst = pdfModal && window.bootstrap ? bootstrap.Modal.getInstance(pdfModal) : null;
+                    if (pdfInst) {
+                        pdfInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного получателя в таблице ниже или выберите «Весь список получателей».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {
@@ -959,7 +1615,15 @@
             if (scope === 'selected') {
                 const checked = document.querySelectorAll('.recipient-select:checked');
                 if (!checked.length) {
-                    alert('Отметьте хотя бы одного получателя в таблице или выберите «Весь список получателей».');
+                    var csvModal = document.getElementById('recipientsCsvModal');
+                    var csvInst = csvModal && window.bootstrap ? bootstrap.Modal.getInstance(csvModal) : null;
+                    if (csvInst) {
+                        csvInst.hide();
+                    }
+                    scrollToExportTable();
+                    setTimeout(function () {
+                        alert('Отметьте хотя бы одного получателя в таблице ниже или выберите «Весь список получателей».');
+                    }, 450);
                     return;
                 }
                 checked.forEach(function (cb) {

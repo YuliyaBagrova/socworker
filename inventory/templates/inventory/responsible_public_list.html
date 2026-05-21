@@ -1,0 +1,210 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Ответственные за инвентарь{% endblock %}
+{% block body_attrs %} class="sw-inventory-page sw-inv-resp-public-page sw-form-page-enter"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+    /*
+     * Колонка до центра экрана: левый край совпадает с контентом main (после padding 1.25rem у .main-content
+     * в теме инвентаря), правый — у вертикали 50vw. Ширина = 50vw − тот же отступ слева.
+     */
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-layout.sw-inv-resp-public-inner {
+        box-sizing: border-box;
+        width: min(calc(50vw - 1.25rem), 100%);
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: auto;
+        flex-shrink: 0;
+        align-self: flex-start;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-sheet .col-text-left {
+        max-width: none;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card.sw-table-card {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0.75rem !important;
+        border-radius: 18px;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card .sw-sheet-wrap {
+        width: 100%;
+        max-width: 100%;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card .sw-sheet {
+        width: 100%;
+        max-width: 100%;
+    }
+    @media (max-width: 768px) {
+        body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-layout.sw-inv-resp-public-inner {
+            max-width: 100%;
+            width: 100%;
+        }
+        body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card.sw-table-card {
+            width: 100%;
+        }
+        body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card .sw-sheet-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+        body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card .sw-sheet {
+            width: 100%;
+        }
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-sheet tbody td.sw-inv-photo-cell {
+        vertical-align: middle !important;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-user-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid rgba(13, 148, 136, 0.28);
+        box-shadow: 0 2px 8px rgba(13, 116, 106, 0.12);
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-user-avatar--empty {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #f0fdfa 0%, #e6fffa 100%);
+        color: #0d9488;
+        font-size: 1.1rem;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-card > .sw-inv-resp-group-head {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f766e;
+        padding: 0.7rem 1.25rem;
+        margin: 0;
+        background: linear-gradient(90deg, rgba(204, 251, 241, 0.6) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border-bottom: 1px solid rgba(13, 148, 136, 0.16);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-group-head .sw-inv-resp-group-meta {
+        font-weight: 600;
+        color: rgba(4, 47, 46, 0.55);
+        font-size: 0.875rem;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-empty {
+        text-align: center;
+        padding: 2.25rem 1.5rem;
+        font-size: 0.9375rem;
+        color: #64748b;
+        border-radius: 18px;
+        border: 1px dashed rgba(13, 148, 136, 0.32);
+        background: rgba(240, 253, 250, 0.55);
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-dash .sw-page-title__label {
+        background-image: none;
+        background-color: transparent;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #ecfdf5;
+        filter: none;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .inv-resp-public-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #0f766e;
+        border: 1.5px solid rgba(13, 148, 136, 0.48);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(240, 253, 250, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(13, 148, 136, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+        flex-shrink: 0;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .inv-resp-public-back-btn:hover {
+        color: #115e59;
+        border-color: rgba(15, 118, 110, 0.62);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-empty i {
+        opacity: 0.5;
+    }
+{% endblock %}
+{% block content %}
+<div class="sw-inv-layout sw-inv-resp-public-inner">
+    <section class="sw-inv-dash" aria-labelledby="inv-resp-pub-title">
+        <div class="page-header sw-inv-dash-header flex-wrap mb-0 justify-content-between align-items-center gap-2">
+            <h1 id="inv-resp-pub-title" class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-people"></i></span>
+                <span class="sw-page-title__label">Ответственные за инвентарь</span>
+            </h1>
+            <a href="{% url 'inventory:panel' %}" class="inv-resp-public-back-btn">
+                <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i> К панели инвентаризации
+            </a>
+        </div>
+    </section>
+
+    {% if responsible_groups %}
+        {% for g in responsible_groups %}
+        <div class="card sw-table-card sw-inv-resp-group-card">
+            <h2 class="sw-inv-resp-group-head">
+                {% if g.avatar_url %}
+                    <img src="{{ g.avatar_url }}" alt="Фото: {% if g.user.get_full_name %}{{ g.user.get_full_name }}{% else %}{{ g.user.username }}{% endif %}" class="sw-inv-resp-user-avatar" width="40" height="40" loading="lazy">
+                {% else %}
+                    <span class="sw-inv-resp-user-avatar sw-inv-resp-user-avatar--empty" aria-hidden="true" title="Нет фото в профиле"><i class="bi bi-person-badge"></i></span>
+                {% endif %}
+                <span class="sw-inv-resp-group-name">
+                    {% if g.user.get_full_name %}{{ g.user.get_full_name }}{% else %}{{ g.user.username }}{% endif %}
+                </span>
+                <span class="sw-inv-resp-group-meta">· {{ g.units|length }}&nbsp;поз.</span>
+            </h2>
+            <div class="card-body p-0">
+                <div class="sw-sheet-wrap">
+                    <table class="sw-sheet mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center sw-inv-photo-th">Фото</th>
+                                <th class="sw-inv-col-inv">Инв. №</th>
+                                <th class="col-text-left">Название</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for unit in g.units %}
+                            <tr class="data-row">
+                                <td class="text-center sw-inv-photo-cell">
+                                    <div class="sw-inv-photo-stack">
+                                        {% if unit.equipment_photo %}
+                                            <a href="{{ unit.equipment_photo.url }}" target="_blank" rel="noopener noreferrer"
+                                               class="text-decoration-none" title="Открыть фото полностью">
+                                                <span class="sw-inv-photo-frame" title="Фото {{ unit.inventory_number }}">
+                                                    <img src="{{ unit.equipment_photo.url }}" alt="" class="sw-inv-equipment-thumb" loading="lazy">
+                                                </span>
+                                            </a>
+                                        {% else %}
+                                            <span class="sw-inv-photo-frame sw-inv-photo-frame--empty" title="Нет фото">
+                                                <span class="visually-hidden">Нет фото</span>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="sw-inv-col-inv"><span class="fw-semibold">{{ unit.inventory_number }}</span></td>
+                                <td class="col-text-left">{{ unit.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="sw-inv-resp-empty">
+            <i class="bi bi-inbox d-block fs-2 mb-2" aria-hidden="true"></i>
+            В системе пока нет единиц учёта с назначенным ответственным.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,14 +1,22 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}Пользователи инвентаризации{% endblock %}
+{% block body_attrs %} class="sw-inventory-page"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% endblock %}
 {% block content %}
+<div class="sw-inv-layout">
 {% include 'inventory/includes/inventory_subnav.html' %}
 
-<div class="page-header flex-wrap">
+<div class="page-header flex-wrap d-flex align-items-center justify-content-between gap-2">
     <h2 class="mb-0"><i class="bi bi-person-badge"></i> Пользователи</h2>
-    <a href="{% url 'inventory:staff_create' %}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Добавить</a>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'inventory:assign_accountable' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-check"></i> Назначить ответственного</a>
+        <a href="{% url 'inventory:staff_create' %}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Добавить</a>
+    </div>
 </div>
 
-<p class="text-muted small">Логин и пароль хранятся в системной учётной записи Django; ФИО, должность, отделение и роль — в профиле инвентаризации.</p>
+<p class="text-muted small">Логин и пароль — в учётной записи Django (auth_user); роль, отделение, должность и телефон инвентаризации — в столбцах inv_* той же таблицы.</p>
 
 <div class="card">
     <div class="card-body p-0">
@@ -25,14 +33,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in profiles %}
+                    {% for row in staff_rows %}
                         <tr>
-                            <td>{{ p.user.username }}</td>
-                            <td>{{ p.full_name }}</td>
-                            <td>{{ p.position|default:"—" }}</td>
-                            <td>{{ p.department.name|default:"—" }}</td>
-                            <td>{{ p.get_role_display }}</td>
-                            <td>{{ p.phone|default:"—" }}</td>
+                            <td>{{ row.username }}</td>
+                            <td>{% if row.last_name or row.first_name %}{{ row.last_name }} {{ row.first_name }}{% else %}—{% endif %}</td>
+                            <td>{{ row.inv_position|default:"—" }}</td>
+                            <td>{{ row.department_name|default:"—" }}</td>
+                            <td>{{ row.role_name|default:"—" }}</td>
+                            <td>{{ row.inv_phone|default:"—" }}</td>
                         </tr>
                     {% empty %}
                         <tr><td colspan="6" class="text-center text-muted py-4">Нет пользователей.</td></tr>
@@ -41,5 +49,6 @@
             </table>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}

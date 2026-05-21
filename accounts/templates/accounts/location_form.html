@@ -1,36 +1,52 @@
 {% extends 'accounts/base_dashboard.html' %}
+{% load static %}
 
 {% block title %}{{ title }} - SocWorker{% endblock %}
 
+{% block body_attrs %} class="sw-location-create-page sw-form-page-enter"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/sw_location_form_theme.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h2><i class="bi bi-geo-alt-fill"></i> {{ title }}</h2>
-    <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> Назад
+<div class="page-header sw-entity-form-header">
+    <h1 class="sw-location-create-page-title mb-0">
+        <span class="sw-location-create-page-title__icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+        <span class="sw-location-create-page-title__label">{{ title }}</span>
+    </h1>
+    <a href="{% url 'accounts:services_panel' %}" class="sw-location-create-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> Назад к услугам
     </a>
 </div>
 
-<div class="card" style="max-width:500px;">
+<div class="card sw-location-create-form-card">
     <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }} <span class="text-danger">*</span></label>
-                {{ form.name }}
-                {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+
+            <div class="section-title"><i class="bi bi-pin-map"></i> Данные населённого пункта</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }} <span class="text-danger">*</span></label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.location_type.id_for_label }}" class="form-label">{{ form.location_type.label }}</label>
+                    {{ form.location_type }}
+                    {% if form.location_type.errors %}<div class="text-danger small mt-1">{{ form.location_type.errors }}</div>{% endif %}
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="{{ form.location_type.id_for_label }}" class="form-label">{{ form.location_type.label }}</label>
-                {{ form.location_type }}
-                {% if form.location_type.errors %}<div class="text-danger small mt-1">{{ form.location_type.errors }}</div>{% endif %}
-            </div>
+
             {% if form.non_field_errors %}
                 <div class="alert alert-danger">{{ form.non_field_errors }}</div>
             {% endif %}
+
             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                 <a href="{% url 'accounts:services_panel' %}" class="btn btn-outline-secondary">Отмена</a>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Сохранить
+                    <i class="bi bi-check-circle"></i> {{ button_text|default:"Сохранить" }}
                 </button>
             </div>
         </form>

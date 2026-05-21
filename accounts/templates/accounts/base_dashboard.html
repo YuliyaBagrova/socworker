@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}SocWorker{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -16,6 +17,8 @@
             --bg: #eef1f8;
             --card-shadow: 0 2px 8px rgba(26, 26, 46, 0.06), 0 1px 2px rgba(26, 26, 46, 0.04);
             --card-shadow-hover: 0 12px 28px rgba(102, 126, 234, 0.12);
+            --content-max-width: 1440px;
+            --content-padding-x: clamp(0.75rem, 3vw, 1.75rem);
         }
 
         * { box-sizing: border-box; }
@@ -40,7 +43,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 0.55rem 0.75rem;
-            padding: 0.5rem 1rem 0.5rem 1rem;
+            padding: max(0.5rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) 0.5rem max(1rem, env(safe-area-inset-left, 0px));
             background-color: rgba(42, 34, 72, 0.38);
             background-image:
                 radial-gradient(ellipse 110% 90% at 92% -30%, rgba(118, 75, 162, 0.26), transparent 52%),
@@ -51,6 +54,168 @@
             box-shadow: 0 8px 24px rgba(35, 25, 70, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             border-bottom: 1px solid rgba(255, 255, 255, 0.14);
         }
+
+        /* Компактная шапка: реальная высота ≈ логотип 5.05rem + вертикальные отступы навбара (раньше 84px обрезало уведомления) */
+        body:has(.top-navbar.sw-top-navbar--admin-portal) {
+            --navbar-height: calc(5.05rem + 1rem);
+        }
+        .top-navbar.sw-top-navbar--admin-portal {
+            min-height: var(--navbar-height);
+            flex-wrap: nowrap;
+            align-items: center;
+            /* Тёмный серо-бордовый графит с лёгким красным свечением */
+            background-color: rgba(22, 17, 18, 0.76);
+            background-image:
+                radial-gradient(ellipse 115% 95% at 96% -28%, rgba(225, 60, 72, 0.34), transparent 54%),
+                radial-gradient(ellipse 88% 72% at -6% 102%, rgba(42, 36, 36, 0.48), transparent 48%),
+                radial-gradient(ellipse 52% 48% at 42% 88%, rgba(225, 52, 62, 0.18), transparent 62%),
+                linear-gradient(
+                    162deg,
+                    rgba(42, 34, 34, 0.94) 0%,
+                    rgba(30, 26, 26, 0.92) 38%,
+                    rgba(26, 22, 22, 0.94) 62%,
+                    rgba(18, 15, 15, 0.96) 100%
+                );
+            box-shadow:
+                0 10px 28px rgba(0, 0, 0, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+        /* Заголовок «Панель Администратора» — запас справа, чтобы не наезжать на меню пользователя */
+        .sw-admin-shell-page-title {
+            position: relative;
+            z-index: 1;
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 clamp(5.35rem, 16.5vw, 7.2rem) 0 0.5rem;
+            box-sizing: border-box;
+        }
+        .sw-admin-shell-page-title__inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.72rem;
+            max-width: 100%;
+            min-width: 0;
+            /* Капсула: высота ограничена строкой навбара (--navbar-height синхронизируется с DOM) */
+            padding: 0.14rem 0.76rem 0.14rem 0.44rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.11);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 4px 18px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+            max-height: calc(var(--navbar-height) - 0.18rem);
+            overflow: hidden;
+        }
+        .sw-admin-shell-page-title__icon-wrap {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            color: #fff;
+        background: linear-gradient(145deg, #fb7185 0%, #e11d48 48%, #881337 92%);
+        }
+        .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__icon-wrap {
+            width: 3.55rem;
+            height: 3.55rem;
+            border-radius: 15px;
+            font-size: 1.72rem;
+            background: linear-gradient(
+                148deg,
+                #fda4af 0%,
+                #fb7185 38%,
+                #e11d48 68%,
+                #881337 100%
+            );
+            box-shadow:
+                0 7px 26px rgba(0, 0, 0, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        }
+        .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__icon-wrap i {
+            font-size: 1.72rem;
+        }
+        .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__text {
+            font-size: clamp(1.52rem, 3.35vw, 2.08rem);
+            line-height: 1.08;
+        }
+        .sw-admin-shell-page-title__text {
+            font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background-image: linear-gradient(
+                118deg,
+                #ffffff 0%,
+                #f4f4f5 38%,
+                #e8e8ec 54%,
+                rgba(212, 212, 220, 0.98) 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.18));
+        }
+        body.sw-admin-portal-shell-page .sw-admin-shell-page-title__inner {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        body.sw-admin-portal-shell-page .sw-admin-shell-page-title__text {
+            background-image: linear-gradient(
+                118deg,
+                #ffffff 0%,
+                #fff5f5 38%,
+                #ffe4e6 54%,
+                rgba(254, 182, 188, 0.98) 100%
+            );
+        }
+        @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+            .sw-admin-shell-page-title__text {
+                color: rgba(255, 255, 255, 0.96);
+                background-image: none;
+                filter: none;
+                text-shadow: 0 1px 10px rgba(0, 0, 0, 0.28);
+            }
+        }
+        @media (max-width: 420px) {
+            .sw-admin-shell-page-title__icon-wrap {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 12px;
+                font-size: 1.18rem;
+            }
+            .sw-admin-shell-page-title__icon-wrap i {
+                font-size: 1.18rem;
+            }
+            .sw-admin-shell-page-title__inner {
+                gap: 0.5rem;
+            }
+            .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__icon-wrap {
+                width: 3.05rem;
+                height: 3.05rem;
+                font-size: 1.46rem;
+            }
+            .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__icon-wrap i {
+                font-size: 1.46rem;
+            }
+            .top-navbar.sw-top-navbar--admin-portal .sw-admin-shell-page-title__text {
+                font-size: clamp(1.2rem, 5.3vw, 1.78rem);
+            }
+        }
+
         .top-navbar::after {
             content: '';
             position: absolute;
@@ -84,8 +249,88 @@
             text-decoration: none;
             flex-shrink: 0;
         }
-        .top-navbar .brand:hover { color: #fff; opacity: 0.95; }
-        .top-navbar .brand i { font-size: 1.35rem; opacity: 0.95; }
+        /* Логотип как «аватарка»: крупнее подписи; текст справа от круга */
+        .top-navbar .brand.brand-stack {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.48rem;
+            align-self: center;
+            font-size: unset;
+            letter-spacing: normal;
+            margin-right: 0.15rem;
+            margin-top: 0;
+            margin-bottom: 0;
+            /* Ближе к панелям визуально, без сдвига flex-сетки */
+            transform: translateX(2.12rem);
+        }
+        .top-navbar .brand-logo-visual {
+            width: 5.05rem;
+            height: 5.05rem;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 50%;
+            overflow: hidden;
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.09) 45%, rgba(230, 220, 255, 0.12) 100%);
+            box-shadow:
+                0 8px 22px rgba(35, 20, 70, 0.28),
+                0 2px 6px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.52),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+        }
+        .top-navbar .brand-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            flex-shrink: 0;
+            transform: scale(1.09);
+            transform-origin: center center;
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.22));
+        }
+        .top-navbar .brand-app-caption {
+            font-size: 1.0625rem;
+            font-weight: 600;
+            letter-spacing: -0.052em;
+            line-height: 1.08;
+            font-variant-ligatures: common-ligatures;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-image: linear-gradient(
+                122deg,
+                #ffffff 0%,
+                #f4f2ff 38%,
+                rgba(216, 200, 255, 0.97) 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: left;
+            max-width: 10rem;
+            white-space: nowrap;
+            text-shadow: none;
+            transition: filter 0.2s ease, opacity 0.2s ease;
+        }
+        @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+            .top-navbar .brand-app-caption {
+                color: rgba(255, 255, 255, 0.96);
+                background-image: none;
+            }
+        }
+        .top-navbar .brand:hover,
+        .top-navbar .brand:focus-visible {
+            color: #fff;
+            opacity: 1;
+        }
+        .top-navbar .brand:hover .brand-app-caption,
+        .top-navbar .brand:focus-visible .brand-app-caption {
+            filter: brightness(1.06);
+        }
 
         /* Два ряда навигации: первый — основные разделы, второй — нагрузка, инвентаризация, ТБ */
         .top-nav-columns {
@@ -98,6 +343,8 @@
             gap: 0.45rem;
             min-width: 0;
             justify-content: center;
+            /* Визуально ближе к логотипу, без перерасчёта ширины flex */
+            transform: translateX(-1.14rem);
         }
         .top-nav-main {
             display: flex;
@@ -127,10 +374,54 @@
                 border-top: 1px solid rgba(255, 255, 255, 0.08);
                 margin: 0 -0.25rem;
                 padding-left: 0.25rem;
+                transform: none;
             }
             .top-nav-main.top-nav-row-primary,
             .top-nav-main.top-nav-row-secondary {
                 justify-content: flex-start;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                gap: 0.45rem;
+                padding: 0.1rem 0 0.45rem;
+                margin: 0;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+            }
+            .top-nav-main.top-nav-row-primary::-webkit-scrollbar,
+            .top-nav-main.top-nav-row-secondary::-webkit-scrollbar {
+                height: 5px;
+            }
+            .top-nav-main.top-nav-row-primary::-webkit-scrollbar-thumb,
+            .top-nav-main.top-nav-row-secondary::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.28);
+                border-radius: 999px;
+            }
+            .top-nav-main .nav-pill {
+                flex-shrink: 0;
+                padding: 0.5rem 0.72rem;
+                min-height: 44px;
+                align-items: center;
+            }
+            .top-navbar .brand.brand-stack {
+                transform: none;
+                max-width: min(11rem, 42vw);
+            }
+            .top-navbar .brand-logo-visual {
+                width: 3.35rem;
+                height: 3.35rem;
+            }
+            .top-navbar .brand-app-caption {
+                font-size: 0.9375rem;
+                max-width: 8.5rem;
+            }
+            .top-navbar .user-area {
+                transform: none;
+            }
+            .sw-admin-shell-page-title {
+                padding-right: 0.35rem;
             }
         }
 
@@ -171,15 +462,77 @@
         }
         .top-nav-main .nav-pill.active i { color: var(--accent); }
 
+        /* Инвентаризация: лёгкая плёнка без размытия (как на соседних кнопках шапки) */
+        .top-nav-main .nav-pill.sw-nav-pill--blocked {
+            position: relative;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(255, 255, 255, 0.16);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked:focus-visible {
+            outline: none;
+        }
+        .top-nav-main .nav-pill.sw-nav-pill--blocked::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(230, 235, 243, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+            cursor: not-allowed;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
         .top-navbar .user-area {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
             gap: 0.4rem;
             margin-left: auto;
             flex-shrink: 0;
+            align-self: center;
+            transform: translateX(-4.5rem);
+        }
+        /* Якорь меню: ровное выравнивание относительно кнопки профиля */
+        .top-navbar .user-menu-dropdown {
+            position: relative;
+            flex-shrink: 0;
+            align-self: center;
+        }
+        .top-navbar .user-menu-dropdown .btn-user-menu .nav-user-name-label {
+            display: block;
+            max-width: min(7.5rem, 22vw);
+            margin: 0 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.35;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: rgba(226, 232, 240, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        }
+        .top-navbar .user-menu-dropdown .btn-user-menu:hover .nav-user-name-label,
+        .top-navbar .user-menu-dropdown .btn-user-menu:focus .nav-user-name-label,
+        .top-navbar .user-menu-dropdown .btn-user-menu.show .nav-user-name-label {
+            color: rgba(241, 245, 249, 0.96);
         }
         @media (max-width: 576px) {
             .top-navbar .user-area {
@@ -238,51 +591,278 @@
 
         .top-navbar .user-menu-dropdown .btn-user-menu {
             color: rgba(255, 255, 255, 0.95);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            padding: 0.4rem 0.75rem;
-            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            padding: 0.45rem 0.5rem 0.4rem;
+            border-radius: 16px;
             font-size: 0.8125rem;
             font-weight: 500;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.4rem;
-            box-shadow: none;
+            justify-content: center;
+            gap: 0.38rem;
+            box-shadow:
+                0 6px 22px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            min-width: 0;
+            width: auto;
+            height: auto;
+            line-height: normal;
         }
         .top-navbar .user-menu-dropdown .btn-user-menu:hover,
         .top-navbar .user-menu-dropdown .btn-user-menu:focus,
         .top-navbar .user-menu-dropdown .btn-user-menu.show {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.32);
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.38);
             color: #fff;
+            box-shadow:
+                0 8px 28px rgba(0, 0, 0, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+            filter: none;
         }
+        .top-navbar .user-menu-dropdown .btn-user-menu:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 3px rgba(255, 255, 255, 0.35),
+                0 8px 28px rgba(0, 0, 0, 0.14);
+        }
+        /* Крупный круг — основной акцент; стрелка Bootstrap скрыта */
         .top-navbar .user-menu-dropdown .btn-user-menu::after {
-            margin-left: 0.15rem;
-            border-top-color: rgba(255,255,255,0.9);
+            display: none !important;
+        }
+        .top-navbar .user-menu-dropdown .nav-user-menu-visual {
+            position: relative;
+            width: 3.75rem;
+            height: 3.75rem;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px;
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.08) 100%);
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.45);
         }
         .top-navbar .nav-user-avatar {
-            width: 28px;
-            height: 28px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.35);
+            border: none;
             flex-shrink: 0;
+            display: block;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
         }
-        .top-navbar .user-menu-dropdown .dropdown-menu {
+        .top-navbar .nav-user-icon-fallback-wrap {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, rgba(167, 139, 250, 0.92) 0%, rgba(102, 126, 234, 0.88) 45%, rgba(118, 75, 162, 0.9) 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+        .top-navbar .nav-user-icon-fallback {
+            font-size: 1.65rem;
+            line-height: 1;
+            display: block;
+            color: rgba(255, 255, 255, 0.96);
+        }
+        .top-navbar .user-menu-dropdown .nav-user-add-photo-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.82);
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            pointer-events: none;
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28);
+        }
+        .top-navbar .user-menu-dropdown .btn-user-menu:hover .nav-user-add-photo-hint,
+        .top-navbar .user-menu-dropdown .btn-user-menu:focus-visible .nav-user-add-photo-hint,
+        .top-navbar .user-menu-dropdown .btn-user-menu.show .nav-user-add-photo-hint {
+            opacity: 1;
+        }
+        /* Селектор от корня .dropdown-menu.sw-user-menu — стили сохраняются при переносе панели в body для перетаскивания */
+        .dropdown-menu.sw-user-menu {
             font-size: 0.9rem;
-            border-radius: 12px;
-            margin-top: 0.45rem !important;
+            min-width: 19rem;
+            max-width: min(22rem, calc(100vw - 1.25rem));
+            margin-top: 0 !important;
+            padding: 0.5rem 0 0.55rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.92);
+            -webkit-backdrop-filter: blur(18px) saturate(1.2);
+            backdrop-filter: blur(18px) saturate(1.2);
+            box-shadow:
+                0 4px 6px rgba(26, 26, 46, 0.05),
+                0 18px 48px rgba(102, 126, 234, 0.14),
+                0 2px 0 rgba(255, 255, 255, 0.85) inset;
+            overflow: hidden;
+            z-index: 1060;
         }
-        .top-navbar .user-menu-dropdown .dropdown-item {
-            border-radius: 8px;
-            margin: 0 0.35rem;
-            padding: 0.45rem 0.65rem;
+        .dropdown-menu.sw-user-menu.dropdown-menu-end {
+            --bs-dropdown-spacer: 0;
         }
-        .top-navbar .user-menu-dropdown .dropdown-item:active {
-            background: rgba(102, 126, 234, 0.15);
-            color: inherit;
+        .dropdown-menu.sw-user-menu .sw-user-menu__identity {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.95rem 1rem 1rem;
+            margin: 0 0.45rem 0.45rem;
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                rgba(102, 126, 234, 0.1) 0%,
+                rgba(118, 75, 162, 0.06) 48%,
+                rgba(34, 211, 238, 0.05) 100%
+            );
+            border: 1px solid rgba(102, 126, 234, 0.14);
+            cursor: grab;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__identity.is-dragging {
+            cursor: grabbing;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__avatar-lg {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.22);
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__avatar-ph {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.14);
+            border: 1px solid rgba(102, 126, 234, 0.22);
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.2rem;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__name {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.02em;
+            color: #1a1a2e;
+            line-height: 1.25;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__email {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+            line-height: 1.3;
+        }
+        .dropdown-menu.sw-user-menu .dropdown-divider {
+            margin: 0.35rem 0.75rem;
+            opacity: 0.85;
+            border-top-color: rgba(102, 126, 234, 0.12);
+        }
+        .dropdown-menu.sw-user-menu .dropdown-header.sw-user-menu__section {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            padding: 0.65rem 1rem 0.35rem;
+            margin-bottom: 0;
+        }
+        .dropdown-menu.sw-user-menu .dropdown-item.sw-user-menu__link {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            border-radius: 11px;
+            margin: 0.08rem 0.45rem;
+            padding: 0.52rem 0.65rem;
+            font-weight: 500;
+            font-size: 0.895rem;
+            color: #1e293b;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .dropdown-menu.sw-user-menu .dropdown-item.sw-user-menu__link:hover,
+        .dropdown-menu.sw-user-menu .dropdown-item.sw-user-menu__link:focus {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.11) 0%, rgba(102, 126, 234, 0.05) 100%);
+            color: #312e81;
+        }
+        .dropdown-menu.sw-user-menu .dropdown-item.sw-user-menu__link:active {
+            background: rgba(102, 126, 234, 0.18);
+            color: #1e1b4b;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__ico {
+            width: 2.125rem;
+            height: 2.125rem;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.05rem;
+            background: rgba(248, 250, 252, 0.95);
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            color: #64748b;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link:hover .sw-user-menu__ico,
+        .dropdown-menu.sw-user-menu .sw-user-menu__link:focus .sw-user-menu__ico {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(102, 126, 234, 0.22);
+            color: #667eea;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__ico--accent {
+            background: linear-gradient(145deg, rgba(102, 126, 234, 0.22) 0%, rgba(118, 75, 162, 0.12) 100%);
+            border-color: rgba(102, 126, 234, 0.28);
+            color: #5568d3;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link:hover .sw-user-menu__ico--accent {
+            background: linear-gradient(145deg, rgba(102, 126, 234, 0.28) 0%, rgba(118, 75, 162, 0.16) 100%);
+            color: #4338ca;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link--danger {
+            color: #b91c1c !important;
+            margin-top: 0.15rem;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link--danger:hover,
+        .dropdown-menu.sw-user-menu .sw-user-menu__link--danger:focus {
+            background: rgba(239, 68, 68, 0.09) !important;
+            color: #991b1b !important;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link--danger .sw-user-menu__ico {
+            background: rgba(254, 226, 226, 0.85);
+            border-color: rgba(248, 113, 113, 0.35);
+            color: #dc2626;
+        }
+        .dropdown-menu.sw-user-menu .sw-user-menu__link--danger:hover .sw-user-menu__ico {
+            background: rgba(254, 202, 202, 0.95);
+            border-color: rgba(239, 68, 68, 0.38);
+            color: #b91c1c;
         }
 
         /* Под навбаром: подсказка «с Главной» + уведомления (один стиль полосы) */
@@ -296,6 +876,40 @@
             flex-direction: column;
             align-items: stretch;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            overflow-x: hidden;
+            overflow-y: visible;
+            max-width: 100vw;
+        }
+        @keyframes appBelowNavStripIn {
+            from {
+                opacity: 0;
+                transform: translateY(-0.45rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes appBelowNavStripOut {
+            to {
+                opacity: 0;
+                transform: translateY(-0.35rem);
+                max-height: 0;
+                min-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                border-bottom-width: 0;
+                border-left-width: 0;
+                margin: 0;
+            }
+        }
+        .below-nav-stack > .home-return-strip:not([hidden]):not(.is-leaving) {
+            animation: appBelowNavStripIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .below-nav-stack > .home-return-strip.is-leaving {
+            animation: appBelowNavStripOut 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            overflow: hidden;
+            pointer-events: none;
         }
         .home-return-strip {
             position: relative;
@@ -307,7 +921,7 @@
             justify-content: space-between;
             gap: 0.75rem;
             flex-wrap: wrap;
-            padding: 0.45rem 1rem;
+            padding: 0.45rem 1.25rem;
             min-height: 46px;
             background: linear-gradient(90deg, #252030 0%, #2d2638 50%, #252030 100%);
             border-bottom: 1px solid rgba(0, 0, 0, 0.35);
@@ -316,6 +930,12 @@
         }
         .home-return-strip--flash {
             border-left: 4px solid rgba(168, 180, 255, 0.65);
+            flex-wrap: nowrap;
+            align-items: center;
+            /* Иначе наследуется min-height: 46px + flex-start — текст и иконка прилипают к верху */
+            min-height: 0;
+            padding-top: 0.62rem;
+            padding-bottom: 0.62rem;
         }
         .home-return-strip--flash.home-return-strip--success {
             border-left-color: #5fd89a;
@@ -348,18 +968,89 @@
         .home-return-strip .btn-close:hover {
             opacity: 1;
         }
+        .home-return-strip--flash .home-return-text {
+            flex: 1 1 auto;
+            min-width: 0;
+            align-items: center;
+        }
+        .home-return-strip--flash .home-return-msg {
+            flex: 1 1 auto;
+            min-width: 0;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.45;
+            text-align: left;
+        }
+        .home-return-strip--flash .home-return-text > .bi:first-child {
+            flex-shrink: 0;
+            margin-top: 0;
+            line-height: 1;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .home-return-strip--flash .btn-close {
+            align-self: center;
+            margin-top: 0;
+            flex-shrink: 0;
+        }
         /* ── Main content (full width — no sidebar) ── */
         .main-content {
             margin-left: 0;
             margin-top: calc(var(--navbar-height) + var(--below-nav-stack-height, 0px) + 8px);
-            padding: 1.5rem 1.75rem 2.5rem;
+            padding: 1.35rem var(--content-padding-x) 2.25rem;
             min-height: calc(100vh - var(--navbar-height) - var(--below-nav-stack-height, 0px) - 8px);
-            max-width: 1440px;
+            max-width: var(--content-max-width);
+            width: 100%;
             margin-inline: auto;
+            transition:
+                margin-top 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                min-height 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @media (min-width: 1536px) {
+            :root { --content-max-width: min(1680px, 94vw); }
+        }
+        @media (min-width: 1920px) {
+            :root { --content-max-width: min(1760px, 92vw); }
         }
         @media (max-width: 992px) {
             :root {
                 --navbar-height: 148px;
+            }
+            body:has(.top-navbar.sw-top-navbar--admin-portal) {
+                --navbar-height: calc(5.05rem + 1rem);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .below-nav-stack > .home-return-strip:not([hidden]):not(.is-leaving) {
+                animation: none;
+            }
+            .below-nav-stack > .home-return-strip.is-leaving {
+                animation: none !important;
+            }
+            .main-content {
+                transition: none;
+            }
+        }
+
+        /* iOS: не увеличивать страницу при фокусе на полях */
+        @media (max-width: 576px) {
+            .main-content .form-control,
+            .main-content .form-select,
+            .main-content textarea.form-control {
+                font-size: 1rem;
+            }
+            .page-header h2 {
+                font-size: clamp(1.15rem, 4.2vw, 1.4rem);
+            }
+            .home-return-strip {
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+                padding-right: max(0.75rem, env(safe-area-inset-right));
+            }
+            .main-content {
+                padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
             }
         }
 
@@ -555,93 +1246,532 @@
         ::-webkit-scrollbar-thumb { background: #c4c7cc; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8abb2; }
 
+        /* Выгрузка PDF/CSV — общий стиль модалок подтверждения (отчёты и панели) */
+        .sw-report-confirm-modal .modal-content {
+            border-radius: 18px;
+            overflow: hidden;
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+        }
+        .sw-report-confirm-modal--pdf .modal-content {
+            border: 1px solid #fecaca;
+            background: linear-gradient(165deg, #ffffff 0%, #fff1f2 48%, #fef2f2 100%);
+            box-shadow:
+                0 24px 56px rgba(185, 28, 28, 0.16),
+                0 2px 12px rgba(239, 68, 68, 0.08);
+        }
+        .sw-report-confirm-modal--csv .modal-content {
+            border: 1px solid #6ee7b7;
+            background: linear-gradient(165deg, #ffffff 0%, #f0fdf4 48%, #ecfdf5 100%);
+            box-shadow:
+                0 24px 56px rgba(20, 83, 45, 0.14),
+                0 2px 12px rgba(16, 185, 129, 0.08);
+        }
+        .sw-report-confirm-modal .modal-header {
+            padding: 1.15rem 1.25rem 0.65rem;
+        }
+        .sw-report-confirm-modal .sw-report-confirm-modal__title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .sw-report-confirm-modal--pdf .sw-report-confirm-modal__icon {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            background:
+                radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.4) 0%, transparent 52%),
+                linear-gradient(155deg, #fb7185 0%, #ef4444 42%, #dc2626 88%, #b91c1c 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.28),
+                0 2px 6px rgba(185, 28, 28, 0.22),
+                0 8px 18px rgba(239, 68, 68, 0.28);
+        }
+        .sw-report-confirm-modal--csv .sw-report-confirm-modal__icon {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            background:
+                radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.38) 0%, transparent 52%),
+                linear-gradient(155deg, #34d399 0%, #10b981 45%, #059669 88%, #047857 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.28),
+                0 2px 6px rgba(5, 150, 105, 0.22),
+                0 8px 18px rgba(16, 185, 129, 0.26);
+        }
+        .sw-report-confirm-modal--pdf .modal-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            color: #7f1d1d;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .sw-report-confirm-modal--csv .modal-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+            color: #14532d;
+            margin: 0;
+            line-height: 1.25;
+        }
+        .sw-report-confirm-modal .modal-body {
+            padding: 0.35rem 1.25rem 1.1rem;
+        }
+        .sw-report-confirm-modal--pdf .sw-report-confirm-modal__hint {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #57534e;
+            margin: 0;
+            padding-left: 0.35rem;
+            border-left: 3px solid rgba(239, 68, 68, 0.65);
+        }
+        .sw-report-confirm-modal--csv .sw-report-confirm-modal__hint {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #57534e;
+            margin: 0;
+            padding-left: 0.35rem;
+            border-left: 3px solid rgba(16, 185, 129, 0.65);
+        }
+        .sw-report-confirm-modal .modal-footer {
+            padding: 0.65rem 1.25rem 1.15rem;
+            gap: 0.5rem;
+        }
+        .sw-report-confirm-modal .sw-report-confirm-modal__btn-cancel {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.45rem 1rem;
+            border-color: rgba(120, 113, 108, 0.35);
+            color: #44403c;
+        }
+        .sw-report-confirm-modal .sw-report-confirm-modal__btn-cancel:hover {
+            background: #f5f5f4;
+            border-color: #a8a29e;
+            color: #292524;
+        }
+        .sw-report-confirm-modal--pdf .sw-report-confirm-modal__btn-confirm {
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 0.45rem 1.1rem;
+            border: none;
+            color: #fff;
+            background:
+                radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+                linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 2px 6px rgba(185, 28, 28, 0.22),
+                0 8px 18px rgba(239, 68, 68, 0.28);
+            transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+        }
+        .sw-report-confirm-modal--pdf .sw-report-confirm-modal__btn-confirm:hover {
+            filter: brightness(1.08);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.38),
+                0 4px 10px rgba(185, 28, 28, 0.28),
+                0 12px 26px rgba(239, 68, 68, 0.38);
+        }
+        .sw-report-confirm-modal--csv .sw-report-confirm-modal__btn-confirm {
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 0.45rem 1.1rem;
+            border: none;
+            color: #fff;
+            background:
+                radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+                linear-gradient(155deg, #34d399 0%, #10b981 40%, #059669 88%, #047857 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 2px 6px rgba(5, 150, 105, 0.22),
+                0 8px 18px rgba(16, 185, 129, 0.28);
+            transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+        }
+        .sw-report-confirm-modal--csv .sw-report-confirm-modal__btn-confirm:hover {
+            filter: brightness(1.08);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.38),
+                0 4px 10px rgba(5, 150, 105, 0.28),
+                0 12px 26px rgba(16, 185, 129, 0.38);
+        }
+        .sw-report-confirm-modal--pdf .form-check.border.rounded {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(252, 165, 165, 0.55) !important;
+        }
+        .sw-report-confirm-modal--csv .form-check.border.rounded {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(110, 231, 183, 0.65) !important;
+        }
+
+        /* Подтверждение выхода — как вкладка «Удаление записи» (.del-confirm-card на страницах подтверждения) */
+        .sw-logout-del-modal .modal-dialog {
+            max-width: 28rem;
+        }
+        .sw-logout-del-modal .modal-content {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+        }
+        .sw-logout-del-modal .del-confirm-card {
+            position: relative;
+            margin-bottom: 0;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.88);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            box-shadow:
+                0 16px 48px rgba(45, 38, 82, 0.12),
+                0 2px 12px rgba(220, 38, 38, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        }
+        .sw-logout-del-modal .sw-logout-del-modal__close {
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            z-index: 2;
+            opacity: 0.92;
+        }
+        .sw-logout-del-modal .sw-logout-del-modal__close:hover {
+            opacity: 1;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-head {
+            padding: 1.35rem 2.35rem 1.25rem 1.5rem;
+            background: linear-gradient(125deg, #fb7185 0%, #f43f5e 38%, #dc2626 72%, #b91c1c 100%);
+            color: #fff;
+            text-align: center;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-head .del-confirm-icon {
+            width: 3.25rem;
+            height: 3.25rem;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-head .del-confirm-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0 0 0.35rem;
+            color: #fff;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-head p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.95;
+            line-height: 1.45;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-body {
+            padding: 1.35rem 1.5rem 1.5rem;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-summary {
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+            background: linear-gradient(165deg, rgba(254, 243, 199, 0.55) 0%, rgba(254, 226, 226, 0.45) 100%);
+            border: 1px solid rgba(248, 113, 113, 0.28);
+            margin-bottom: 1rem;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-summary strong {
+            font-size: 1.05rem;
+            color: #1f1a36;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-summary small {
+            display: block;
+            margin-top: 0.35rem;
+            color: #5f6368;
+            font-size: 0.8125rem;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-warning {
+            font-size: 0.8125rem;
+            color: #b91c1c;
+            font-weight: 600;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 1.35rem;
+            line-height: 1.45;
+        }
+        .sw-logout-del-modal .del-confirm-card .del-confirm-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            justify-content: center;
+        }
+        .sw-logout-del-modal .del-confirm-card .btn-del-cancel {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.55rem 1.25rem;
+            border: 1px solid rgba(102, 126, 234, 0.28);
+            background: rgba(255, 255, 255, 0.95);
+            color: #3d3a56;
+        }
+        .sw-logout-del-modal .del-confirm-card .btn-del-cancel:hover {
+            background: #fff;
+            border-color: rgba(102, 126, 234, 0.45);
+            color: #1f1a36;
+        }
+        .sw-logout-del-modal .del-confirm-card .btn-del-submit {
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 0.55rem 1.35rem;
+            color: #fff;
+            background: linear-gradient(145deg, #f87171 0%, #ef4444 45%, #dc2626 100%);
+            box-shadow:
+                0 4px 16px rgba(220, 38, 38, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        }
+        .sw-logout-del-modal .del-confirm-card .btn-del-submit:hover {
+            color: #fff;
+            filter: brightness(1.06);
+            box-shadow:
+                0 6px 22px rgba(220, 38, 38, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        /* Переход по sw-fs-form-link: те же длительности/кривые, что у modal.fade (backdrop) + .modal-dialog (transform), без отдельного окна */
+        @keyframes swFsFormBackdropIn {
+            from { opacity: 0; }
+            to { opacity: var(--bs-backdrop-opacity, 0.5); }
+        }
+        @keyframes swFsFormEnterMain {
+            from {
+                opacity: 0;
+                transform: translate3d(0, -50px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .top-navbar,
+        .below-nav-stack {
+            transition: opacity 0.15s linear;
+        }
+        body.sw-fs-form-nav-out {
+            pointer-events: none;
+        }
+        body.sw-fs-form-nav-out::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            background: var(--bs-backdrop-bg, #000);
+            opacity: 0;
+            pointer-events: none;
+            will-change: opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            animation: swFsFormBackdropIn 0.15s linear forwards;
+        }
+        body.sw-fs-form-nav-out .top-navbar,
+        body.sw-fs-form-nav-out .below-nav-stack {
+            opacity: 0.5;
+            will-change: opacity;
+        }
+        body.sw-fs-form-nav-in main.main-content {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            animation: swFsFormEnterMain 0.3s ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body.sw-fs-form-nav-out::before {
+                animation: none;
+                opacity: 0.5;
+            }
+            body.sw-fs-form-nav-out .top-navbar,
+            body.sw-fs-form-nav-out .below-nav-stack {
+                opacity: 1;
+                transition: none;
+                will-change: auto;
+            }
+            body.sw-fs-form-nav-in main.main-content {
+                animation: none;
+                will-change: auto;
+            }
+        }
+
+        /* Плавное появление целевых форм (как «Добавить получателя»): класс sw-form-page-enter на body */
+        @keyframes swFormPageEnterReveal {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        body.sw-form-page-enter main.main-content {
+            animation: swFormPageEnterReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body.sw-form-page-enter main.main-content {
+                animation: none;
+            }
+        }
+
         {% block inline_css %}{% endblock %}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    <nav class="top-navbar">
-        <a href="{% url 'accounts:dashboard' %}" class="brand">
-            <i class="bi bi-shield-lock-fill"></i> SocWorker
+    <nav class="top-navbar{% if sw_admin_portal_shell or sw_portal_admin_menu %} sw-top-navbar--admin-portal{% endif %}">
+        <a href="{% if sw_admin_portal_shell or sw_portal_admin_menu %}{% url 'accounts:admin_portal_panel' %}{% else %}{% url 'accounts:dashboard' %}{% endif %}" class="brand brand-stack" title="СоцПомощник{% if sw_admin_portal_shell or sw_portal_admin_menu %} — Панель Администратора{% endif %}"
+           aria-label="{% if sw_admin_portal_shell or sw_portal_admin_menu %}Панель Администратора{% else %}СоцПомощник, перейти на главную{% endif %}">
+            <span class="brand-logo-visual" aria-hidden="true">
+                <img src="{% static 'img/logo_white_transparent.png' %}" alt="" class="brand-logo-img" width="58" height="58" decoding="async">
+            </span>
+            <span class="brand-app-caption">СоцПомощник</span>
         </a>
 
+        {% if sw_admin_portal_shell %}
+        <div class="sw-admin-shell-page-title" role="presentation">
+            <span class="sw-admin-shell-page-title__inner">
+                <span class="sw-admin-shell-page-title__icon-wrap" aria-hidden="true">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </span>
+                <span class="sw-admin-shell-page-title__text">Панель Администратора</span>
+            </span>
+        </div>
+        {% endif %}
+
+        {% if not sw_admin_portal_shell and not sw_portal_admin_menu %}
         <div class="top-nav-columns">
             <div class="top-nav-main top-nav-row-primary">
                 <a class="nav-pill {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
                    href="{% url 'accounts:dashboard' %}">
                     <i class="bi bi-house-door-fill"></i> Главная
                 </a>
-                <a class="nav-pill {% if 'social_worker' in request.resolver_match.url_name or 'assigned_persons' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:social_workers_list' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'social_worker' in request.resolver_match.url_name or 'assigned_persons' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:social_workers_list' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-people-fill"></i> Соц. работники
                 </a>
-                <a class="nav-pill {% if 'recipient' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:recipients_list' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'recipient' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:recipients_list' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-person-heart"></i> Получатели услуг
                 </a>
-                <a class="nav-pill {% if 'services' in request.resolver_match.url_name or 'location' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:services_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'services' in request.resolver_match.url_name or 'location' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:services_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-briefcase-fill"></i> Услуги
                 </a>
-                <a class="nav-pill {% if request.resolver_match.url_name == 'visit_planning' %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'visit_planning' in request.resolver_match.url_name or 'planned_visit' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:visit_planning' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-calendar-week"></i> Планирование визитов
                 </a>
             </div>
             <div class="top-nav-main top-nav-row-secondary">
-                <a class="nav-pill {% if 'workload' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:workload_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'workload' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:workload_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-calculator"></i> Расчёт нагрузки
                 </a>
                 <a class="nav-pill {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"
                    href="{% url 'inventory:panel' %}">
                     <i class="bi bi-box-seam"></i> Инвентаризация
                 </a>
-                <a class="nav-pill {% if request.resolver_match.url_name == 'medical_checkup_panel' %}active{% endif %}"
-                   href="{% url 'accounts:medical_checkup_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if request.resolver_match.url_name == 'medical_checkup_panel' %}active{% endif %}"
+                   href="{% url 'accounts:medical_checkup_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-heart-pulse"></i> Прохождение медосмотра
                 </a>
-                <a class="nav-pill {% if 'safety_briefing' in request.resolver_match.url_name %}active{% endif %}"
-                   href="{% url 'accounts:safety_briefing_panel' %}">
+                <a class="nav-pill {% if sw_inventory_top_nav_locked %}sw-nav-pill--blocked {% endif %}{% if 'safety_briefing' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'accounts:safety_briefing_panel' %}"
+                   {% if sw_inventory_top_nav_locked %}tabindex="-1" aria-disabled="true" title="Недоступно на страницах инвентаризации"{% endif %}>
                     <i class="bi bi-shield-check"></i> Техника безопасности
                 </a>
             </div>
         </div>
+        {% endif %}
 
         <div class="user-area">
+            {% block user_area %}
             <div class="dropdown user-menu-dropdown">
                 <button class="btn btn-user-menu dropdown-toggle" type="button" id="userMenuDropdown"
-                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                        data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                        data-bs-placement="bottom-end" data-bs-offset="0,10" data-bs-boundary="viewport"
+                        data-bs-popper-config='{"strategy":"fixed"}'
+                        aria-expanded="false"
+                        aria-label="Меню пользователя: {{ user.first_name|default:user.username }}"
                         title="Меню пользователя">
-                    {% if nav_user_profile and nav_user_profile.avatar %}
-                        <img src="{{ nav_user_profile.avatar.url }}" alt="" class="nav-user-avatar">
-                    {% else %}
-                        <i class="bi bi-person-circle"></i>
-                    {% endif %}
-                    <span class="span-text">{{ user.get_full_name|default:user.username }}</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2" aria-labelledby="userMenuDropdown" style="min-width: 17rem;">
-                    <li class="px-3 pb-2 mb-1 border-bottom border-light">
-                        <div class="small text-muted">Вошли как</div>
-                        <div class="fw-semibold text-truncate">{{ user.get_full_name|default:user.username }}</div>
-                        {% if user.email %}
-                            <div class="small text-muted text-truncate">{{ user.email }}</div>
+                    <span class="nav-user-menu-visual" aria-hidden="true">
+                        {% if nav_user_profile and nav_user_profile.avatar %}
+                            <img src="{{ nav_user_profile.avatar.url }}" alt="" class="nav-user-avatar">
+                        {% else %}
+                            <span class="nav-user-icon-fallback-wrap"><i class="bi bi-person-fill nav-user-icon-fallback" aria-hidden="true"></i></span>
                         {% endif %}
+                        <span class="nav-user-add-photo-hint" aria-hidden="true" title="Добавить фото в профиле"><i class="bi bi-plus-lg"></i></span>
+                    </span>
+                    <span class="nav-user-name-label">{{ user.first_name|default:user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end sw-user-menu py-2 border-0" aria-labelledby="userMenuDropdown">
+                    <li class="px-0 pb-0 mb-0">
+                        <div class="sw-user-menu__identity" title="Потяните, чтобы перенести меню">
+                            {% if nav_user_profile and nav_user_profile.avatar %}
+                                <img src="{{ nav_user_profile.avatar.url }}" alt="" class="sw-user-menu__avatar-lg" width="48" height="48" draggable="false">
+                            {% else %}
+                                <div class="sw-user-menu__avatar-ph" aria-hidden="true"><i class="bi bi-person-fill"></i></div>
+                            {% endif %}
+                            <div class="min-w-0 flex-grow-1">
+                                <div class="sw-user-menu__label">Вошли как</div>
+                                <div class="sw-user-menu__name text-truncate">{{ user.first_name|default:user.username }}</div>
+                                {% if user.email %}
+                                    <div class="sw-user-menu__email text-truncate">{{ user.email }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </li>
-                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person-badge me-2 text-primary"></i>О пользователе</a></li>
-                    <li><a class="dropdown-item" href="{% url 'accounts:password_change' %}"><i class="bi bi-key me-2 text-secondary"></i>Смена пароля</a></li>
-                    <li><hr class="dropdown-divider mx-2"></li>
-                    <li><h6 class="dropdown-header text-uppercase small mb-0 px-3">Быстрый доступ</h6></li>
-                    <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}"><i class="bi bi-house-door me-2 text-secondary"></i>Главная</a></li>
-                    <li><a class="dropdown-item" href="{% url 'accounts:report_select' %}"><i class="bi bi-file-earmark-bar-graph me-2 text-secondary"></i>Отчёты</a></li>
-                    <li><a class="dropdown-item" href="{% url 'inventory:panel' %}"><i class="bi bi-box-seam me-2 text-secondary"></i>Инвентаризация</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'accounts:profile' %}"><span class="sw-user-menu__ico sw-user-menu__ico--accent" aria-hidden="true"><i class="bi bi-person-badge"></i></span><span>О пользователе</span></a></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'accounts:password_change' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-key"></i></span><span>Смена пароля</span></a></li>
+                    {% if sw_portal_admin_menu %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item sw-user-menu__link sw-user-menu__link--danger fw-semibold js-sw-logout-confirm" href="{% url 'accounts:logout' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span><span>Выход</span></a></li>
+                    {% else %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header sw-user-menu__section text-uppercase">Быстрый доступ</h6></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'accounts:dashboard' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-house-door"></i></span><span>Главная</span></a></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'accounts:report_select' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-file-earmark-bar-graph"></i></span><span>Отчёты</span></a></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'inventory:panel' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-box-seam"></i></span><span>Инвентаризация</span></a></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'accounts:admin_portal_login' %}?next={% url 'accounts:admin_portal_panel' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-ui-checks-grid"></i></span><span>Панель Администратора</span></a></li>
                     {% if user.is_staff %}
-                    <li><a class="dropdown-item" href="{% url 'admin:index' %}" target="_blank" rel="noopener"><i class="bi bi-gear-wide-connected me-2 text-secondary"></i>Админ-панель</a></li>
+                    <li><a class="dropdown-item sw-user-menu__link" href="{% url 'admin:index' %}" target="_blank" rel="noopener"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-gear-wide-connected"></i></span><span>Админ-панель</span></a></li>
                     {% endif %}
-                    <li><hr class="dropdown-divider mx-2"></li>
-                    <li><a class="dropdown-item text-danger fw-medium" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Выход</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item sw-user-menu__link sw-user-menu__link--danger fw-semibold js-sw-logout-confirm" href="{% url 'accounts:logout' %}"><span class="sw-user-menu__ico" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span><span>Выход</span></a></li>
+                    {% endif %}
                 </ul>
             </div>
+            {% endblock %}
         </div>
     </nav>
 
@@ -656,9 +1786,19 @@
                 <button type="button" class="btn-close" id="homeReturnStripClose" aria-label="Закрыть подсказку"></button>
             </div>
         </div>
+        <div id="visitPlanningReturnStrip" class="home-return-strip" hidden role="region" aria-label="Возврат к планированию визитов">
+            <div class="home-return-text">
+                <i class="bi bi-calendar-week flex-shrink-0" style="color:#fdba74;" aria-hidden="true"></i>
+                <span class="text-truncate">Перешли с <strong>Планирования визитов</strong>? Вернитесь кнопкой или закройте подсказку крестиком.</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <a class="btn btn-sm btn-light rounded-pill px-3 fw-semibold" id="visitPlanningReturnLink" href="{% url 'accounts:visit_planning' %}">К планированию</a>
+                <button type="button" class="btn-close" id="visitPlanningReturnStripClose" aria-label="Закрыть подсказку"></button>
+            </div>
+        </div>
         {% if messages %}
             {% for message in messages %}
-                <div class="home-return-strip home-return-strip--flash home-return-strip--{{ message.level_tag|default:'info' }}" role="alert">
+                <div class="home-return-strip home-return-strip--flash home-return-strip--{{ message.level_tag|default:'info' }}{% if message.extra_tags %} {{ message.extra_tags }}{% endif %}" role="alert">
                     <div class="home-return-text">
                         {% if message.level_tag == 'success' %}
                             <i class="bi bi-check-circle-fill flex-shrink-0" style="color:#7dd3a0;" aria-hidden="true"></i>
@@ -671,7 +1811,7 @@
                         {% else %}
                             <i class="bi bi-info-circle-fill flex-shrink-0" style="color:#a8cfff;" aria-hidden="true"></i>
                         {% endif %}
-                        <span class="text-truncate">{{ message }}</span>
+                        <span class="home-return-msg">{{ message }}</span>
                     </div>
                     <button type="button" class="btn-close app-message-close" aria-label="Закрыть уведомление"></button>
                 </div>
@@ -680,6 +1820,13 @@
     </div>
     <script>
         (function () {
+            var nav = document.querySelector('.top-navbar');
+            if (nav) {
+                var nh = Math.ceil(nav.getBoundingClientRect().height);
+                if (nh > 0) {
+                    document.documentElement.style.setProperty('--navbar-height', nh + 'px');
+                }
+            }
             var s = document.getElementById('belowNavStack');
             if (s) {
                 document.documentElement.style.setProperty('--below-nav-stack-height', (s.offsetHeight || 0) + 'px');
@@ -691,18 +1838,105 @@
         {% block content %}{% endblock %}
     </main>
 
+    <div class="modal fade sw-logout-del-modal" id="swLogoutConfirmModal" tabindex="-1" aria-labelledby="swLogoutConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="card del-confirm-card">
+                    <button type="button" class="btn-close btn-close-white sw-logout-del-modal__close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    <div class="del-confirm-head">
+                        <div class="del-confirm-icon" aria-hidden="true">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
+                        <h2 class="del-confirm-title" id="swLogoutConfirmModalLabel">Выйти из аккаунта?</h2>
+                        <p>Завершается текущая сессия в SocWorker. Это окно подтверждения — проверьте учётную запись и выберите действие.</p>
+                    </div>
+                    <div class="del-confirm-body">
+                        <div class="del-confirm-summary">
+                            <strong>{{ user.get_full_name|default:user.username }}</strong>
+                            <small>Логин: {{ user.username }}</small>
+                        </div>
+                        <div class="del-confirm-warning">
+                            <i class="bi bi-exclamation-octagon-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
+                            <span>Несохранённые данные на открытых страницах могут быть потеряны. После выхода потребуется снова войти в систему.</span>
+                        </div>
+                        <div class="del-confirm-actions">
+                            <button type="button" class="btn btn-del-cancel" data-bs-dismiss="modal">Отмена</button>
+                            <button type="button" class="btn btn-del-submit" id="swLogoutConfirmBtn" data-logout-url="">
+                                <i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Да, выйти из аккаунта
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     (function () {
         var KEY = 'socworkerFromHome';
+        var KEY_VP = 'socworkerFromVisitPlanning';
+        var KEY_VP_URL = 'socworkerVisitPlanningReturnUrl';
         function isDashboardPath() {
             return /\/accounts\/dashboard\/?$/.test(window.location.pathname);
         }
+        function isVisitPlanningPath() {
+            return /\/accounts\/visits\/?$/.test(window.location.pathname);
+        }
+        function isRecipientSectionPath() {
+            return /\/accounts\/recipients(\/|$)/.test(window.location.pathname);
+        }
+        function syncNavbarHeightCssVar() {
+            var nav = document.querySelector('.top-navbar');
+            if (!nav) return;
+            var h = Math.ceil(nav.getBoundingClientRect().height);
+            if (h > 0) {
+                document.documentElement.style.setProperty('--navbar-height', h + 'px');
+            }
+        }
         function syncBelowNavStackHeight() {
+            syncNavbarHeightCssVar();
             var stack = document.getElementById('belowNavStack');
             if (!stack) return;
             var h = stack.offsetHeight || 0;
             document.documentElement.style.setProperty('--below-nav-stack-height', h + 'px');
+        }
+        function prefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+        function dismissBelowNavRow(row, removeFromDom) {
+            if (!row || row.classList.contains('is-leaving')) return;
+            if (prefersReducedMotion()) {
+                if (removeFromDom) {
+                    row.remove();
+                } else {
+                    row.setAttribute('hidden', 'hidden');
+                }
+                syncBelowNavStackHeight();
+                return;
+            }
+            row.classList.add('is-leaving');
+            var done = false;
+            function finish() {
+                if (done) return;
+                done = true;
+                row.classList.remove('is-leaving');
+                if (removeFromDom) {
+                    row.remove();
+                } else {
+                    row.setAttribute('hidden', 'hidden');
+                }
+                syncBelowNavStackHeight();
+            }
+            row.addEventListener('animationend', function (e) {
+                if (e.target !== row) return;
+                finish();
+            }, { once: true });
+            setTimeout(finish, 500);
         }
         function showHomeReturnStrip() {
             var el = document.getElementById('homeReturnStrip');
@@ -712,18 +1946,206 @@
         }
         function hideHomeReturnStrip() {
             var el = document.getElementById('homeReturnStrip');
-            if (!el) return;
-            el.setAttribute('hidden', 'hidden');
             try { sessionStorage.removeItem(KEY); } catch (e) {}
+            if (!el || el.hasAttribute('hidden')) {
+                syncBelowNavStackHeight();
+                return;
+            }
+            dismissBelowNavRow(el, false);
+        }
+        function showVisitPlanningReturnStrip() {
+            var el = document.getElementById('visitPlanningReturnStrip');
+            var link = document.getElementById('visitPlanningReturnLink');
+            if (!el) return;
+            try {
+                var back = sessionStorage.getItem(KEY_VP_URL);
+                if (link && back && back.charAt(0) === '/' && back.indexOf('//') === -1) {
+                    link.setAttribute('href', back);
+                }
+            } catch (e) {}
+            el.removeAttribute('hidden');
             syncBelowNavStackHeight();
         }
+        function hideVisitPlanningReturnStrip() {
+            var el = document.getElementById('visitPlanningReturnStrip');
+            var link = document.getElementById('visitPlanningReturnLink');
+            if (link) {
+                link.setAttribute('href', '{% url "accounts:visit_planning" %}');
+            }
+            try {
+                sessionStorage.removeItem(KEY_VP);
+                sessionStorage.removeItem(KEY_VP_URL);
+            } catch (e) {}
+            if (!el || el.hasAttribute('hidden')) {
+                syncBelowNavStackHeight();
+                return;
+            }
+            dismissBelowNavRow(el, false);
+        }
+
+        function setupDraggableUserMenu() {
+            var toggle = document.getElementById('userMenuDropdown');
+            if (!toggle || typeof bootstrap === 'undefined') return;
+            var wrap = toggle.closest('.user-menu-dropdown');
+            var menu = toggle.nextElementSibling;
+            if (!menu || !menu.classList.contains('sw-user-menu')) return;
+            var handle = menu.querySelector('.sw-user-menu__identity');
+            if (!handle) return;
+
+            function pinMenuFixed() {
+                var rect = menu.getBoundingClientRect();
+                try {
+                    var inst = bootstrap.Dropdown.getInstance(toggle);
+                    if (inst && inst._popper) {
+                        inst._popper.destroy();
+                        inst._popper = null;
+                    }
+                } catch (err) {}
+
+                if (wrap && menu.parentElement !== document.body) {
+                    document.body.appendChild(menu);
+                }
+
+                menu.style.position = 'fixed';
+                menu.style.top = rect.top + 'px';
+                menu.style.left = rect.left + 'px';
+                menu.style.right = 'auto';
+                menu.style.bottom = 'auto';
+                menu.style.margin = '0';
+                menu.style.transform = 'none';
+            }
+
+            function resetMenuStyles() {
+                if (wrap && menu.parentElement === document.body) {
+                    wrap.appendChild(menu);
+                }
+                menu.style.position = '';
+                menu.style.top = '';
+                menu.style.left = '';
+                menu.style.right = '';
+                menu.style.bottom = '';
+                menu.style.margin = '';
+                menu.style.transform = '';
+            }
+
+            function clampMenuInViewport() {
+                var rect = menu.getBoundingClientRect();
+                var margin = 8;
+                var vw = window.innerWidth;
+                var vh = window.innerHeight;
+                var left = rect.left;
+                var top = rect.top;
+                var maxL = Math.max(margin, vw - rect.width - margin);
+                var maxT = Math.max(margin, vh - rect.height - margin);
+                left = Math.min(maxL, Math.max(margin, left));
+                top = Math.min(maxT, Math.max(margin, top));
+                menu.style.left = left + 'px';
+                menu.style.top = top + 'px';
+            }
+
+            function onResizeWhileOpen() {
+                if (menu.classList.contains('show')) clampMenuInViewport();
+            }
+
+            toggle.addEventListener('shown.bs.dropdown', function () {
+                requestAnimationFrame(function () {
+                    pinMenuFixed();
+                    clampMenuInViewport();
+                });
+            });
+            toggle.addEventListener('hidden.bs.dropdown', resetMenuStyles);
+            window.addEventListener('resize', onResizeWhileOpen);
+
+            var drag = { active: false, pid: null, sx: 0, sy: 0, sl: 0, st: 0 };
+
+            function endDrag(e) {
+                if (!drag.active || (e && e.pointerId !== drag.pid)) return;
+                drag.active = false;
+                try {
+                    if (drag.pid != null) handle.releasePointerCapture(drag.pid);
+                } catch (err) {}
+                drag.pid = null;
+                handle.classList.remove('is-dragging');
+            }
+
+            function onPointerMove(e) {
+                if (!drag.active || e.pointerId !== drag.pid) return;
+                var dx = e.clientX - drag.sx;
+                var dy = e.clientY - drag.sy;
+                menu.style.left = drag.sl + dx + 'px';
+                menu.style.top = drag.st + dy + 'px';
+                clampMenuInViewport();
+            }
+
+            handle.addEventListener('pointerdown', function (e) {
+                if (!menu.classList.contains('show')) return;
+                if (e.button != null && e.button !== 0) return;
+                e.preventDefault();
+                pinMenuFixed();
+                var rect = menu.getBoundingClientRect();
+                drag.active = true;
+                drag.pid = e.pointerId;
+                drag.sx = e.clientX;
+                drag.sy = e.clientY;
+                drag.sl = rect.left;
+                drag.st = rect.top;
+                handle.classList.add('is-dragging');
+                try {
+                    handle.setPointerCapture(e.pointerId);
+                } catch (err) {}
+            });
+            handle.addEventListener('pointermove', onPointerMove);
+            handle.addEventListener('pointerup', endDrag);
+            handle.addEventListener('pointercancel', endDrag);
+        }
+
+        (function setupBlockedUiNavLinks() {
+            function blockedAnchorFromTarget(t) {
+                return t && t.closest ? t.closest('a.sw-nav-pill--blocked, a.dash-inv-glass-lock') : null;
+            }
+            document.addEventListener('click', function (ev) {
+                var a = blockedAnchorFromTarget(ev.target);
+                if (!a) return;
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+            }, true);
+            document.addEventListener('auxclick', function (ev) {
+                if (ev.button !== 1) return;
+                var a = blockedAnchorFromTarget(ev.target);
+                if (!a) return;
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+            }, true);
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                var t = ev.target;
+                if (!t || !t.matches || !t.matches('a.sw-nav-pill--blocked, a.dash-inv-glass-lock')) return;
+                ev.preventDefault();
+            }, true);
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
+            setupDraggableUserMenu();
             if (isDashboardPath()) {
                 try { sessionStorage.removeItem(KEY); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP_URL); } catch (e) {}
                 hideHomeReturnStrip();
-            } else {
+                hideVisitPlanningReturnStrip();
+            } else if (isVisitPlanningPath()) {
+                try { sessionStorage.removeItem(KEY_VP); } catch (e) {}
+                try { sessionStorage.removeItem(KEY_VP_URL); } catch (e) {}
+                hideVisitPlanningReturnStrip();
                 try {
                     if (sessionStorage.getItem(KEY) === '1') {
+                        showHomeReturnStrip();
+                    }
+                } catch (e) {}
+            } else {
+                try {
+                    if (isRecipientSectionPath() && sessionStorage.getItem(KEY_VP) === '1') {
+                        showVisitPlanningReturnStrip();
+                    } else if (sessionStorage.getItem(KEY) === '1') {
                         showHomeReturnStrip();
                     }
                 } catch (e) {}
@@ -732,6 +2154,10 @@
             if (closeBtn) {
                 closeBtn.addEventListener('click', hideHomeReturnStrip);
             }
+            var closeVp = document.getElementById('visitPlanningReturnStripClose');
+            if (closeVp) {
+                closeVp.addEventListener('click', hideVisitPlanningReturnStrip);
+            }
             var stack = document.getElementById('belowNavStack');
             if (stack) {
                 stack.addEventListener('click', function (e) {
@@ -739,12 +2165,147 @@
                     if (!btn) return;
                     var row = btn.closest('.home-return-strip--flash');
                     if (!row) return;
-                    row.remove();
-                    syncBelowNavStackHeight();
+                    dismissBelowNavRow(row, true);
                 });
             }
+            var logoutModalEl = document.getElementById('swLogoutConfirmModal');
+            var logoutConfirmBtn = document.getElementById('swLogoutConfirmBtn');
+            var logoutModal = logoutModalEl && typeof bootstrap !== 'undefined'
+                ? bootstrap.Modal.getOrCreateInstance(logoutModalEl)
+                : null;
+            if (logoutConfirmBtn) {
+                logoutConfirmBtn.addEventListener('click', function () {
+                    var url = logoutConfirmBtn.getAttribute('data-logout-url');
+                    if (url) window.location.href = url;
+                });
+            }
+            document.addEventListener('click', function (ev) {
+                var link = ev.target.closest('a.js-sw-logout-confirm');
+                if (!link || !link.getAttribute('href')) return;
+                ev.preventDefault();
+                var href = link.href;
+                if (!logoutModal || !logoutConfirmBtn) {
+                    window.location.href = href;
+                    return;
+                }
+                logoutConfirmBtn.setAttribute('data-logout-url', href);
+                var menuBtn = document.getElementById('userMenuDropdown');
+                if (menuBtn && typeof bootstrap !== 'undefined') {
+                    var dd = bootstrap.Dropdown.getInstance(menuBtn);
+                    if (dd) dd.hide();
+                }
+                logoutModal.show();
+            });
             syncBelowNavStackHeight();
             window.addEventListener('resize', syncBelowNavStackHeight);
+            window.addEventListener('load', syncBelowNavStackHeight);
+            requestAnimationFrame(function () {
+                syncBelowNavStackHeight();
+                requestAnimationFrame(syncBelowNavStackHeight);
+            });
+            var stackObs = document.getElementById('belowNavStack');
+            if (stackObs && typeof ResizeObserver !== 'undefined') {
+                try {
+                    new ResizeObserver(syncBelowNavStackHeight).observe(stackObs);
+                } catch (e) {}
+            }
+            var navObs = document.querySelector('.top-navbar');
+            if (navObs && typeof ResizeObserver !== 'undefined') {
+                try {
+                    new ResizeObserver(syncBelowNavStackHeight).observe(navObs);
+                } catch (e) {}
+            }
+        });
+    })();
+    </script>
+    <script>
+    (function () {
+        var STORAGE_KEY = 'swFsFormNavPending';
+        var prefetched = {};
+
+        function prefetchHref(href) {
+            try {
+                var abs = new URL(href, window.location.href);
+                if (abs.origin !== window.location.origin) return;
+                var key = abs.pathname + abs.search;
+                if (prefetched[key]) return;
+                prefetched[key] = true;
+                var link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = abs.href;
+                link.as = 'document';
+                document.head.appendChild(link);
+            } catch (err) {}
+        }
+
+        function prefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+        document.addEventListener('mouseover', function (e) {
+            var a = e.target.closest && e.target.closest('a.sw-fs-form-link');
+            if (!a || !a.href) return;
+            var href = a.href;
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(function () { prefetchHref(href); }, { timeout: 500 });
+            } else {
+                requestAnimationFrame(function () { prefetchHref(href); });
+            }
+        }, true);
+
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('a.sw-fs-form-link');
+            if (!a || !a.getAttribute('href')) return;
+            if (e.defaultPrevented) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (e.button !== 0) return;
+            var href = a.getAttribute('href');
+            if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
+            if (a.hasAttribute('download')) return;
+            if ((a.getAttribute('target') || '').toLowerCase() === '_blank') return;
+            if (a.getAttribute('role') === 'menuitem') return;
+            e.preventDefault();
+            prefetchHref(a.href);
+            if (prefersReducedMotion()) {
+                window.location.href = a.href;
+                return;
+            }
+            var targetUrl = a.href;
+            try {
+                sessionStorage.setItem(STORAGE_KEY, '1');
+            } catch (err) {}
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    document.body.classList.add('sw-fs-form-nav-out');
+                });
+            });
+            window.setTimeout(function () {
+                window.location.href = targetUrl;
+            }, 180);
+        });
+        function runEnterAnimation() {
+            if (prefersReducedMotion()) return;
+            try {
+                if (sessionStorage.getItem(STORAGE_KEY) !== '1') return;
+                sessionStorage.removeItem(STORAGE_KEY);
+            } catch (e) {
+                return;
+            }
+            document.body.classList.add('sw-fs-form-nav-in');
+            window.setTimeout(function () {
+                document.body.classList.remove('sw-fs-form-nav-in');
+            }, 340);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runEnterAnimation);
+        } else {
+            runEnterAnimation();
+        }
+        window.addEventListener('pageshow', function () {
+            document.body.classList.remove('sw-fs-form-nav-out');
         });
     })();
     </script>

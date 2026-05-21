@@ -1,0 +1,89 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Изменить запись инструктажа — SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-entity-edit-page"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/sw_edit_form_theme.html' with is_edit=True %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header sw-entity-form-header">
+    <h1 class="sw-edit-page-title mb-0">
+        <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+        <span class="sw-edit-page-title__label">Инструктаж по технике безопасности</span>
+    </h1>
+    <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:safety_briefing_panel' %}{% endif %}" class="sw-edit-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели техники безопасности
+    </a>
+</div>
+
+<div class="card sw-edit-form-card">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+
+            <div class="section-title"><i class="bi bi-person-badge"></i> Сотрудник</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Табельный номер</label>
+                    <input type="text" class="form-control" value="{{ record.social_worker.employee_id }}" readonly tabindex="-1">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">ФИО</label>
+                    <input type="text" class="form-control" value="{{ record.social_worker.get_full_name }}" readonly tabindex="-1">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-journal-text"></i> Запись журнала</div>
+            <div class="row g-3 mb-3">
+                <div class="col-12">
+                    <label for="{{ form.social_worker.id_for_label }}" class="form-label">{{ form.social_worker.label }}</label>
+                    {{ form.social_worker }}
+                    {% if form.social_worker.errors %}<div class="text-danger small mt-1">{{ form.social_worker.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-8">
+                    <label for="{{ form.briefing_title.id_for_label }}" class="form-label">{{ form.briefing_title.label }}</label>
+                    {{ form.briefing_title }}
+                    {% if form.briefing_title.errors %}<div class="text-danger small mt-1">{{ form.briefing_title.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label for="{{ form.briefing_date.id_for_label }}" class="form-label">{{ form.briefing_date.label }}</label>
+                    {{ form.briefing_date }}
+                    <div class="form-text small text-muted">Дата инструктажа / подтверждения прохождения</div>
+                    {% if form.briefing_date.errors %}<div class="text-danger small mt-1">{{ form.briefing_date.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    {{ form.passed }}
+                    <label class="form-check-label" for="{{ form.passed.id_for_label }}">{{ form.passed.label }}</label>
+                </div>
+                {% if form.passed.errors %}<div class="text-danger small mt-1">{{ form.passed.errors }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">{{ form.notes.label }}</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="text-danger small mt-1">{{ form.notes.errors }}</div>{% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:safety_briefing_panel' %}{% endif %}" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

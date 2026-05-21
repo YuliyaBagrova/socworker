@@ -1,0 +1,231 @@
+{# Страница новой/редактирования записи нагрузки — макет как «Запланировать визит», палитра панели «Расчёт нагрузки». #}
+    body.sw-workload-page.wl-record-assign-page .main-content {
+        max-width: 920px;
+        min-width: 0;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+        box-sizing: border-box;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-record-wrap {
+        max-width: none;
+        margin: 0;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-page-title__icon {
+        flex-shrink: 0;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 35%, #2563eb 75%, #1d4ed8 100%);
+        box-shadow:
+            0 6px 22px rgba(37, 99, 235, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-page-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            108deg,
+            #1e3a8a 0%,
+            #1d4ed8 18%,
+            #2563eb 34%,
+            #0ea5e9 52%,
+            #38bdf8 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-workload-page.wl-record-assign-page .wl-assign-page-title__label {
+            color: #1e3a8a;
+            background: none;
+        }
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #1d4ed8;
+        border: 1.5px solid rgba(56, 189, 248, 0.55);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 249, 255, 0.92) 100%);
+        box-shadow:
+            0 4px 18px rgba(14, 165, 233, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-back-btn:hover {
+        color: #1e3a8a;
+        border-color: rgba(14, 165, 233, 0.75);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-intro {
+        font-size: 0.8125rem;
+        color: #475569;
+        line-height: 1.45;
+        margin: 0 0 1.25rem 0;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card {
+        border: 1px solid rgba(56, 189, 248, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 20px 56px rgba(30, 58, 138, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .card-body {
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .wl-form-section {
+        position: relative;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .wl-form-section::before {
+        display: none;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .wl-form-section__kicker {
+        display: none;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .wl-form-section__title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #0ea5e9;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(224, 242, 254, 0.95) 0%, rgba(239, 246, 255, 0.35) 72%, transparent 100%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card section.wl-form-section:first-of-type .wl-form-section__title {
+        margin-top: 0;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .wl-form-section__table-hint {
+        font-size: 0.8125rem;
+        color: #64748b;
+        font-weight: 500;
+        margin: -0.15rem 0 1rem 0;
+        line-height: 1.45;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .form-label {
+        color: #312e81;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .form-control,
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .form-select,
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card textarea.form-control {
+        border-color: rgba(56, 189, 248, 0.45);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .form-control:focus,
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .form-select:focus,
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card textarea.form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.28);
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .border-top {
+        border-color: rgba(56, 189, 248, 0.22) !important;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-col-match {
+        color: #64748b;
+    }
+    body.sw-workload-page.wl-record-assign-page #wl-hint-no-recipients {
+        border-color: rgba(251, 191, 36, 0.45);
+        background: rgba(254, 243, 199, 0.5);
+    }
+    body.sw-workload-page.wl-record-assign-page #wl-hint-multi {
+        border-color: rgba(56, 189, 248, 0.45);
+        background: rgba(224, 242, 254, 0.55);
+        color: #1e40af;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        padding-bottom: 0.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #0ea5e9;
+        padding-left: 0.75rem;
+        background: linear-gradient(90deg, rgba(224, 242, 254, 0.95) 0%, rgba(239, 246, 255, 0.35) 72%, transparent 100%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .section-title i {
+        color: #0ea5e9;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.15rem;
+        border-color: rgba(56, 189, 248, 0.5);
+        color: #475569;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-btn-cancel:hover {
+        background: rgba(240, 249, 255, 0.95);
+        border-color: #0ea5e9;
+        color: #1e3a8a;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-btn-save {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 40%, #2563eb 88%, #1d4ed8 100%);
+        box-shadow: 0 4px 18px rgba(37, 99, 235, 0.38);
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card .alert {
+        border-radius: 12px;
+    }
+    body.sw-workload-page.wl-record-assign-page .wl-assign-form-card hr {
+        border-color: rgba(56, 189, 248, 0.25);
+        opacity: 1;
+    }

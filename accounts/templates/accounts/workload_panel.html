@@ -1,8 +1,810 @@
 {% extends 'accounts/base_dashboard.html' %}
 
-{% block title %}Нагрузка на соцработников - SocWorker{% endblock %}
+{% block title %}Расчёт нагрузки - SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-workload-page"{% endblock %}
 
 {% block inline_css %}
+    /* Фон: та же схема слоёв, что панель «Планирование визитов» (visit_planning), палитра голубая */
+    body.sw-workload-page {
+        min-height: 100vh;
+        background-color: #f0f9ff;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(224, 242, 254, 0.42) 45%, rgba(186, 230, 253, 0.32) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(56, 189, 248, 0.42), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(96, 165, 250, 0.3), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(14, 165, 233, 0.2), transparent 58%),
+            linear-gradient(118deg, rgba(191, 219, 254, 0.45) 0%, rgba(165, 243, 252, 0.18) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(239, 246, 255, 0.4) 0%, rgba(186, 230, 253, 0.14) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+    }
+    body.sw-workload-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+    .sw-workload-layout {
+        --wl-glass: rgba(255, 255, 255, 0.78);
+        --wl-glass-border: rgba(255, 255, 255, 0.95);
+        --wl-ink: #1e1b4b;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .sw-workload-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--wl-glass-border);
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+    }
+    .sw-workload-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, rgba(15, 23, 42, 0.42) 0%, rgba(49, 46, 129, 0.28) 50%, rgba(15, 23, 42, 0.12) 100%);
+        pointer-events: none;
+    }
+    .sw-workload-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.2rem 1.45rem 1.15rem;
+        margin-bottom: 0 !important;
+    }
+    .sw-workload-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sw-workload-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 35%, #2563eb 75%, #1d4ed8 100%);
+        box-shadow:
+            0 6px 22px rgba(37, 99, 235, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    .sw-workload-dash .sw-page-title__label {
+        font-size: clamp(1.3rem, 2.3vw, 1.65rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(
+            108deg,
+            #ffffff 0%,
+            #e0e7ff 20%,
+            #c7d2fe 38%,
+            #a5b4fc 56%,
+            #93c5fd 74%,
+            #7dd3fc 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.2));
+    }
+    @supports not (background-clip: text) {
+        .sw-workload-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #e0e7ff;
+            background: none;
+            filter: none;
+        }
+    }
+    /* Тулбар — как панель «Техника безопасности»: PDF/CSV btn-sm, основная без sm, ::before при наведении */
+    .sw-workload-page .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sw-workload-page .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-workload-page .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-workload-page .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-workload-page .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-workload-page .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-sm {
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        font-size: 0.8125rem;
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-secondary,
+    .sw-workload-page .sw-toolbar-btn.btn-outline-primary {
+        color: #334155;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%);
+        border-color: rgba(100, 116, 139, 0.28);
+    }
+    .sw-workload-page .sw-toolbar-btn.btn-outline-primary {
+        color: #1e40af;
+        border-color: rgba(99, 102, 241, 0.35);
+        border-left: 3px solid #6366f1;
+    }
+    /* Блок периода — та же визуальная схема, что «Поиск и сортировка» у соцработников */
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter {
+        --dash-glass: rgba(255, 255, 255, 0.78);
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        --dash-violet: #4a3f6f;
+        --dash-violet-light: #667eea;
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--dash-glass-border);
+        border-radius: 18px;
+        box-shadow:
+            0 8px 32px rgba(26, 26, 46, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        transition: box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter:hover {
+        box-shadow:
+            0 12px 36px rgba(102, 126, 234, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.2rem;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.14);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.12rem;
+        color: #fff;
+        background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+        box-shadow:
+            0 4px 16px rgba(102, 126, 234, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #3d2f5c;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--dash-violet);
+        margin-bottom: 0.4rem;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap {
+        position: relative;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: var(--dash-violet-light);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #4f46e5;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #4f46e5;
+        transform: translateY(-50%) scale(1);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-control.sw-wl-filter-field,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2d2652;
+        background: rgba(255, 255, 255, 0.92);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(45, 38, 82, 0.05);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-control.sw-wl-filter-field:focus,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .form-select.sw-status-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        background: #fff;
+    }
+    /* «Найти» / «Сбросить» — как панель «Инвентаризация»; иконка поиска — bi-search */
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .wl-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .wl-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit.wl-filter-icon-btn,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset.wl-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit.wl-filter-icon-btn i,
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset.wl-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter .btn.btn-primary.wl-filter-submit:active {
+        transform: translateY(0);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-workload-page .sw-filter-dash.sw-wl-period-filter a.wl-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
+    }
+    /* Справка — структура как планирование визитов, голубая гамма панели нагрузки */
+    .sw-filter-dash.sw-wl-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.6) 38%, rgba(199, 210, 254, 0.48) 72%, rgba(191, 219, 254, 0.38) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        box-shadow:
+            0 4px 6px -1px rgba(30, 64, 175, 0.08),
+            0 12px 28px -8px rgba(37, 99, 235, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .sw-filter-dash.sw-wl-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #7dd3fc 0%, #3b82f6 40%, #6366f1 100%);
+        opacity: 0.95;
+    }
+    .sw-filter-dash-inner.sw-wl-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .sw-wl-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    .sw-wl-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #1d4ed8;
+        background: linear-gradient(145deg, rgba(240, 249, 255, 0.98) 0%, rgba(186, 230, 253, 0.85) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    }
+    .sw-wl-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #1e3a8a;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .sw-wl-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #1d4ed8;
+        background: rgba(96, 165, 250, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0;
+        cursor: pointer;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.2s ease;
+    }
+    .sw-wl-guide__toggle:hover {
+        background: rgba(96, 165, 250, 0.32);
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 2px 12px rgba(37, 99, 235, 0.18);
+    }
+    .sw-wl-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    }
+    .sw-wl-guide__toggle[aria-expanded="true"] {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: rgba(67, 56, 202, 0.45);
+    }
+    .sw-wl-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.9;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-wl-guide__toggle[aria-expanded="true"] .sw-wl-guide__chev {
+        transform: rotate(180deg);
+    }
+    .sw-wl-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sw-wl-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(224, 242, 254, 0.5) 45%, rgba(199, 210, 254, 0.55) 100%);
+        border: 1px solid rgba(147, 197, 253, 0.55);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.92),
+            0 4px 20px rgba(30, 64, 175, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    #workloadInfoCollapse.collapse.show .sw-wl-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .sw-wl-guide__lead {
+        margin: 0;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(37, 99, 235, 0.75);
+    }
+    .sw-wl-guide__lead strong {
+        color: #1e40af;
+    }
+    .sw-wl-guide__subsection-title {
+        margin: 0.85rem 0 0.35rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #312e81;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .sw-wl-guide__subsection-title .bi {
+        color: #4f46e5;
+    }
+    .sw-wl-guide__note {
+        margin: 0;
+        font-size: 0.8125rem;
+        line-height: 1.55;
+        color: #475569;
+    }
+    .sw-wl-guide__note + .sw-wl-guide__note {
+        margin-top: 0.5rem;
+    }
+    /* Расширенная справка — секции и сетка в голубой гамме панели */
+    body.sw-workload-page .sw-wl-help-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(224, 242, 254, 0.88) 45%, rgba(199, 210, 254, 0.55) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.32);
+        box-shadow: 0 2px 16px rgba(37, 99, 235, 0.07);
+    }
+    body.sw-workload-page .sw-wl-help-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #1e40af;
+        background: rgba(96, 165, 250, 0.18);
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-workload-page .sw-wl-help-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-workload-page .sw-wl-help-intro__text strong {
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+    body.sw-workload-page .sw-wl-help-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(147, 197, 253, 0.55);
+    }
+    body.sw-workload-page .sw-wl-help-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-workload-page .sw-wl-help-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #1e40af;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-workload-page .sw-wl-help-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #38bdf8 0%, #3b82f6 45%, #1d4ed8 100%);
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28);
+    }
+    body.sw-workload-page .sw-wl-help-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-workload-page .sw-wl-help-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-workload-page .sw-wl-help-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-workload-page .sw-wl-help-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(147, 197, 253, 0.55);
+        box-shadow: 0 2px 10px rgba(30, 64, 175, 0.04);
+    }
+    body.sw-workload-page .sw-wl-help-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #1d4ed8;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-workload-page .sw-wl-help-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-workload-page .sw-wl-help-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #ca8a04;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-workload-page .sw-wl-help-note strong {
+        color: #854d0e;
+    }
+    body.sw-workload-page .sw-wl-help-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(219, 234, 254, 0.65) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-left: 4px solid #2563eb;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #1e3a8a;
+    }
+    body.sw-workload-page .sw-wl-help-tip strong {
+        color: #172554;
+    }
+    body.sw-workload-page .sw-wl-help-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-workload-page .sw-wl-help-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-workload-page .sw-wl-help-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #60a5fa, #2563eb);
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+    body.sw-workload-page .sw-wl-help-list-rich > li strong {
+        color: #1e40af;
+        font-weight: 700;
+    }
+    body.sw-workload-page .sw-wl-help-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-workload-page .sw-wl-help-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-workload-page .sw-wl-help-ol li::marker {
+        color: #2563eb;
+        font-weight: 700;
+    }
+    body.sw-workload-page .sw-wl-help-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #1e40af;
+        background: rgba(239, 246, 255, 0.98);
+        border: 1px solid rgba(147, 197, 253, 0.85);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-workload-page .sw-filter-dash.sw-wl-guide .sw-filter-dash-inner.sw-wl-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-workload-page .sw-filter-dash.sw-wl-guide .sw-wl-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
+    .sw-wl-matrix-card {
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(238, 242, 255, 0.92) 100%);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        box-shadow:
+            0 10px 36px rgba(30, 27, 75, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
+    }
+    .sw-wl-matrix-card__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.85rem 1.1rem;
+        border-bottom: 1px solid rgba(199, 210, 254, 0.55);
+        background: linear-gradient(90deg, rgba(224, 231, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+    }
+    .sw-wl-matrix-card__head h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #312e81;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+    .sw-wl-matrix-card__head h2 i {
+        color: #4f46e5;
+        font-size: 1.1rem;
+    }
     .workload-sheet-wrap {
         overflow-x: auto;
         border-radius: 0 0 14px 14px;
@@ -14,13 +816,13 @@
         margin: 0;
     }
     .workload-sheet thead th {
-        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
-        color: #3c4043;
+        background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #1e1b4b;
         font-weight: 600;
         text-align: center;
         vertical-align: middle;
         padding: 0.55rem 0.4rem;
-        border: 1px solid #cdd1d6;
+        border: 1px solid rgba(99, 102, 241, 0.22);
         white-space: normal;
         text-transform: none;
         letter-spacing: 0;
@@ -33,188 +835,426 @@
         line-height: 1.25;
     }
     .workload-sheet tbody td {
-        border: 1px solid #e0e3e7;
+        border: 1px solid rgba(199, 210, 254, 0.65);
         padding: 0.45rem 0.4rem;
         vertical-align: middle;
         text-align: center;
     }
     .workload-sheet tbody tr.data-row:nth-child(odd) {
-        background: #fafbfc;
+        background: #f8fafc;
     }
     .workload-sheet tbody tr.data-row:nth-child(even) {
         background: #fff;
     }
+    .workload-sheet tbody tr.data-row:hover {
+        background: #eef2ff !important;
+    }
     .workload-sheet .workload-total-row td {
-        background: #fdebd0 !important;
+        background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%) !important;
         font-weight: 600;
-        border-color: #e8d4b8;
+        border-color: #fde68a;
+        color: #78350f;
     }
     .workload-sheet .col-text-left {
         text-align: left !important;
         max-width: 220px;
     }
-    .workload-subnav .btn {
-        border-radius: 6px;
+    .sw-workload-page .workload-sheet .workload-actions-th {
+        max-width: none;
+        white-space: nowrap;
+        min-width: 6.5rem;
+    }
+    .sw-workload-page .workload-sheet .sw-actions-cell {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        border-width: 1px;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.12);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-workload-page .workload-sheet a.sw-action-btn.sw-action-btn--destructive:visited {
+        color: #fff;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .sw-workload-page .workload-sheet a.sw-action-btn.sw-action-btn--edit:visited {
+        color: #fff;
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    .sw-workload-page .workload-sheet .sw-action-btn.sw-action-btn--edit:focus-visible {
+        outline: none;
+        color: #fff;
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    .sw-workload-page .workload-sheet .sw-actions-cell a.sw-action-btn {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-workload-page .workload-sheet .sw-actions-cell a.sw-action-btn:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+    .sw-wl-rate-badge {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+        color: #422006 !important;
+    }
+    body.sw-workload-page #wl-panel-table-anchor {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
     }
 {% endblock %}
 
 {% block content %}
-{% include 'accounts/includes/workload_subnav.html' with active='accounting' %}
+<div class="sw-workload-layout">
+    <section class="sw-workload-dash" aria-label="Панель расчёта нагрузки">
+        <div class="page-header sw-workload-dash-header flex-wrap mb-0">
+            <h1 class="sw-page-title mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-calculator"></i></span>
+                <span class="sw-page-title__label">Расчёт нагрузки</span>
+            </h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 ms-md-auto">
+                <div class="sw-toolbar-group">
+                    <button type="button" class="btn btn-outline-danger btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadPdfModal">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
+                        <i class="bi bi-filetype-csv"></i> CSV
+                    </button>
+                    <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}&wl_sort={{ wl_sort }}" class="btn btn-primary sw-toolbar-btn">
+                        <i class="bi bi-plus-circle"></i> Добавить строку
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="page-header flex-wrap">
-    <h2 class="mb-0"><i class="bi bi-calculator"></i> Учёт рабочего времени</h2>
-    <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#workloadPdfModal">
-            <i class="bi bi-file-pdf"></i> PDF
-        </button>
-        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#workloadCsvModal">
-            <i class="bi bi-filetype-csv"></i> CSV
-        </button>
-        <a href="{% url 'accounts:workload_record_create' %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> Добавить строку
-        </a>
-        <a href="{% url 'accounts:workload_records_list' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-list-ul"></i> Плоский список
-        </a>
-        <a href="{% url 'accounts:workload_summary' %}?year={{ year }}&month={{ month }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-people"></i> Сводка
-        </a>
-        <a href="{% url 'accounts:workload_export_csv' %}?year={{ year }}&month={{ month }}&worker={{ wl_worker }}" class="btn btn-outline-secondary btn-sm" title="Плоский список полей журнала">
-            <i class="bi bi-list-columns-reverse"></i> Журнал CSV
-        </a>
-    </div>
-</div>
+    <div id="workload-about" class="sw-filter-dash mb-0 sw-wl-guide">
+        <div class="sw-filter-dash-inner sw-wl-guide__inner">
+            <div class="sw-wl-guide__top">
+                <span class="sw-wl-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+                <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <span class="sw-wl-guide__title">Справка по разделу «Расчёт нагрузки»</span>
+                    <button type="button" id="workloadInfoToggle" class="sw-wl-guide__toggle"
+                            data-bs-toggle="collapse" data-bs-target="#workloadInfoCollapse"
+                            aria-expanded="false" aria-controls="workloadInfoCollapse">
+                        Как пользоваться
+                        <i class="bi bi-chevron-down sw-wl-guide__chev" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="collapse" id="workloadInfoCollapse">
+                <div class="sw-wl-guide__panel">
+                    <div class="sw-wl-help-intro">
+                        <div class="sw-wl-help-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                        <p class="sw-wl-help-intro__text">
+                            <strong>Расчёт нагрузки</strong> — журнал учёта времени социальных работников (и строк с привязкой к подопечным) за выбранный месяц: кратности визитов, фактически отработанные минуты и часы, сравнение с нормой и итоговая ставка.
+                            Интерфейс выполнен в спокойной голубо-индиго гамме, согласованной с общей визуальной системой SocWorker.
+                        </p>
+                    </div>
 
-<form method="get" class="card mb-3">
-    <div class="card-body py-3">
-        <div class="row g-2 align-items-end flex-wrap">
-            <div class="col-6 col-md-2">
-                <label class="form-label mb-0 small">Год</label>
-                <input type="number" name="year" class="form-control form-control-sm" value="{{ year }}" min="2000" max="2100">
-            </div>
-            <div class="col-6 col-md-2">
-                <label class="form-label mb-0 small">Месяц</label>
-                <input type="number" name="month" class="form-control form-control-sm" value="{{ month }}" min="1" max="12">
-            </div>
-            <div class="col-12 col-md-4">
-                <label class="form-label mb-0 small">Работник</label>
-                <select name="worker" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for w in workers %}
-                        <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary btn-sm">Показать</button>
+                    <section class="sw-wl-help-section" aria-labelledby="wl-guide-period">
+                        <h3 id="wl-guide-period" class="sw-wl-help-h"><i class="bi bi-calendar3" aria-hidden="true"></i>Период и отбор</h3>
+                        <ol class="sw-wl-help-ol">
+                            <li>Укажите <strong>год</strong> и <strong>месяц</strong> журнала.</li>
+                            <li>При необходимости выберите <strong>работника</strong> — таблица покажет только его группу строк и итоги. <span class="sw-wl-help-kbd">↺</span> сбрасывает отбор к умолчанию.</li>
+                            <li><strong>Сортировка</strong> задаёт порядок строк и влияет на нумерацию и на выгрузку PDF/CSV (при «вся таблица»). Нажмите кнопку с иконкой лупы <strong>«Найти»</strong>, чтобы применить год, месяц, работника и сортировку.</li>
+                        </ol>
+                    </section>
+
+                    <section class="sw-wl-help-section" aria-labelledby="wl-guide-table">
+                        <h3 id="wl-guide-table" class="sw-wl-help-h"><i class="bi bi-table" aria-hidden="true"></i>Структура журнала</h3>
+                        <p class="sw-wl-help-p">
+                            Порядок строк: в режимах <strong>«Фамилия подопечного»</strong>, <strong>«по мин./макс. коэффициенту»</strong> и <strong>«по мин./макс. ставке»</strong> сортировка действует <strong>по всей таблице</strong> (по значению в строке). Строка <strong>ИТОГО</strong> — сразу после последней строки этого соц. работника в выбранном порядке.
+                        </p>
+                        <div class="sw-wl-help-grid" role="list">
+                            <div class="sw-wl-help-card" role="listitem">
+                                <p class="sw-wl-help-card__title">ФИО и пункт</p>
+                                <p class="sw-wl-help-card__text">В столбце ФИО — подопечный или, если строка только по работнику, его имя приглушённым цветом. Населённый пункт и тип жилья подставляются из данных строки / карточки.</p>
+                            </div>
+                            <div class="sw-wl-help-card" role="listitem">
+                                <p class="sw-wl-help-card__title">Кратность</p>
+                                <p class="sw-wl-help-card__text">Визитов в неделю и в месяц. Если месячное поле пустое, при расчётах используется недельная кратность × 4.</p>
+                            </div>
+                            <div class="sw-wl-help-card" role="listitem">
+                                <p class="sw-wl-help-card__title">Время и итоги</p>
+                                <p class="sw-wl-help-card__text">Длительность одного посещения (мин.), всего минут и часов за месяц, норма рабочего времени (часов), коэффициент нагрузки по строке. <strong>Ставка в таблице показывается только в строке ИТОГО</strong> — по сумме коэффициентов нагрузки работника.</p>
+                            </div>
+                            <div class="sw-wl-help-card" role="listitem">
+                                <p class="sw-wl-help-card__title">Галочка</p>
+                                <p class="sw-wl-help-card__text">Первая колонка — для выгрузки PDF/CSV «только отмеченные».</p>
+                            </div>
+                            <div class="sw-wl-help-card" role="listitem">
+                                <p class="sw-wl-help-card__title">Действия</p>
+                                <p class="sw-wl-help-card__text">Редактирование записи и удаление (с подтверждением).</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sw-wl-help-section" aria-labelledby="wl-guide-math">
+                        <h3 id="wl-guide-math" class="sw-wl-help-h"><i class="bi bi-calculator" aria-hidden="true"></i>Формулы и ставка</h3>
+                        <p class="sw-wl-help-p">
+                            Коэффициент нагрузки в строке: <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong> (норма рабочего времени).
+                            В строке <strong>ИТОГО</strong> коэффициенты по строкам суммируются; <strong>ставка выводится по суммарной нагрузке</strong>.
+                        </p>
+                        <p class="sw-wl-help-p mb-0">
+                            Шкала ставки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.
+                        </p>
+                        <div class="sw-wl-help-tip">
+                            <strong>Совет:</strong> при выборе подопечного в форме строки автоматически подставляются закреплённый за ним социальный работник и населённый пункт из карточки получателя услуг.
+                        </div>
+                    </section>
+
+                    <section class="sw-wl-help-section" aria-labelledby="wl-guide-export">
+                        <h3 id="wl-guide-export" class="sw-wl-help-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>PDF и CSV</h3>
+                        <p class="sw-wl-help-p">
+                            В модальном окне можно выгрузить <strong>всю таблицу на экране</strong> за выбранный месяц (с учётом фильтра по работнику) либо только <strong>отмеченные</strong> строки.
+                        </p>
+                    </section>
+
+                    <section class="sw-wl-help-section" aria-labelledby="wl-guide-more">
+                        <h3 id="wl-guide-more" class="sw-wl-help-h"><i class="bi bi-plus-circle" aria-hidden="true"></i>Новая строка</h3>
+                        <ul class="sw-wl-help-list-rich">
+                            <li>Кнопка <strong>«Добавить строку»</strong> в шапке открывает форму; в запрос подставляются текущие год, месяц и при необходимости работник из фильтра.</li>
+                        </ul>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
-</form>
 
-<div class="card mb-3">
-    <div class="card-body py-2 px-3">
-        <p class="small text-muted mb-0">
-            Данные из справочников: социальные работники и подопечные — из общей базы; в строке указывается работник и при необходимости подопечный (ФИО в первом столбце).
-            Кратность за месяц при пустом поле = за неделю × 4. Коэффициент нагрузки (как на типовой таблице):
-            <strong>всего часов за месяц ÷ {{ norm_hours_default }} ч</strong>. В строке «ИТОГО» коэффициенты по строкам суммируются; ставка — по суммарной нагрузке.
-        </p>
+    <div class="sw-filter-dash mb-0 sw-wl-period-filter">
+        <div class="sw-filter-dash-inner">
+            <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+                <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-sliders2"></i></span>
+                <span class="sw-page-title__label">Период и отбор</span>
+            </h2>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-6 col-lg-2">
+                    <label for="wl_year" class="sw-filter-label d-block">Год</label>
+                    <input type="number" name="year" id="wl_year" class="form-control sw-wl-filter-field"
+                           value="{{ year }}" min="2000" max="2100">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="wl_month" class="sw-filter-label d-block">Месяц</label>
+                    <input type="number" name="month" id="wl_month" class="form-control sw-wl-filter-field"
+                           value="{{ month }}" min="1" max="12">
+                </div>
+                <div class="col-12 col-lg-4">
+                    <label for="wl_worker" class="sw-filter-label d-block">Работник</label>
+                    <div class="sw-select-wrap">
+                        <select name="worker" id="wl_worker" class="form-select sw-status-select sw-select-native">
+                            <option value="">Все</option>
+                            {% for w in workers %}
+                                <option value="{{ w.pk }}" {% if worker_filter == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-2">
+                    <label for="wl_sort" class="sw-filter-label d-block">Сортировка</label>
+                    <div class="sw-select-wrap">
+                        <select name="wl_sort" id="wl_sort" class="form-select sw-status-select sw-select-native"
+                                title="Сортировка применится после нажатия кнопки «Найти» (лупа)">
+                            <option value="surname" {% if wl_sort == 'surname' %}selected{% endif %}>Фамилия подопечного (А–Я)</option>
+                            <option value="load_asc" {% if wl_sort == 'load_asc' %}selected{% endif %}>По мин. коэффициенту нагрузки</option>
+                            <option value="load_desc" {% if wl_sort == 'load_desc' %}selected{% endif %}>По макс. коэффициенту нагрузки</option>
+                            <option value="rate_asc" {% if wl_sort == 'rate_asc' %}selected{% endif %}>По мин. ставке</option>
+                            <option value="rate_desc" {% if wl_sort == 'rate_desc' %}selected{% endif %}>По макс. ставке</option>
+                        </select>
+                        <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 col-lg wl-filter-actions-col">
+                    <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wl-filter-actions" id="wl-filter-actions">
+                        <button type="submit" class="btn btn-primary wl-filter-submit wl-filter-icon-btn" aria-label="Найти по периоду и фильтрам">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                        </button>
+                        <a href="{% url 'accounts:workload_panel' %}" class="wl-filter-reset wl-filter-icon-btn" id="wl-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить год, месяц и работника к умолчанию">
+                            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body p-0 workload-sheet-wrap">
-        <table class="workload-sheet">
-            <thead>
-                <tr>
-                    <th rowspan="2" class="text-center align-middle" style="width:2.2rem;" title="Для выгрузки в PDF и CSV">
-                        <input type="checkbox" class="form-check-input" id="workloadSelectAll" aria-label="Отметить все строки">
-                    </th>
-                    <th rowspan="2">№</th>
-                    <th rowspan="2">ФИО соцработника / подопечного</th>
-                    <th rowspan="2">Населённый пункт</th>
-                    <th rowspan="2">Тип</th>
-                    <th rowspan="2">Кратность<br>(раз в неделю)</th>
-                    <th rowspan="2">Кратность<br>(раз в месяц)</th>
-                    <th rowspan="2">Время 1 посещения<br>(минут)</th>
-                    <th colspan="2" class="workload-cat-total-month">Всего отработано за месяц</th>
-                    <th rowspan="2">Норма рабочего<br>времени (часов)</th>
-                    <th rowspan="2">Коэф-т<br>нагрузки</th>
-                    <th rowspan="2">Ставка</th>
-                    <th rowspan="2"></th>
-                </tr>
-                <tr class="workload-head-sub">
-                    <th>Всего отработано за месяц (минут)</th>
-                    <th>Всего отработано за месяц (часов)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for g in workload_groups %}
-                    {% for row in g.rows %}
-                        {% with r=row.record %}
-                        <tr class="data-row">
-                            <td class="text-center align-middle">
-                                <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="Строка {{ row.num }}">
-                            </td>
-                            <td>{{ row.num }}</td>
-                            <td class="col-text-left">
-                                {% if r.recipient %}
-                                    {{ r.recipient.get_full_name }}
-                                {% else %}
-                                    <span class="text-muted">{{ r.social_worker.get_full_name }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="col-text-left">
-                                {% if r.location %}
-                                    {{ r.location.get_location_type_display }} {{ r.location.name }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </td>
-                            <td>{{ r.get_housing_type_display }}</td>
-                            <td>{{ r.visits_per_week }}</td>
-                            <td>{{ r.visits_per_month }}</td>
-                            <td>{{ r.visit_duration_minutes }}</td>
-                            <td>{{ r.worked_minutes_month }}</td>
-                            <td>{{ r.worked_hours_month }}</td>
-                            <td>{{ r.work_time_norm_hours }}</td>
-                            <td>{{ r.load_coefficient }}</td>
+    <div class="sw-wl-matrix-card" id="wl-panel-table-anchor">
+        <div class="sw-wl-matrix-card__head">
+            <h2><i class="bi bi-table" aria-hidden="true"></i> Журнал за {{ month }}.{{ year }}</h2>
+        </div>
+        <div class="p-0 workload-sheet-wrap">
+            <table class="workload-sheet">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="text-center align-middle" style="width:2.2rem;" title="Для выгрузки в PDF и CSV">
+                            <input type="checkbox" class="form-check-input" id="workloadSelectAll" aria-label="Отметить все строки">
+                        </th>
+                        <th rowspan="2">№</th>
+                        <th rowspan="2">ФИО соцработника / подопечного</th>
+                        <th rowspan="2">Населённый пункт</th>
+                        <th rowspan="2">Тип</th>
+                        <th rowspan="2">Кратность<br>(раз в неделю)</th>
+                        <th rowspan="2">Кратность<br>(раз в месяц)</th>
+                        <th rowspan="2">Время 1 посещения<br>(минут)</th>
+                        <th colspan="2" class="workload-cat-total-month">Всего отработано за месяц</th>
+                        <th rowspan="2">Норма рабочего<br>времени (часов)</th>
+                        <th rowspan="2">Коэф-т<br>нагрузки</th>
+                        <th rowspan="2">Ставка</th>
+                        <th rowspan="2" class="text-center workload-actions-th">Действия</th>
+                    </tr>
+                    <tr class="workload-head-sub">
+                        <th>Всего отработано за месяц (минут)</th>
+                        <th>Всего отработано за месяц (часов)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in workload_groups %}
+                        {% if item.kind == 'data' %}
+                            {% with r=item.record %}
+                            <tr class="data-row">
+                                <td class="text-center align-middle">
+                                    <input type="checkbox" class="form-check-input workload-record-select" value="{{ r.pk }}" aria-label="№ {{ item.num }}, запись учёта">
+                                </td>
+                                <td><span class="fw-semibold">{{ item.num }}</span></td>
+                                <td class="col-text-left">
+                                    {% if r.recipient %}
+                                        {{ r.recipient.get_full_name }}
+                                    {% else %}
+                                        <span class="text-muted">{{ r.social_worker.get_full_name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="col-text-left">
+                                    {% if r.location %}
+                                        {{ r.location.get_location_type_display }} {{ r.location.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.get_housing_type_display }}</td>
+                                <td>{{ r.visits_per_week }}</td>
+                                <td>{{ r.visits_per_month }}</td>
+                                <td>{{ r.visit_duration_minutes }}</td>
+                                <td>{{ r.worked_minutes_month }}</td>
+                                <td>{{ r.worked_hours_month }}</td>
+                                <td>{{ r.work_time_norm_hours }}</td>
+                                <td>{{ r.load_coefficient }}</td>
+                                <td></td>
+                                <td>
+                                    <div class="sw-actions-cell">
+                                        <a href="{% url 'accounts:workload_record_edit' r.pk %}?wl_sort={{ wl_sort }}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Редактировать">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Редактировать</span>
+                                        </a>
+                                        <a href="{% url 'accounts:workload_record_delete' r.pk %}?wl_sort={{ wl_sort }}" class="btn btn-sm sw-action-btn sw-action-btn--destructive" title="Удалить запись">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Удалить</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% elif item.kind == 'subtotal' %}
+                        <tr class="workload-total-row">
                             <td></td>
-                            <td class="text-nowrap">
-                                <a href="{% url 'accounts:workload_record_edit' r.pk %}" class="btn btn-sm btn-outline-primary py-0 px-1" title="Изменить">изм.</a>
+                            <td></td>
+                            <td class="col-text-left" colspan="6">ИТОГО по {{ item.worker.get_full_name }}</td>
+                            <td>{{ item.total_minutes }}</td>
+                            <td>{{ item.total_hours }}</td>
+                            <td>—</td>
+                            <td>{{ item.load_sum }}</td>
+                            <td><span class="badge rounded-pill sw-wl-rate-badge">{{ item.rate }}</span></td>
+                            <td></td>
+                        </tr>
+                        {% endif %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="14" class="text-center py-5" style="color: #64748b;">
+                                <i class="bi bi-inbox d-block fs-1 mb-2 opacity-50"></i>
+                                Нет записей за выбранный период.
+                                <a href="{% url 'accounts:workload_record_create' %}?year={{ year }}&month={{ month }}{% if worker_filter %}&worker={{ worker_filter }}{% endif %}&wl_sort={{ wl_sort }}" class="fw-semibold">Добавить строку</a>
                             </td>
                         </tr>
-                        {% endwith %}
                     {% endfor %}
-                    <tr class="workload-total-row">
-                        <td></td>
-                        <td></td>
-                        <td class="col-text-left" colspan="6">ИТОГО по {{ g.worker.get_full_name }}</td>
-                        <td>{{ g.total_minutes }}</td>
-                        <td>{{ g.total_hours }}</td>
-                        <td>—</td>
-                        <td>{{ g.load_sum }}</td>
-                        <td><span class="badge rounded-pill bg-warning text-dark">{{ g.rate }}</span></td>
-                        <td></td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="14" class="text-center text-muted py-5">
-                            Нет записей за выбранный период.
-                            <a href="{% url 'accounts:workload_record_create' %}">Добавить строку</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div id="workload-about" class="card mt-4">
-    <div class="card-header"><h5 class="mb-0">О расчёте нагрузки</h5></div>
-    <div class="card-body small text-muted">
-        <p class="mb-2">Ставка по суммарному коэффициенту нагрузки: 0,00 при нагрузке ≤ 0,12; 0,25 — ≤ 0,37; 0,50 — ≤ 0,62; 0,75 — ≤ 0,87; 1,00 — при нагрузке &gt; 0,87.</p>
-        <p class="mb-0">Подопечные и работники хранятся в общих таблицах; при выборе подопечного в форме строки подставляются закреплённый за ним социальный работник и населённый пункт из карточки подопечного.</p>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -224,6 +1264,7 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ wl_sort }}">
     <span id="workloadPdfIdFields"></span>
 </form>
 
@@ -233,20 +1274,22 @@
     <input type="hidden" name="year" value="{{ year }}">
     <input type="hidden" name="month" value="{{ month }}">
     <input type="hidden" name="worker" value="{{ wl_worker }}">
+    <input type="hidden" name="wl_sort" value="{{ wl_sort }}">
     <span id="workloadCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="workloadPdfModal" tabindex="-1" aria-labelledby="workloadPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="workloadPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="workloadPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие строки учёта включить в отчёт за <strong>{{ month }}.{{ year }}</strong>.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие строки учёта включить в отчёт за <strong>{{ month }}.{{ year }}</strong> (порядок соответствует текущей сортировке в таблице).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="wl_pdf_scope_choice" id="wlPdfScopeAll" value="all" checked>
@@ -260,27 +1303,28 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="workloadPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="workloadPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="workloadCsvModal" tabindex="-1" aria-labelledby="workloadCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="workloadCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="workloadCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие строки учёта включить в файл за <strong>{{ month }}.{{ year }}</strong>.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие строки учёта включить в файл за <strong>{{ month }}.{{ year }}</strong> (порядок соответствует текущей сортировке в таблице).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="wl_csv_scope_choice" id="wlCsvScopeAll" value="all" checked>
@@ -294,10 +1338,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="workloadCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="workloadCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>
@@ -308,6 +1352,56 @@
 {% block extra_js %}
 <script>
 (function () {
+    const tableAnchor = document.getElementById('wl-panel-table-anchor');
+    const SCROLL_AFTER_FILTER_KEY = 'workloadScrollToResults';
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var wlFilterForm = document.querySelector('.sw-wl-period-filter form[method="get"]');
+    if (wlFilterForm) {
+        wlFilterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var wlReset = document.getElementById('wl-filter-reset-link');
+    if (wlReset) {
+        wlReset.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
+    }
+
     const selectAll = document.getElementById('workloadSelectAll');
     if (selectAll) {
         selectAll.addEventListener('change', function () {

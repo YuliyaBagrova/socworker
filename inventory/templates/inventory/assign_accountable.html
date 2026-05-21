@@ -1,0 +1,37 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Назначить ответственного за инвентарь{% endblock %}
+{% block body_attrs %} class="sw-inventory-page"{% endblock %}
+{% block inline_css %}
+{% include 'inventory/includes/inventory_app_theme.html' %}
+{% endblock %}
+{% block content %}
+<div class="sw-inv-layout">
+{% include 'inventory/includes/inventory_subnav.html' %}
+
+<div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <h2 class="h5 mb-0"><i class="bi bi-person-badge"></i> Назначить ответственного за инвентарь</h2>
+    <a href="{% url 'inventory:staff_list' %}" class="btn btn-outline-secondary btn-sm">К списку пользователей</a>
+</div>
+
+<p class="text-muted small">Выбранному пользователю системы будет назначена роль «Ответственный за инвентарь» (поля отделения и контакты сохранятся, если уже были заданы).</p>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.user.id_for_label }}">{{ form.user.label }}</label>
+                        {{ form.user }}
+                        {% for err in form.user.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    {% for err in form.non_field_errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    <button type="submit" class="btn btn-primary">Назначить роль</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

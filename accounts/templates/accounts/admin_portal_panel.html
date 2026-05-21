@@ -1,0 +1,2816 @@
+{% extends 'accounts/base_dashboard.html' %}
+{% block title %}Панель Администратора{% endblock %}
+{% block body_attrs %} class="sw-admin-portal-shell-page sw-admin-portal-panel-page"{% endblock %}
+
+{% block inline_css %}
+    body.sw-admin-portal-panel-page {
+        background-color: #151314;
+        background-image:
+            radial-gradient(ellipse 94% 60% at 98% 2%, rgba(225, 52, 62, 0.26), transparent 56%),
+            radial-gradient(ellipse 80% 54% at 0% 98%, rgba(46, 44, 44, 0.48), transparent 52%),
+            radial-gradient(ellipse 50% 38% at 74% 88%, rgba(225, 48, 58, 0.12), transparent 58%),
+            radial-gradient(ellipse 46% 34% at 14% 10%, rgba(210, 70, 78, 0.18), transparent 56%),
+            linear-gradient(172deg, #211e1f 0%, #171516 34%, #1a1617 58%, #100e0f 100%);
+    }
+    body.sw-admin-portal-panel-page .main-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+    }
+
+    /* Flash-сообщения: светлое «стекло» и те же боковые отступы, что у контента — без тёмной полосы на светлом фоне */
+    body.sw-admin-portal-panel-page .below-nav-stack {
+        background: transparent;
+        box-shadow: none;
+        padding: 0.35rem 1.25rem 0;
+        box-sizing: border-box;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash {
+        border-radius: 14px;
+        margin-bottom: 0.35rem;
+        background: linear-gradient(135deg, rgba(255, 252, 252, 0.97) 0%, rgba(252, 247, 247, 0.95) 45%, rgba(248, 242, 242, 0.93) 100%);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 252, 252, 0.96);
+        border-bottom: 1px solid rgba(251, 154, 164, 0.42);
+        border-left: 4px solid rgba(244, 101, 114, 0.72);
+        color: #1c191a;
+        box-shadow:
+            0 8px 28px rgba(90, 22, 32, 0.09),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash .home-return-msg {
+        color: #334155;
+        font-weight: 500;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash .btn-close {
+        filter: none;
+        opacity: 0.5;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash .btn-close:hover {
+        opacity: 0.9;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.home-return-strip--success .home-return-text > .bi:first-child {
+        color: #059669 !important;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.home-return-strip--error .home-return-text > .bi:first-child {
+        color: #dc2626 !important;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.home-return-strip--warning .home-return-text > .bi:first-child {
+        color: #ca8a04 !important;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.home-return-strip--info .home-return-text > .bi:first-child,
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.home-return-strip--debug .home-return-text > .bi:first-child {
+        color: #e11d48 !important;
+    }
+    /* Уведомление о блокировке: тёмная полоса как на остальных страницах, не «белое стекло» */
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.ap-panel-flash-dark {
+        border-radius: 0;
+        margin-bottom: 0;
+        background: linear-gradient(90deg, #2a2224 0%, #322628 50%, #2a2224 100%);
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+        border-left: 4px solid #fb7185;
+        color: #f5eef1;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.ap-panel-flash-dark .home-return-msg {
+        color: #f5eef1;
+        font-weight: 400;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.ap-panel-flash-dark .btn-close {
+        filter: invert(1);
+        opacity: 0.75;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.ap-panel-flash-dark .btn-close:hover {
+        opacity: 1;
+    }
+    body.sw-admin-portal-panel-page .below-nav-stack .home-return-strip--flash.ap-panel-flash-dark.home-return-strip--success .home-return-text > .bi:first-child {
+        color: #f4e8e8 !important;
+    }
+    .sw-admin-portal-layout {
+        --dash-glass: rgba(255, 251, 251, 0.91);
+        --dash-glass-border: rgba(232, 72, 86, 0.32);
+        --dash-violet: #7f1d2d;
+        --dash-violet-light: #f43f5e;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-height: calc(100vh - var(--navbar-height) - 2.5rem);
+    }
+    body.home-return-on.sw-admin-portal-panel-page .sw-admin-portal-layout {
+        min-height: calc(100vh - var(--navbar-height) - 46px - 2.5rem);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-layout > .card.shadow-sm {
+        background: rgba(255, 252, 252, 0.97);
+        border: 1px solid rgba(232, 72, 86, 0.24);
+        box-shadow:
+            0 4px 22px rgba(90, 22, 32, 0.11),
+            0 1px 0 rgba(255, 255, 255, 0.92) inset;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-layout > .card.shadow-sm > .card-header {
+        background: linear-gradient(182deg, rgba(255, 252, 252, 0.99) 0%, rgba(248, 242, 242, 0.96) 100%);
+        border-bottom: 1px solid rgba(232, 72, 86, 0.24);
+    }
+
+    .sw-admin-portal-layout .sw-table-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        margin-bottom: 0 !important;
+    }
+    .sw-admin-portal-layout .sw-table-card > .card-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+    }
+    .sw-toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    /* Тулбар: стекло + акцентная полоска, в тон шапке */
+    .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .sw-toolbar-btn.btn-outline-primary {
+        color: #4338ca;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(245, 243, 255, 0.9) 100%);
+        border-color: rgba(102, 126, 234, 0.32);
+        border-left: 3px solid #667eea;
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.1);
+    }
+    .sw-toolbar-btn.btn-outline-primary:hover {
+        color: #312e81;
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify {
+        color: #b45309;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 251, 235, 0.93) 100%);
+        border-color: rgba(245, 158, 11, 0.34);
+        border-left: 3px solid #f59e0b;
+        box-shadow: 0 2px 12px rgba(245, 158, 11, 0.12);
+        overflow: visible;
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify:hover {
+        color: #92400e;
+        border-color: rgba(217, 119, 6, 0.48);
+        box-shadow: 0 8px 22px rgba(245, 158, 11, 0.2);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-notify .sw-ap-notify-badge {
+        position: absolute;
+        top: -0.28rem;
+        right: -0.1rem;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.32rem;
+        min-height: 1.32rem;
+        padding: 0.15rem 0.42rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        line-height: 1.15;
+        color: #fff;
+        text-align: center;
+        border-radius: 999px;
+        box-sizing: border-box;
+        background: linear-gradient(155deg, #fde68a 0%, #f59e0b 44%, #d97706 92%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.35),
+            0 2px 8px rgba(180, 83, 9, 0.35);
+        pointer-events: none;
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-auth-code {
+        color: #047857;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.94) 100%);
+        border-color: rgba(16, 185, 129, 0.38);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.12);
+    }
+    .sw-toolbar-btn.sw-toolbar-btn-auth-code:hover {
+        color: #065f46;
+        border-color: rgba(5, 150, 105, 0.5);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.2);
+    }
+    .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    .sw-toolbar-btn.btn-outline-secondary {
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(249, 250, 251, 0.9) 100%);
+        border-color: rgba(107, 114, 128, 0.25);
+        border-left: 3px solid #9ca3af;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+    .sw-toolbar-btn.btn-outline-secondary:hover {
+        color: #1f2937;
+        border-color: rgba(75, 85, 99, 0.35);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Справка — структура как «Прохождение медосмотра», палитра панели */
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide {
+        flex-shrink: 0;
+    }
+    body.sw-admin-portal-panel-page .sw-filter-dash.sw-admin-portal-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 253, 253, 0.96) 0%, rgba(250, 244, 244, 0.88) 42%, rgba(242, 234, 234, 0.78) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 252, 252, 0.94);
+        box-shadow:
+            0 4px 6px -1px rgba(80, 20, 30, 0.06),
+            0 12px 28px -8px rgba(190, 40, 55, 0.11),
+            inset 0 1px 0 rgba(255, 255, 255, 0.96);
+    }
+    body.sw-admin-portal-panel-page .sw-filter-dash.sw-admin-portal-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #fda4af 0%, #f43f5e 48%, #be123c 100%);
+        opacity: 0.95;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #be123c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(252, 246, 246, 0.96) 100%);
+        border: 1px solid rgba(232, 72, 86, 0.35);
+        box-shadow: 0 2px 8px rgba(155, 28, 42, 0.1);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #3f3536;
+        margin: 0;
+        line-height: 1.3;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #be123c;
+        background: rgba(244, 101, 114, 0.12);
+        border: 1px solid rgba(232, 72, 86, 0.42);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__toggle:hover {
+        background: rgba(244, 101, 114, 0.18);
+        border-color: rgba(210, 70, 82, 0.55);
+        box-shadow: 0 2px 12px rgba(165, 32, 45, 0.09);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(244, 101, 114, 0.28);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(190, 55, 68, 0.14);
+        border-color: rgba(225, 76, 89, 0.52);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 253, 253, 0.97) 0%, rgba(252, 246, 246, 0.78) 50%, rgba(245, 238, 238, 0.62) 100%);
+        border: 1px solid rgba(254, 180, 188, 0.52);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 252, 252, 0.94),
+            0 4px 20px rgba(90, 24, 34, 0.06);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    body.sw-admin-portal-panel-page #adminPortalGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(225, 76, 89, 0.72);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__lead strong {
+        color: #3f3536;
+        font-weight: 700;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #fecdd3 0%, #f43f5e 52%, #be123c 100%);
+        box-shadow: 0 0 0 3px rgba(224, 180, 182, 0.55);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #881337;
+    }
+    /* Расширенная справка — секции, сетка, акценты */
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 253, 253, 0.98) 0%, rgba(250, 244, 244, 0.93) 45%, rgba(242, 234, 234, 0.82) 100%);
+        border: 1px solid rgba(232, 72, 86, 0.32);
+        box-shadow: 0 2px 16px rgba(90, 24, 34, 0.06);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #f43f5e;
+        background: rgba(225, 76, 89, 0.12);
+        border: 1px solid rgba(225, 76, 89, 0.28);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-intro__text strong {
+        color: #3f3536;
+        font-weight: 700;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(232, 72, 86, 0.22);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #881337;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #fda4af 0%, #f43f5e 42%, #881337 100%);
+        box-shadow: 0 3px 12px rgba(155, 28, 42, 0.35);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(244, 130, 150, 0.52);
+        box-shadow: 0 2px 10px rgba(24, 24, 27, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-card:hover {
+        border-color: rgba(172, 112, 134, 0.62);
+        box-shadow: 0 4px 16px rgba(24, 24, 27, 0.1);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #f43f5e;
+        margin: 0 0 0.35rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #eab308;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-note strong {
+        color: #854d0e;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(253, 248, 248, 0.96) 0%, rgba(255, 252, 252, 0.94) 100%);
+        border: 1px solid rgba(252, 176, 184, 0.42);
+        border-left: 4px solid #e11d48;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #3f3536;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-tip strong {
+        color: #3f3536;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #fecaca 0%, #fb7185 48%, #be123c 100%);
+        box-shadow: 0 2px 6px rgba(155, 28, 42, 0.28);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-list-rich > li strong {
+        color: #881337;
+        font-weight: 700;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-ol li::marker {
+        color: #e11d48;
+        font-weight: 700;
+    }
+    /* Блок «Поиск и сортировка» под каждой таблицей — те же приёмы, что на панели «Соц. работники» */
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-filter-dash {
+        background: var(--dash-glass);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: none;
+        border-bottom: 1px solid rgba(225, 76, 89, 0.14) !important;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-filter-dash-inner {
+        padding: 1rem 1.15rem 1.15rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(225, 76, 89, 0.16);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        font-size: 1.12rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fda4af 0%, #f43f5e 46%, #881337 100%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+            0 4px 16px rgba(24, 24, 27, 0.32),
+            inset 0 1px 0 rgba(255, 235, 242, 0.22);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #3f3536;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap {
+        position: relative;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: var(--dash-violet-light);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #e11d48;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #f43f5e;
+        transform: translateY(-50%) scale(1);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--dash-violet);
+        margin-bottom: 0.4rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(90, 24, 34, 0.07);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .input-group-text {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(225, 76, 89, 0.22);
+        border-right: none;
+        color: var(--dash-violet-light);
+        font-size: 1rem;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .form-control.sw-search-input {
+        border: 1px solid rgba(225, 76, 89, 0.22);
+        border-left: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a1a2e;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 0 12px 12px 0;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .form-control.sw-search-input::placeholder {
+        color: #7a7694;
+        font-weight: 400;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .form-control.sw-search-input:focus {
+        border-color: #f43f5e;
+        box-shadow: none;
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(225, 76, 89, 0.24);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #3f3536;
+        background: rgba(255, 255, 255, 0.92);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(24, 24, 27, 0.06);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash .form-select.sw-status-select:focus {
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 3px rgba(225, 76, 89, 0.14);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .wk-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .wk-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn,
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset.wk-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit.wk-filter-icon-btn i,
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset.wk-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit:active {
+        transform: translateY(0);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:active {
+        transform: translateY(0);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
+    }
+    /* Заведующие отделениями — палитра как ячейка «Роль» на «О пользователе» (индиго) */
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-ap-card-title-row .sw-ap-card-title-icon {
+        font-size: 1.05rem;
+        color: #fff;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #667eea 0%, #5a6fd6 45%, #764ba2 100%);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+        opacity: 1;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash.sw-filter-dash {
+        border-bottom: 1px solid rgba(102, 126, 234, 0.22) !important;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        border-bottom: 1px solid rgba(102, 126, 234, 0.22);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__icon {
+        background: linear-gradient(145deg, #667eea 0%, #5a6fd6 45%, #764ba2 100%);
+        box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__label {
+        color: #312e81;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-filter-label {
+        color: #6366f1;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .input-group {
+        box-shadow: 0 1px 4px rgba(102, 126, 234, 0.08);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .input-group-text {
+        border-color: rgba(102, 126, 234, 0.28);
+        color: #6366f1;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .form-control.sw-search-input {
+        border-color: rgba(102, 126, 234, 0.28);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .form-control.sw-search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.14);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .form-select.sw-status-select {
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .form-select.sw-status-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.16);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-select-wrap:hover .sw-select-chevron {
+        color: #667eea;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash .sw-select-wrap:focus-within .sw-select-chevron {
+        color: #4f46e5;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:hover {
+        border-color: rgba(102, 126, 234, 0.42);
+        color: #4338ca;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:focus-visible {
+        box-shadow:
+            0 0 0 3px rgba(102, 126, 234, 0.28),
+            0 4px 16px rgba(15, 23, 42, 0.1);
+    }
+    /* Управляющие инвентарём — палитра как роль инвентаризации на «О пользователе» (бирюза) */
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-ap-card-title-row .sw-ap-card-title-icon {
+        font-size: 1.05rem;
+        color: #fff;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #5eead4 0%, #2dd4bf 32%, #14b8a6 68%, #0f766e 100%);
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.32);
+        opacity: 1;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash.sw-filter-dash {
+        border-bottom: 1px solid rgba(20, 184, 166, 0.32) !important;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        border-bottom: 1px solid rgba(20, 184, 166, 0.32);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__icon {
+        background: linear-gradient(145deg, #5eead4 0%, #2dd4bf 32%, #14b8a6 68%, #0f766e 100%);
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-filter-panel-heading .sw-page-title__label {
+        color: #0f766e;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-filter-label {
+        color: #0d9488;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .input-group {
+        box-shadow: 0 1px 4px rgba(13, 148, 136, 0.1);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .input-group-text {
+        border-color: rgba(20, 184, 166, 0.35);
+        color: #0d9488;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .form-control.sw-search-input {
+        border-color: rgba(20, 184, 166, 0.35);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .form-control.sw-search-input:focus {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .form-select.sw-status-select {
+        border-color: rgba(20, 184, 166, 0.38);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .form-select.sw-status-select:focus {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.22);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-select-wrap:hover .sw-select-chevron {
+        color: #14b8a6;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash .sw-select-wrap:focus-within .sw-select-chevron {
+        color: #0f766e;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit {
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 38%, #0d9488 72%, #0f766e 100%);
+        box-shadow:
+            0 4px 18px rgba(13, 148, 136, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash .btn.btn-primary.wk-filter-submit:hover {
+        box-shadow:
+            0 8px 28px rgba(15, 118, 110, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:hover {
+        border-color: rgba(20, 184, 166, 0.45);
+        color: #0f766e;
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-inv .sw-admin-portal-filter-dash.sw-admin-portal-filter-dash a.wk-filter-reset:focus-visible {
+        box-shadow:
+            0 0 0 3px rgba(45, 212, 191, 0.32),
+            0 4px 16px rgba(15, 23, 42, 0.1);
+    }
+    /* Заголовок карточки таблицы: выравнивание вправо (заведующие / управляющие инвентарём) */
+    body.sw-admin-portal-panel-page .sw-ap-card-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    body.sw-admin-portal-panel-page .sw-ap-card-title-row--end {
+        justify-content: flex-end;
+        text-align: right;
+    }
+    body.sw-admin-portal-panel-page .sw-ap-card-title-row .sw-ap-card-title-icon {
+        font-size: 1.15rem;
+        color: #e11d48;
+        opacity: 0.92;
+    }
+    body.sw-admin-portal-panel-page .sw-ap-card-title-row--end .sw-ap-card-title-icon {
+        color: #f43f5e;
+    }
+    /* Таблица — как «Соц. работники» (.sw-sheet); логин остаётся «розовым» как у Bootstrap code */
+    body.sw-admin-portal-panel-page .sw-ap-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 14px 14px;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+        color: #3f3536;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #fecdd3;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet tbody td {
+        border: 1px solid #fce7e9;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #3c4043;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fcfcfc;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet tbody tr.data-row:hover {
+        background: #fffbfb !important;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 16rem;
+        white-space: normal;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password,
+    body.sw-admin-portal-panel-page .sw-sheet th.sw-ap-col-password {
+        max-width: min(42rem, 96vw);
+        min-width: 7rem;
+        white-space: normal !important;
+        vertical-align: middle;
+        text-align: center !important;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .col-narrow {
+        white-space: nowrap;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-login code.sw-ap-login-code {
+        color: #d63384;
+        background-color: rgba(214, 51, 132, 0.09);
+        padding: 0.12rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        max-width: 100%;
+        vertical-align: middle;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-plain-pw {
+        color: #3c4043;
+        background-color: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        font: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        text-align: center;
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: baseline;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-masked {
+        letter-spacing: inherit;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row .sw-ap-pw-eye {
+        flex-shrink: 0;
+        color: #64748b;
+        line-height: 1;
+        text-decoration: none;
+        opacity: 0.92;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet td.sw-ap-col-password .sw-ap-pw-cell-row .sw-ap-pw-eye:hover {
+        color: #475569;
+        opacity: 1;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        justify-content: center;
+        align-items: center;
+    }
+    /* Круглые значки как у «Соц. работники» */
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        line-height: 1;
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        color: #fff;
+        font-size: 1.06rem;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn:hover {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn:focus-visible {
+        outline: none;
+        color: #fff;
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--destructive {
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--destructive:hover {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--destructive:focus-visible {
+        box-shadow:
+            0 0 0 3px rgba(251, 113, 133, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(239, 68, 68, 0.3);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--edit {
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--edit:hover {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--edit:focus-visible {
+        box-shadow:
+            0 0 0 3px rgba(253, 230, 138, 0.75),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px rgba(245, 158, 11, 0.32);
+    }
+    /* Разблокировать — голубой/индиго, как колонка «Просмотр» у «Соц. работники» */
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view {
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #a5b4fc 0%, #6366f1 38%, #4f46e5 82%, #4338ca 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 2px 6px rgba(67, 56, 202, 0.22),
+            0 8px 18px rgba(99, 102, 241, 0.3);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view:hover {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(67, 56, 202, 0.28),
+            0 12px 26px rgba(99, 102, 241, 0.38);
+    }
+    body.sw-admin-portal-panel-page .sw-sheet .sw-actions-cell .sw-action-btn.sw-action-btn--view:focus-visible {
+        box-shadow:
+            0 0 0 3px rgba(165, 180, 252, 0.65),
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 8px 18px rgba(99, 102, 241, 0.32);
+    }
+    body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-workers-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #f43f5e;
+        background: rgba(244, 244, 245, 0.98);
+        border: 1px solid rgba(232, 72, 86, 0.38);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.sw-admin-portal-panel-page .sw-admin-portal-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
+
+    /* Окно «Новый пароль» — структура как «Напоминание о задаче», палитра панели */
+    body.sw-admin-portal-panel-page #adminSetPasswordModal.sw-ap-pwd-modal .modal-dialog.sw-ap-pwd-modal__dialog {
+        max-width: 520px;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__content {
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255, 252, 252, 0.98);
+        border: 1px solid rgba(232, 72, 86, 0.28);
+        box-shadow:
+            0 4px 22px rgba(90, 22, 32, 0.14),
+            0 18px 48px rgba(40, 10, 18, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 1.25rem 1.5rem 0.85rem;
+        border-bottom: none;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+        line-height: 1.25;
+        color: #1c191a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__title > i {
+        color: #e11d48;
+        font-size: 1.35rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header .btn-close {
+        opacity: 0.45;
+        margin: 0;
+        padding: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__header .btn-close:hover {
+        opacity: 0.85;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card {
+        margin: 0 1.5rem 0;
+        padding: 0.35rem 0 1.1rem;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #450a0a;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-control,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-select {
+        border-radius: 10px;
+        border-color: rgba(225, 29, 72, 0.18);
+        background: rgba(255, 253, 253, 0.95);
+        color: #1c191a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-control:focus,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .form-select:focus {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field:focus-within .form-control {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: rgba(225, 29, 72, 0.22);
+        color: #9f1239;
+        background: rgba(255, 253, 253, 0.95);
+        font-weight: 600;
+        padding: 0.375rem 0.65rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.15s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle:hover {
+        border-color: rgba(225, 29, 72, 0.38);
+        background: #fff;
+        color: #881337;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field:focus-within .sw-ap-pwd-modal__pwd-toggle {
+        border-color: rgba(225, 29, 72, 0.45);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__pwd-field .sw-ap-pwd-modal__pwd-toggle:focus-visible {
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        outline: none;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .small,
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .text-muted {
+        color: #64748b !important;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__card .small strong {
+        color: #1c191a;
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.65rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(232, 72, 86, 0.15);
+        background: linear-gradient(180deg, rgba(255, 249, 249, 0.5) 0%, rgba(255, 252, 252, 0.85) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(225, 29, 72, 0.35);
+        color: #7f1d2d;
+        background: rgba(255, 255, 255, 0.98);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .sw-ap-pwd-modal__submit {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.5rem 1.15rem;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 40%, #9f1239 100%);
+        box-shadow:
+            0 4px 18px rgba(225, 29, 72, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminSetPasswordModal .sw-ap-pwd-modal__footer .sw-ap-pwd-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(190, 18, 60, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    /* Окно «Уведомления» — те же блоки что «Новый пароль», палитра как кнопка блокировки (янтарь) */
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal.sw-ap-pwd-modal .modal-dialog.sw-ap-pwd-modal__dialog {
+        max-width: 520px;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__content {
+        border-radius: 20px;
+        overflow: hidden;
+        background: rgba(255, 253, 250, 0.98);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        box-shadow:
+            0 4px 22px rgba(146, 64, 14, 0.12),
+            0 18px 48px rgba(69, 26, 3, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 1.25rem 1.5rem 0.85rem;
+        border-bottom: none;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__title {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+        line-height: 1.25;
+        color: #1c191a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__title > i {
+        color: #d97706;
+        font-size: 1.35rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header .btn-close {
+        opacity: 0.45;
+        margin: 0;
+        padding: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__header .btn-close:hover {
+        opacity: 0.85;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__card {
+        margin: 0 1.5rem 0;
+        padding: 0.35rem 0 1.1rem;
+        border-radius: 0;
+        border: none;
+        background: transparent;
+        max-height: min(52vh, 22rem);
+        overflow-y: auto;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row {
+        border-radius: 12px;
+        border: 1px solid rgba(245, 158, 11, 0.22);
+        background: rgba(255, 253, 248, 0.95);
+        padding: 0.75rem 0.85rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        transition:
+            opacity 0.38s ease,
+            transform 0.38s ease,
+            filter 0.38s ease,
+            max-height 0.42s ease,
+            margin 0.42s ease,
+            padding 0.42s ease,
+            border-width 0.42s ease;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row.sw-ap-notify-row--out {
+        opacity: 0;
+        max-height: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-width: 0 !important;
+        transform: translateY(-10px) scale(0.97);
+        filter: blur(0.4px);
+        pointer-events: none;
+        overflow: hidden;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row {
+            transition-duration: 0.08s;
+        }
+        body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row.sw-ap-notify-row--out {
+            transform: none;
+            filter: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__meta {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 0.2rem;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__role {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #b45309;
+        text-transform: none;
+        letter-spacing: 0.01em;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row code.sw-ap-plain-pw {
+        display: inline-block;
+        margin-top: 0.35rem;
+        color: #1c191a;
+        background-color: rgba(253, 230, 138, 0.28);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        padding: 0.18rem 0.5rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        font-family: ui-monospace, monospace;
+        word-break: break-all;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        color: #78350f;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 247, 237, 0.95) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.42);
+        white-space: nowrap;
+        transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide.sw-ap-notify-row__hide--done {
+        color: #fff;
+        background: linear-gradient(145deg, #6ee7b7 0%, #059669 52%, #047857 100%);
+        border-color: rgba(5, 150, 105, 0.55);
+        box-shadow:
+            0 4px 16px rgba(5, 150, 105, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        transform: none;
+        pointer-events: none;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-notify-row__hide.sw-ap-notify-row__hide--done:hover {
+        transform: none;
+        box-shadow:
+            0 4px 16px rgba(5, 150, 105, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0;
+        padding: 0.65rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(245, 158, 11, 0.22);
+        background: linear-gradient(180deg, rgba(255, 251, 235, 0.55) 0%, rgba(255, 252, 250, 0.9) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(217, 119, 6, 0.45);
+        color: #78350f;
+        background: rgba(255, 255, 255, 0.98);
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .sw-ap-notify-modal__clear {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.5rem 1.05rem;
+        background: linear-gradient(135deg, #fde68a 0%, #f59e0b 42%, #d97706 92%);
+        box-shadow:
+            0 4px 18px rgba(217, 119, 6, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        margin-right: auto;
+    }
+    body.sw-admin-portal-panel-page #adminPasswordNotifyModal .sw-ap-pwd-modal__footer .sw-ap-notify-modal__clear:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(180, 83, 9, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    }
+
+    /* «Код аутентификации» — полноэкранно как «Редактировать соцработника», зелёная гамма */
+    body.sw-admin-portal-panel-page #adminAuthCodesModal.sw-ap-auth-codes-modal .modal-dialog {
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(16, 185, 129, 0.16), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(5, 150, 105, 0.12), transparent 54%),
+            linear-gradient(175deg, #ecfdf5 0%, #d1fae5 32%, #ecfccb 70%, #e7f6ef 100%);
+        box-shadow: none;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal #adminAuthCodesForm {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__page {
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        padding: 1.25rem 1.25rem 1.75rem;
+        box-sizing: border-box;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin: 0 0 1.25rem;
+        padding: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title-icon {
+        flex-shrink: 0;
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.28rem;
+        color: #fff;
+        background: linear-gradient(145deg, #34d399 0%, #10b981 48%, #047857 100%);
+        box-shadow:
+            0 6px 22px rgba(5, 150, 105, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(108deg, #064e3b 0%, #047857 38%, #059669 72%, #10b981 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__title {
+            color: #047857;
+            background: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        color: #047857;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(236, 253, 245, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(5, 150, 105, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__back-btn:hover {
+        color: #065f46;
+        border-color: rgba(5, 150, 105, 0.62);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.2);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__sheet {
+        border-radius: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        background: rgba(255, 255, 255, 0.86);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(6, 78, 59, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__card {
+        padding: 1.5rem 1.5rem 1.25rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #065f46;
+        padding-bottom: 0.5rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #10b981;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(209, 250, 229, 0.75) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title i {
+        color: #059669;
+        font-size: 1.05rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__admin-panel-section {
+        margin-top: 1.35rem;
+        padding: 1rem 1rem 1rem;
+        border: 1.5px solid rgba(220, 38, 38, 0.55);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(254, 242, 242, 0.72) 0%, rgba(255, 255, 255, 0.35) 55%, transparent 100%);
+        box-shadow:
+            0 0 0 1px rgba(254, 202, 202, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title--admin-panel {
+        color: #991b1b;
+        border-left-color: #dc2626;
+        margin-top: 0;
+        background: linear-gradient(90deg, rgba(254, 226, 226, 0.88) 0%, transparent 88%);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__section-title--admin-panel i {
+        color: #dc2626;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-label {
+        color: #064e3b;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-control {
+        border-color: rgba(16, 185, 129, 0.32);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .form-control:focus {
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footnote {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.35rem;
+        line-height: 1.4;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem 1.35rem;
+        border: none;
+        border-top: 1px solid rgba(16, 185, 129, 0.2);
+        background: linear-gradient(180deg, rgba(236, 253, 245, 0.45) 0%, rgba(255, 255, 255, 0.88) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(120, 113, 108, 0.32);
+        color: #57534e;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .btn-outline-secondary:hover {
+        background: rgba(236, 253, 245, 0.95);
+        border-color: #a8a29e;
+        color: #44403c;
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .sw-ap-auth-codes-modal__submit {
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        color: #fff;
+        padding: 0.52rem 1.35rem;
+        background: linear-gradient(135deg, #34d399 0%, #10b981 42%, #047857 100%);
+        box-shadow:
+            0 4px 18px rgba(5, 150, 105, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    body.sw-admin-portal-panel-page #adminAuthCodesModal .sw-ap-auth-codes-modal__footer .sw-ap-auth-codes-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(4, 120, 87, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    /* «Добавить пользователя» — полноэкранно, отступы и каркас как страница «Добавить работника» */
+    body.sw-admin-portal-panel-page #adminAddUserModal.sw-ap-add-user-modal .modal-dialog {
+        max-width: none;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 92% 58% at 98% 2%, rgba(225, 52, 62, 0.12), transparent 54%),
+            radial-gradient(ellipse 78% 52% at -2% 98%, rgba(120, 80, 90, 0.08), transparent 54%),
+            linear-gradient(175deg, #fff8f8 0%, #fdf2f2 35%, #faf5f5 70%, #f5f0f0 100%);
+        box-shadow: none;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal #adminAddUserForm {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__page {
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        padding: 1.25rem 1.25rem 1.75rem;
+        box-sizing: border-box;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal.show .sw-ap-add-user-modal__page {
+        animation: swFormPageEnterReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        body.sw-admin-portal-panel-page #adminAddUserModal.show .sw-ap-add-user-modal__page {
+            animation: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin: 0 0 1.25rem;
+        padding: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title-icon {
+        flex-shrink: 0;
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.28rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb7185 0%, #e11d48 48%, #9f1239 100%);
+        box-shadow:
+            0 6px 22px rgba(225, 29, 72, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        background: linear-gradient(108deg, #1c191a 0%, #450a0a 38%, #9f1239 72%, #e11d48 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__title {
+            color: #7f1d2d;
+            background: none;
+        }
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: 1.5px solid rgba(225, 29, 72, 0.38);
+        color: #9f1239;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 249, 249, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(90, 22, 32, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn:hover {
+        color: #881337;
+        border-color: rgba(225, 29, 72, 0.55);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(90, 22, 32, 0.14);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__back-btn i {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__sheet {
+        border: 1px solid rgba(232, 72, 86, 0.28);
+        border-radius: 20px;
+        background: rgba(255, 252, 252, 0.96);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 12px 40px rgba(90, 22, 32, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__sheet:hover {
+        box-shadow:
+            0 14px 42px rgba(90, 22, 32, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card {
+        margin: 0;
+        padding: 1.75rem 1.75rem 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #881337;
+        padding-bottom: 0.45rem;
+        margin-top: 1.35rem;
+        margin-bottom: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #e11d48;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(255, 241, 242, 0.85) 0%, transparent 90%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title.sw-ap-add-user-modal__section-title--first {
+        margin-top: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title.sw-ap-add-user-modal__section-title--tight-after {
+        margin-top: 1.1rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__section-title i {
+        color: #e11d48;
+        font-size: 1.05rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-label {
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: #590d1d;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-control,
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-select {
+        border-radius: 10px;
+        border-color: rgba(225, 29, 72, 0.2);
+        background: rgba(255, 253, 253, 0.96);
+        color: #1c191a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-control:focus,
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .form-select:focus {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field:focus-within .form-control {
+        border-color: rgba(225, 29, 72, 0.45);
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+        background: #fff;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-color: rgba(225, 29, 72, 0.22);
+        color: #9f1239;
+        background: rgba(255, 253, 253, 0.96);
+        font-weight: 600;
+        padding: 0.375rem 0.65rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.15s ease, color 0.15s ease;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle:hover {
+        border-color: rgba(225, 29, 72, 0.38);
+        background: #fff;
+        color: #881337;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field:focus-within .sw-ap-add-user-modal__pwd-toggle {
+        border-color: rgba(225, 29, 72, 0.45);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__pwd-field .sw-ap-add-user-modal__pwd-toggle:focus-visible {
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.14);
+        outline: none;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__card .alert {
+        border-radius: 12px;
+        border: none;
+        margin-bottom: 0.85rem;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        margin: 1.25rem 0 0;
+        padding: 0.875rem 1.75rem 1.25rem;
+        border: none;
+        border-top: 1px solid rgba(232, 72, 86, 0.18);
+        background: transparent;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .btn-outline-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(107, 114, 128, 0.28);
+        color: #4b5563;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.92) 100%);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .btn-outline-secondary:hover {
+        border-color: rgba(225, 29, 72, 0.35);
+        color: #7f1d2d;
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .sw-ap-add-user-modal__submit {
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        padding: 0.52rem 1.2rem;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 40%, #9f1239 100%);
+        box-shadow:
+            0 4px 18px rgba(225, 29, 72, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    body.sw-admin-portal-panel-page #adminAddUserModal .sw-ap-add-user-modal__footer .sw-ap-add-user-modal__submit:hover {
+        color: #fff;
+        filter: brightness(1.05);
+        box-shadow:
+            0 6px 22px rgba(190, 18, 60, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.sw-admin-portal-panel-page #ap-panel-table-heads,
+    body.sw-admin-portal-panel-page #ap-panel-table-inv,
+    body.sw-admin-portal-panel-page #ap-panel-table-other {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
+{% endblock %}
+
+{% block content %}
+<div class="sw-admin-portal-layout">
+
+<div class="page-header flex-wrap mb-0 justify-content-end">
+    <div class="sw-toolbar-group">
+        <button type="button" class="btn position-relative sw-toolbar-btn sw-toolbar-btn-notify" id="adminToolbarNotifyBtn" data-bs-toggle="modal" data-bs-target="#adminPasswordNotifyModal" aria-label="Уведомления о смене пароля">
+            <i class="bi bi-bell-fill"></i> Уведомления
+            {% if password_notify_count %}<span class="sw-ap-notify-badge">{{ password_notify_count }}</span>{% endif %}
+        </button>
+        <button type="button" class="btn position-relative sw-toolbar-btn sw-toolbar-btn-auth-code" id="adminToolbarAuthCodesBtn" data-bs-toggle="modal" data-bs-target="#adminAuthCodesModal" aria-label="Код аутентификации">
+            <i class="bi bi-shield-lock-fill"></i> Код аутентификации
+        </button>
+        {% if password_pick_users %}
+        <button type="button" class="btn btn-outline-primary position-relative sw-toolbar-btn" id="adminToolbarPasswordBtn" data-bs-toggle="modal" data-bs-target="#adminSetPasswordModal">
+            <i class="bi bi-key-fill"></i> Пароль
+        </button>
+        {% endif %}
+        <button type="button" class="btn btn-primary sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#adminAddUserModal">
+            <i class="bi bi-plus-circle"></i> Добавить пользователя
+        </button>
+    </div>
+</div>
+
+<div class="sw-filter-dash mb-0 sw-services-guide sw-admin-portal-guide">
+    <div class="sw-filter-dash-inner sw-services-guide__inner">
+        <div class="sw-services-guide__top">
+            <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+            <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="sw-services-guide__title">Справка по разделу «Панель Администратора»</span>
+                <button type="button" id="adminPortalGuideToggle" class="sw-services-guide__toggle"
+                        data-bs-toggle="collapse" data-bs-target="#adminPortalGuideCollapse"
+                        aria-expanded="false" aria-controls="adminPortalGuideCollapse">
+                    Как пользоваться
+                    <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse" id="adminPortalGuideCollapse">
+            <div class="sw-services-guide__panel">
+                <div class="sw-workers-guide-intro">
+                    <div class="sw-workers-guide-intro__badge"><i class="bi bi-shield-lock" aria-hidden="true"></i> Закрытый раздел</div>
+                    <p class="sw-workers-guide-intro__text">
+                        <strong>Панель Администратора</strong> — отдельный вход по секретному коду: здесь управляют учётными записями staff без входа в общий интерфейс приложения как обычный пользователь.
+                        Ниже три таблицы с разными наборами действий; над каждой — блок <strong>«Поиск и сортировка»</strong> в том же стиле, что у раздела «Соц. работники»: текстовый поиск, фильтр по статусу учётной записи, порядок строк по статусу, кнопка с лупой и сброс ↺ только для этой таблицы.
+                        Сообщения об успехе или ошибке показываются в верхней полосе под шапкой сайта.
+                    </p>
+                </div>
+
+                <section class="sw-workers-guide-section" aria-labelledby="ap-guide-add">
+                    <h3 id="ap-guide-add" class="sw-workers-guide-h"><i class="bi bi-person-plus-fill" aria-hidden="true"></i>Добавление пользователя</h3>
+                    <p class="sw-workers-guide-p">
+                        Нажмите <strong>«Добавить пользователя»</strong> над блоком справки (справа, как «Добавить работника» у соцработников) — откроется <strong>полноэкранная форма</strong>. Кнопка <strong>«Пароль»</strong> рядом открывает смену пароля для выбранной учётной записи из списка. Заполните поля формы и нажмите <strong>«Создать»</strong>.
+                        После сохранения список таблиц обновится; при ошибках проверки подсветятся поля и текст уведомления.
+                    </p>
+                    <div class="sw-workers-guide-tip">
+                        <strong>Совет:</strong> пароли должны соответствовать требованиям формы (минимальная длина и совпадение при подтверждении).
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="ap-guide-heads">
+                    <h3 id="ap-guide-heads" class="sw-workers-guide-h"><i class="bi bi-building" aria-hidden="true"></i>Заведующие отделениями</h3>
+                    <p class="sw-workers-guide-p">
+                        Список учётных записей, у которых в основном приложении отмечена роль <strong>«Заведующий отделением»</strong>.
+                        Они работают с соцработниками и смежными разделами, но <strong>не</strong> получают роль инвентаризации из этой панели.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li><strong>Блокировка / разблокировка</strong> — значок замка в оранжевом круге (запретить вход) или открытого замка в голубом круге (снова разрешить вход).</li>
+                        <li><strong>Смена пароля</strong> — кнопка <strong>«Пароль»</strong> над справкой: выберите учётную запись в окне и задайте новый пароль.</li>
+                        <li><strong>Удаление</strong> — красный круг с корзиной, как у соцработников; действие необратимо после подтверждения.</li>
+                        <li>У заведующих нет роли инвентаризации из этой панели — отдельная кнопка снятия роли для них не показывается.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="ap-guide-inv">
+                    <h3 id="ap-guide-inv" class="sw-workers-guide-h"><i class="bi bi-box-seam" aria-hidden="true"></i>Управляющие инвентарём</h3>
+                    <p class="sw-workers-guide-p">
+                        Пользователи с ролью <strong>«Управляющий инвентарём»</strong> в справочнике инвентаризации: от них зависят складские операции и доступ к панели инвентаря.
+                    </p>
+                    <ul class="sw-workers-guide-list-rich">
+                        <li>Доступны те же значковые действия в строке (блокировка — замок, удаление — корзина в красном круге), как у соцработников по стилю кнопок; смена пароля — только через кнопку <strong>«Пароль»</strong> над справкой.</li>
+                        <li>Снять роль управляющего инвентарём из этой панели нельзя — используйте основное приложение или справочник инвентаризации.</li>
+                    </ul>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="ap-guide-other">
+                    <h3 id="ap-guide-other" class="sw-workers-guide-h"><i class="bi bi-people" aria-hidden="true"></i>Прочие роли инвентаризации</h3>
+                    <p class="sw-workers-guide-p">
+                        Если в организации есть другие роли справочника инвентаризации (например, руководитель отдела в модуле склада, завхоз и т.п.), они перечислены отдельным блоком <strong>только для просмотра</strong>.
+                    </p>
+                    <div class="sw-workers-guide-note">
+                        <strong>Важно:</strong> из «Панели Администратора» для этих строк нельзя менять статус, пароль или роли — чтобы не нарушить согласованность со справочником инвентаризации. Изменения выполняются через основное приложение или ответственного за данные.
+                    </div>
+                </section>
+
+                <section class="sw-workers-guide-section" aria-labelledby="ap-guide-security">
+                    <h3 id="ap-guide-security" class="sw-workers-guide-h"><i class="bi bi-key-fill" aria-hidden="true"></i>Безопасность</h3>
+                    <ol class="sw-workers-guide-ol">
+                        <li>Не передавайте секретный код входа в панель посторонним; при компрометации смените код в настройках развёртывания.</li>
+                        <li>Выход из панели и переход в основное приложение — через меню пользователя в шапке сайта (как на других страницах).</li>
+                    </ol>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'accounts/admin_portal_staff_table_fragment.html' with rows=department_head_rows section_title='Заведующие отделениями' section_icon='bi-person-badge-fill' section_header_align_right=True empty_message=heads_empty_message ap_filter_section='heads' ap_filter_default_url=heads_filter_default_url ap_table_anchor_id='ap-panel-table-heads' %}
+
+{% include 'accounts/admin_portal_staff_table_fragment.html' with rows=inventory_accountable_rows section_title='Управляющие инвентарём' section_icon='bi-box-seam' section_header_align_right=True empty_message=inv_empty_message ap_filter_section='inv' ap_filter_default_url=inv_filter_default_url ap_table_anchor_id='ap-panel-table-inv' %}
+
+{% if show_other_inv_panel %}
+{% include 'accounts/admin_portal_staff_table_fragment.html' with rows=other_inv_rows section_title='Другие роли инвентаризации' section_icon='bi-people' empty_message=other_empty_message readonly_actions=True ap_filter_section='other' ap_filter_default_url=other_filter_default_url ap_table_anchor_id='ap-panel-table-other' %}
+{% endif %}
+
+<div class="modal fade sw-ap-add-user-modal" id="adminAddUserModal" tabindex="-1" aria-labelledby="adminAddUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0 sw-ap-add-user-modal__content rounded-0">
+            <form method="post" novalidate id="adminAddUserForm" class="d-flex flex-column h-100">
+                {% csrf_token %}
+                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                <input type="hidden" name="action" value="create_staff">
+                <div class="sw-ap-add-user-modal__scroll">
+                    <div class="sw-ap-add-user-modal__page">
+                        <div class="sw-ap-add-user-modal__header">
+                            <div class="sw-ap-add-user-modal__title-wrap">
+                                <span class="sw-ap-add-user-modal__title-icon" aria-hidden="true"><i class="bi bi-person-plus-fill"></i></span>
+                                <h2 class="sw-ap-add-user-modal__title" id="adminAddUserModalLabel">Добавить пользователя</h2>
+                            </div>
+                            <button type="button" class="sw-ap-add-user-modal__back-btn" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-left-circle-fill"></i> Назад к панели
+                            </button>
+                        </div>
+                        <div class="sw-ap-add-user-modal__sheet">
+                            <div class="sw-ap-add-user-modal__card">
+                                {% if create_form.non_field_errors %}
+                                    <div class="alert alert-danger">{{ create_form.non_field_errors }}</div>
+                                {% endif %}
+                                <div class="sw-ap-add-user-modal__section-title sw-ap-add-user-modal__section-title--first">
+                                    <i class="bi bi-key" aria-hidden="true"></i>
+                                    Логин и пароль
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ create_form.username.id_for_label }}">{{ create_form.username.label }}</label>
+                                    {{ create_form.username }}
+                                    {% for err in create_form.username.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                </div>
+                                <div class="row g-3 mb-0">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.password1.id_for_label }}">{{ create_form.password1.label }}</label>
+                                        <div class="input-group sw-ap-add-user-modal__pwd-field">
+                                            {{ create_form.password1 }}
+                                            <button type="button" class="btn btn-outline-secondary sw-ap-add-user-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        {% for err in create_form.password1.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.password2.id_for_label }}">{{ create_form.password2.label }}</label>
+                                        <div class="input-group sw-ap-add-user-modal__pwd-field">
+                                            {{ create_form.password2 }}
+                                            <button type="button" class="btn btn-outline-secondary sw-ap-add-user-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        {% for err in create_form.password2.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="sw-ap-add-user-modal__section-title sw-ap-add-user-modal__section-title--tight-after">
+                                    <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+                                    ФИО, email и роль
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.full_name.id_for_label }}">{{ create_form.full_name.label }}</label>
+                                        {{ create_form.full_name }}
+                                        {% for err in create_form.full_name.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="{{ create_form.email.id_for_label }}">{{ create_form.email.label }}</label>
+                                        {{ create_form.email }}
+                                        {% for err in create_form.email.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label" for="{{ create_form.role.id_for_label }}">{{ create_form.role.label }}</label>
+                                    {{ create_form.role }}
+                                    {% for err in create_form.role.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                                </div>
+                            </div>
+                            <div class="sw-ap-add-user-modal__footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn sw-ap-add-user-modal__submit"><i class="bi bi-check2-circle me-1"></i>Создать</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sw-ap-pwd-modal" id="adminSetPasswordModal" tabindex="-1" aria-labelledby="adminSetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered sw-ap-pwd-modal__dialog">
+        <div class="modal-content border-0 sw-ap-pwd-modal__content">
+            <form method="post" id="adminSetPasswordForm" novalidate>
+                {% csrf_token %}
+                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                <input type="hidden" name="action" value="set_password">
+                <input type="hidden" name="user_id" id="adminSetPasswordUserId" value="">
+                <div class="sw-ap-pwd-modal__header">
+                    <h2 class="sw-ap-pwd-modal__title" id="adminSetPasswordModalLabel">
+                        <i class="bi bi-key-fill" aria-hidden="true"></i>
+                        <span>Новый пароль</span>
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="sw-ap-pwd-modal__card">
+                    {% if password_pick_users %}
+                    <div class="mb-3" id="adminPasswordAccountPicker">
+                        <label class="form-label" for="adminPasswordUserPick">Учётная запись</label>
+                        <select class="form-select" id="adminPasswordUserPick" autocomplete="off">
+                            <option value="">Выберите пользователя…</option>
+                            {% for u in password_pick_users %}
+                            <option value="{{ u.id }}" data-username="{{ u.username }}">{{ u.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    <p class="small text-muted mb-3 {% if password_pick_users %}d-none{% endif %}" id="adminPasswordAccountFixed">
+                        Учётная запись: <strong id="adminSetPasswordUsername">—</strong>
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label" for="adminNewPassword">Новый пароль</label>
+                        <div class="input-group sw-ap-pwd-modal__pwd-field">
+                            <input type="password" class="form-control" name="new_password" id="adminNewPassword" autocomplete="new-password" required minlength="8">
+                            <button type="button" class="btn btn-outline-secondary sw-ap-pwd-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="adminNewPasswordConfirm">Подтверждение</label>
+                        <div class="input-group sw-ap-pwd-modal__pwd-field">
+                            <input type="password" class="form-control" name="new_password_confirm" id="adminNewPasswordConfirm" autocomplete="new-password" required minlength="8">
+                            <button type="button" class="btn btn-outline-secondary sw-ap-pwd-modal__pwd-toggle" aria-label="Показать пароль" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="sw-ap-pwd-modal__footer">
+                    <button type="submit" class="btn sw-ap-pwd-modal__submit">Сохранить</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sw-ap-pwd-modal" id="adminPasswordNotifyModal" tabindex="-1" aria-labelledby="adminPasswordNotifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered sw-ap-pwd-modal__dialog">
+        <div class="modal-content border-0 sw-ap-pwd-modal__content">
+            <div class="sw-ap-pwd-modal__header">
+                <h2 class="sw-ap-pwd-modal__title" id="adminPasswordNotifyModalLabel">
+                    <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                    <span>Уведомления о смене пароля</span>
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="sw-ap-pwd-modal__card">
+                <div class="sw-ap-notify-stack" id="adminPwdNotifyStack">
+                    {% for n in password_notifications %}
+                    <div class="sw-ap-notify-row" data-notification-id="{{ n.pk }}">
+                        <div class="sw-ap-notify-row__top">
+                            <div class="min-w-0">
+                                <div class="sw-ap-notify-row__role">{{ n.role_label }}</div>
+                                <div class="fw-semibold text-break">{{ n.username }}</div>
+                                <div class="sw-ap-notify-row__meta">{{ n.created_at|date:"d.m.Y H:i" }}</div>
+                                <code class="sw-ap-plain-pw">{{ n.new_password_plaintext }}</code>
+                            </div>
+                            <form method="post" action="{% url 'accounts:admin_portal_panel' %}" class="m-0 align-self-start flex-shrink-0 js-ap-dismiss-pwd-notify-form">
+                                {% csrf_token %}
+                                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                                <input type="hidden" name="action" value="dismiss_password_notification">
+                                <input type="hidden" name="notification_id" value="{{ n.pk }}">
+                                <button type="button" class="sw-ap-notify-row__hide js-ap-dismiss-pwd-notify-btn">Скрыть</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="small text-muted mb-0 {% if password_notifications %}d-none{% endif %}" id="adminPwdNotifyEmpty">Нет активных уведомлений.</p>
+            </div>
+            <div class="sw-ap-pwd-modal__footer">
+                <div class="js-ap-pwd-notify-footer-actions me-auto {% if not password_notifications %}d-none{% endif %}" id="adminPwdNotifyFooterActions">
+                    {% if password_notifications %}
+                    <form method="post" class="m-0">
+                        {% csrf_token %}
+                        {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                        <input type="hidden" name="action" value="dismiss_all_password_notifications">
+                        <button type="submit" class="btn sw-ap-notify-modal__clear">Очистить все</button>
+                    </form>
+                    {% endif %}
+                </div>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade sw-ap-auth-codes-modal" id="adminAuthCodesModal" tabindex="-1" aria-labelledby="adminAuthCodesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content border-0 rounded-0 sw-ap-auth-codes-modal__content">
+            <form method="post" id="adminAuthCodesForm" novalidate>
+                {% csrf_token %}
+                {% include 'accounts/admin_portal_ap_post_hidden.html' %}
+                <input type="hidden" name="action" value="update_authentication_codes">
+                <div class="sw-ap-auth-codes-modal__scroll">
+                    <div class="sw-ap-auth-codes-modal__page">
+                        <div class="sw-ap-auth-codes-modal__header">
+                            <div class="sw-ap-auth-codes-modal__title-wrap">
+                                <span class="sw-ap-auth-codes-modal__title-icon" aria-hidden="true"><i class="bi bi-shield-lock-fill"></i></span>
+                                <h2 class="sw-ap-auth-codes-modal__title" id="adminAuthCodesModalLabel">Код аутентификации</h2>
+                            </div>
+                            <button type="button" class="sw-ap-auth-codes-modal__back-btn" data-bs-dismiss="modal">
+                                <i class="bi bi-arrow-left-circle-fill"></i> Назад к панели
+                            </button>
+                        </div>
+                        <div class="sw-ap-auth-codes-modal__sheet">
+                            <div class="sw-ap-auth-codes-modal__card">
+                                <div class="sw-ap-auth-codes-modal__section-title">
+                                    <i class="bi bi-box-seam" aria-hidden="true"></i>
+                                    Раздел «Инвентаризация»
+                                </div>
+                                <div class="mb-3 mb-lg-4">
+                                    <label class="form-label" for="id_inventory_auth_code">Секретный код</label>
+                                    <input type="text" class="form-control" name="inventory_auth_code" id="id_inventory_auth_code" maxlength="512" autocomplete="off" value="{{ effective_inventory_auth_code }}">
+                                    <p class="sw-ap-auth-codes-modal__footnote mb-0">Очистите поле и сохраните, чтобы снова использовать значение из настроек сервера (переменная окружения).</p>
+                                </div>
+                                <div class="sw-ap-auth-codes-modal__admin-panel-section">
+                                    <div class="sw-ap-auth-codes-modal__section-title sw-ap-auth-codes-modal__section-title--admin-panel">
+                                        <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                        Панель администратора
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label" for="id_admin_panel_auth_code">Секретный код</label>
+                                        <input type="text" class="form-control" name="admin_panel_auth_code" id="id_admin_panel_auth_code" maxlength="512" autocomplete="off" value="{{ effective_admin_panel_auth_code }}">
+                                        <p class="sw-ap-auth-codes-modal__footnote mb-0">Очистите поле и сохраните, чтобы снова использовать значение из настроек сервера.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sw-ap-auth-codes-modal__footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn sw-ap-auth-codes-modal__submit"><i class="bi bi-check2-circle me-1"></i>Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var KEY = 'adminPortalScrollToTable';
+    function markScrollForCard(card) {
+        try {
+            sessionStorage.setItem(KEY, card && card.id ? card.id : '');
+        } catch (e) {}
+    }
+    function scrollIfFlagged() {
+        var id;
+        try {
+            id = sessionStorage.getItem(KEY);
+            sessionStorage.removeItem(KEY);
+        } catch (e) {
+            return;
+        }
+        if (!id) return;
+        var el = document.getElementById(id);
+        if (!el) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                el.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+    document.querySelectorAll('.sw-admin-portal-filter-dash form[method="get"]').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            markScrollForCard(form.closest('.js-ap-staff-table-card'));
+        });
+    });
+    document.querySelectorAll('.sw-admin-portal-filter-dash a.wk-filter-reset').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollForCard(a.closest('.js-ap-staff-table-card'));
+        });
+    });
+    document.querySelectorAll('.js-ap-staff-table-card form[method="post"]').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            markScrollForCard(form.closest('.js-ap-staff-table-card'));
+        });
+    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollIfFlagged);
+    } else {
+        scrollIfFlagged();
+    }
+})();
+</script>
+<script>
+(function () {
+    var modal = document.getElementById('adminPasswordNotifyModal');
+    if (!modal) return;
+    var stack = document.getElementById('adminPwdNotifyStack');
+    var emptyEl = document.getElementById('adminPwdNotifyEmpty');
+    var footerActions = document.getElementById('adminPwdNotifyFooterActions');
+    var notifyBtn = document.getElementById('adminToolbarNotifyBtn');
+
+    function getCsrfToken(form) {
+        var inp = form.querySelector('[name=csrfmiddlewaretoken]');
+        return inp ? inp.value : '';
+    }
+
+    function updateBadge(remaining) {
+        if (!notifyBtn) return;
+        var badge = notifyBtn.querySelector('.sw-ap-notify-badge');
+        if (remaining > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'sw-ap-notify-badge';
+                notifyBtn.appendChild(badge);
+            }
+            badge.textContent = String(remaining);
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function prefersReducedMotion() {
+        try {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function prepareRowCollapse(row) {
+        if (!row || row.classList.contains('sw-ap-notify-row--out')) return;
+        var h = row.getBoundingClientRect().height;
+        row.style.maxHeight = h + 'px';
+        void row.offsetHeight;
+    }
+
+    modal.addEventListener('click', function (ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest('.js-ap-dismiss-pwd-notify-btn') : null;
+        if (!btn || !modal.contains(btn)) return;
+        var form = btn.closest('.js-ap-dismiss-pwd-notify-form');
+        if (!form) return;
+        ev.preventDefault();
+
+        var row = form.closest('.sw-ap-notify-row');
+        if (!row || btn.disabled) return;
+
+        btn.disabled = true;
+        var origHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i>';
+        btn.classList.add('sw-ap-notify-row__hide--done');
+        btn.setAttribute('aria-label', 'Скрыто');
+
+        var fd = new FormData(form);
+        var postUrl = form.getAttribute('action') || form.action || window.location.pathname;
+        fetch(postUrl, {
+            method: 'POST',
+            body: fd,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCsrfToken(form),
+            },
+            credentials: 'same-origin',
+        })
+            .then(function (r) {
+                return r.text().then(function (text) {
+                    var data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (err) {
+                        throw new Error('not json');
+                    }
+                    if (!r.ok || !data || !data.ok) {
+                        throw new Error('not ok');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                updateBadge(typeof data.remaining === 'number' ? data.remaining : 0);
+                prepareRowCollapse(row);
+                row.classList.add('sw-ap-notify-row--out');
+                var ms = prefersReducedMotion() ? 120 : 480;
+                window.setTimeout(function () {
+                    row.remove();
+                    if (stack && !stack.querySelector('.sw-ap-notify-row')) {
+                        if (emptyEl) emptyEl.classList.remove('d-none');
+                        if (footerActions) footerActions.classList.add('d-none');
+                    }
+                }, ms);
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.innerHTML = origHTML;
+                btn.classList.remove('sw-ap-notify-row__hide--done');
+                btn.removeAttribute('aria-label');
+                row.style.maxHeight = '';
+            });
+    });
+})();
+</script>
+<script>
+(function () {
+    var modal = document.getElementById('adminSetPasswordModal');
+    if (!modal) return;
+    var pickWrap = document.getElementById('adminPasswordAccountPicker');
+    var pick = document.getElementById('adminPasswordUserPick');
+    var fixed = document.getElementById('adminPasswordAccountFixed');
+    var uidInput = document.getElementById('adminSetPasswordUserId');
+    var unameEl = document.getElementById('adminSetPasswordUsername');
+
+    function clearPasswordFields() {
+        var p1 = document.getElementById('adminNewPassword');
+        var p2 = document.getElementById('adminNewPasswordConfirm');
+        if (p1) {
+            p1.value = '';
+            p1.type = 'password';
+        }
+        if (p2) {
+            p2.value = '';
+            p2.type = 'password';
+        }
+        modal.querySelectorAll('.sw-ap-pwd-modal__pwd-toggle').forEach(function (btn) {
+            var ic = btn.querySelector('i');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-label', 'Показать пароль');
+            if (ic) ic.className = 'bi bi-eye';
+        });
+    }
+
+    modal.querySelectorAll('.sw-ap-pwd-modal__pwd-field').forEach(function (wrap) {
+        var inp = wrap.querySelector('input');
+        var btn = wrap.querySelector('.sw-ap-pwd-modal__pwd-toggle');
+        var icon = btn && btn.querySelector('i');
+        if (!inp || !btn) return;
+        btn.addEventListener('click', function () {
+            var show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+            btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+            if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
+
+    if (pick && uidInput) {
+        pick.addEventListener('change', function () {
+            var opt = pick.selectedOptions[0];
+            uidInput.value = pick.value || '';
+            if (unameEl && opt && opt.getAttribute('data-username')) {
+                unameEl.textContent = opt.getAttribute('data-username');
+            }
+        });
+    }
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        clearPasswordFields();
+        var btn = event.relatedTarget;
+        var fromRow = btn && btn.classList && btn.classList.contains('js-admin-set-password-open');
+        if (fromRow) {
+            if (pickWrap) pickWrap.classList.add('d-none');
+            if (fixed) fixed.classList.remove('d-none');
+            if (pick) pick.value = '';
+            var uid = btn.getAttribute('data-user-id') || '';
+            var uname = btn.getAttribute('data-username') || '—';
+            if (uidInput) uidInput.value = uid;
+            if (unameEl) unameEl.textContent = uname;
+        } else {
+            if (pickWrap) pickWrap.classList.remove('d-none');
+            if (fixed) fixed.classList.add('d-none');
+            if (uidInput) uidInput.value = '';
+            if (unameEl) unameEl.textContent = '—';
+            if (pick) pick.value = '';
+        }
+    });
+
+    var pwdForm = document.getElementById('adminSetPasswordForm');
+    if (pwdForm && uidInput) {
+        pwdForm.addEventListener('submit', function (e) {
+            if (!uidInput.value.trim()) {
+                e.preventDefault();
+                if (pickWrap && !pickWrap.classList.contains('d-none') && pick && !pick.value) {
+                    pick.focus();
+                }
+            }
+        });
+    }
+})();
+</script>
+<script>
+(function () {
+    var root = document.querySelector('body.sw-admin-portal-panel-page');
+    if (!root) return;
+    root.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('.sw-ap-pw-eye');
+        if (!btn || !root.contains(btn)) return;
+        var wrap = btn.closest('td.sw-ap-col-password');
+        if (!wrap) return;
+        var plain = wrap.querySelector('.sw-ap-pw-plain');
+        var masked = wrap.querySelector('.sw-ap-pw-masked');
+        var icon = btn.querySelector('i');
+        if (!plain || !masked || !icon) return;
+        var hidden = plain.classList.contains('d-none');
+        if (hidden) {
+            plain.classList.remove('d-none');
+            masked.classList.add('d-none');
+            icon.className = 'bi bi-eye-fill fs-6';
+            btn.setAttribute('aria-pressed', 'true');
+        } else {
+            plain.classList.add('d-none');
+            masked.classList.remove('d-none');
+            icon.className = 'bi bi-eye-slash-fill fs-6';
+            btn.setAttribute('aria-pressed', 'false');
+        }
+    });
+})();
+</script>
+<script>
+(function () {
+    var modal = document.getElementById('adminAddUserModal');
+    if (!modal) return;
+
+    function resetAddUserPwdToggles() {
+        modal.querySelectorAll('.sw-ap-add-user-modal__pwd-field input').forEach(function (inp) {
+            inp.type = 'password';
+        });
+        modal.querySelectorAll('.sw-ap-add-user-modal__pwd-toggle').forEach(function (btn) {
+            var ic = btn.querySelector('i');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-label', 'Показать пароль');
+            if (ic) ic.className = 'bi bi-eye';
+        });
+    }
+
+    modal.querySelectorAll('.sw-ap-add-user-modal__pwd-field').forEach(function (wrap) {
+        var inp = wrap.querySelector('input');
+        var btn = wrap.querySelector('.sw-ap-add-user-modal__pwd-toggle');
+        var icon = btn && btn.querySelector('i');
+        if (!inp || !btn) return;
+        btn.addEventListener('click', function () {
+            var show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+            btn.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+            if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
+
+    modal.addEventListener('show.bs.modal', function () {
+        resetAddUserPwdToggles();
+    });
+})();
+</script>
+{% if create_form.errors %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('adminAddUserModal');
+    if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(el).show();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Изменить информацию о медосмотре — SocWorker{% endblock %}
+
+{% block body_attrs %} class="sw-entity-edit-page"{% endblock %}
+
+{% block inline_css %}
+{% include 'accounts/includes/sw_edit_form_theme.html' with is_edit=True %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header sw-entity-form-header">
+    <h1 class="sw-edit-page-title mb-0">
+        <span class="sw-edit-page-title__icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+        <span class="sw-edit-page-title__label">Изменить информацию о медосмотре</span>
+    </h1>
+    <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:medical_checkup_panel' %}{% endif %}" class="sw-edit-back-btn">
+        <i class="bi bi-arrow-left-circle-fill"></i> К панели медосмотра
+    </a>
+</div>
+
+<div class="card sw-edit-form-card">
+    <div class="card-body p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+
+            <div class="section-title"><i class="bi bi-person-badge"></i> Сотрудник</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Табельный номер</label>
+                    <input type="text" class="form-control" value="{{ worker.employee_id }}" readonly tabindex="-1">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Соц. работник</label>
+                    <input type="text" class="form-control" value="{{ worker.get_full_name }}" readonly tabindex="-1">
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-clipboard2-pulse"></i> Медосмотр</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.medical_checkup.id_for_label }}" class="form-label">{{ form.medical_checkup.label }}</label>
+                    {{ form.medical_checkup }}
+                    {% if form.medical_checkup.errors %}<div class="text-danger small mt-1">{{ form.medical_checkup.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.mc_ok_12.id_for_label }}" class="form-label">{{ form.mc_ok_12.label }}</label>
+                    {{ form.mc_ok_12 }}
+                    {% if form.mc_ok_12.errors %}<div class="text-danger small mt-1">{{ form.mc_ok_12.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.last_medical_checkup_date.id_for_label }}" class="form-label">{{ form.last_medical_checkup_date.label }}</label>
+                    {{ form.last_medical_checkup_date }}
+                    {% if form.last_medical_checkup_date.errors %}<div class="text-danger small mt-1">{{ form.last_medical_checkup_date.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.valid_until.id_for_label }}" class="form-label">{{ form.valid_until.label }}</label>
+                    {{ form.valid_until }}
+                    <div class="form-text small text-muted">При заполнении «Годен до» дата последнего осмотра пересчитывается (минус 365 дн.)</div>
+                    {% if form.valid_until.errors %}<div class="text-danger small mt-1">{{ form.valid_until.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="section-title"><i class="bi bi-calendar-event"></i> Назначен на</div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.medical_checkup_planned_date.id_for_label }}" class="form-label">{{ form.medical_checkup_planned_date.label }}</label>
+                    {{ form.medical_checkup_planned_date }}
+                    {% if form.medical_checkup_planned_date.errors %}<div class="text-danger small mt-1">{{ form.medical_checkup_planned_date.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.medical_notes.id_for_label }}" class="form-label">{{ form.medical_notes.label }}</label>
+                {{ form.medical_notes }}
+                {% if form.medical_notes.errors %}<div class="text-danger small mt-1">{{ form.medical_notes.errors }}</div>{% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{% if next_url %}{{ next_url }}{% else %}{% url 'accounts:medical_checkup_panel' %}{% endif %}" class="btn btn-outline-secondary">Отмена</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

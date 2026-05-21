@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,15 @@ SECRET_KEY = 'django-insecure-rtt*h$ehkzbe!wmtb!*-5=gv+_43$aa(1ctk@ykd3=ejh!vl!5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Пустой список в DEBUG не всегда принимает нужный Host; явно задаём локальную разработку.
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS',
+        'localhost,127.0.0.1,[::1],testserver',
+    ).split(',')
+    if h.strip()
+]
 
 
 # Application definition
@@ -37,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'inventory',
 ]
 
@@ -48,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'socworker_project.middleware.SwNavContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'socworker_project.middleware.DisableBrowserCacheForAuthenticatedHtmlMiddleware',
@@ -67,6 +77,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_nav_profile',
+                'accounts.context_processors.admin_portal_shell',
                 'inventory.context_processors.inventory_nav',
             ],
         },
@@ -82,11 +93,18 @@ WSGI_APPLICATION = 'socworker_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'socworker_db',  # Имя базы данных (нужно создать в MySQL)
-        'USER': 'root',
-        'PASSWORD': '12345678',
-        'HOST': '127.0.0.1',
-        'PORT': '3010',
+        # Параметры из окружения (docker-compose задаёт DB_HOST=db и т.д.)
+        'NAME': os.environ.get(
+            'MYSQL_DATABASE',
+            os.environ.get('DB_NAME', 'socworker_db'),
+        ),
+        'USER': os.environ.get('MYSQL_USER', os.environ.get('DB_USER', 'root')),
+        'PASSWORD': os.environ.get(
+            'MYSQL_PASSWORD',
+            os.environ.get('DB_PASSWORD', '12345678'),
+        ),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '3010'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         },
@@ -138,6 +156,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/accounts/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Секретный код аутентификации для раздела «Инвентаризация» (только сервер/начальник).
+# Значение по умолчанию — переменные окружения; администратор портала может переопределить код в интерфейсе (сохраняется в БД).
+INVENTORY_AUTHENTICATION_CODE = os.environ.get(
+    'INVENTORY_AUTHENTICATION_CODE',
+    os.environ.get('INVENTORY_PORTAL_ACCESS_CODE', 'admin'),
+)
+
+# Вход и регистрация в «Панели администратора» (управление учётными записями инвентаризации).
+# Значение по умолчанию из окружения; при необходимости переопределяется из панели администратора (БД).
+ADMIN_PANEL_AUTHENTICATION_CODE = os.environ.get(
+    'ADMIN_PANEL_AUTHENTICATION_CODE',
+    'administrator',
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

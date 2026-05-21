@@ -1,0 +1,63 @@
+# Запуск: docker compose up --build (из корня репозитория, поднимаются оба сервиса).
+# Приложение: http://localhost:8000
+# MySQL с хоста: localhost:3010 (как у локальной разработки) или через docker network имя сервиса db.
+#
+# Если видите OperationalError про «Can't connect ... 'db' (Name or service not known)»:
+# — не используйте `docker compose run --no-deps web` без запущенного `db`;
+# — поднимите БД: `docker compose up -d db` или полный стек `docker compose up`;
+# — на Windows/VPN если не резолвится имя `db`, в сервисе web ниже включён dns 127.0.0.11 (Docker).
+
+networks:
+  socworker_internal:
+    driver: bridge
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    networks:
+      - socworker_internal
+    environment:
+      MYSQL_DATABASE: socworker_db
+      MYSQL_ROOT_PASSWORD: "12345678"
+    ports:
+      - "3010:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      # Совпадает с MYSQL_ROOT_PASSWORD выше (только для локального compose).
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p12345678"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  web:
+    build: .
+    restart: unless-stopped
+    networks:
+      - socworker_internal
+    # Чтобы имена сервисов Compose (например `db`) искались через встроенный DNS Docker до внешних DNS (VPN и т.д.).
+    dns:
+      - 127.0.0.11
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      MYSQL_DATABASE: socworker_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: "12345678"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  mysql_data:

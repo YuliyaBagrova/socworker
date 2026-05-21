@@ -1,11 +1,12 @@
 {% extends 'accounts/base.html' %}
 
-{% block title %}Регистрация — SocWorker{% endblock %}
+{% block title %}Регистрация — СоцПомощник{% endblock %}
 
 {% block header_title %}Регистрация{% endblock %}
 {% block header_subtitle %}Создайте учётную запись для входа в систему{% endblock %}
 
 {% block content %}
+{% include 'accounts/includes/auth_portal_gateway_icons.html' %}
 <form method="post" action="{% url 'accounts:register' %}">
     {% csrf_token %}
     

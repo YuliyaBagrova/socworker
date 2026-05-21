@@ -2,40 +2,1207 @@
 
 {% block title %}Планирование визитов - SocWorker{% endblock %}
 
+{% block body_attrs %} class="vp-planning-page"{% endblock %}
+
 {% block inline_css %}
-    .visit-stat-card {
+    /* Фон и шапка: структура как «Услуги», палитра оранжево–салатовая */
+    body.vp-planning-page {
+        min-height: 100vh;
+        background-color: #fff7ed;
+        background-image:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.48) 0%, rgba(254, 243, 199, 0.42) 45%, rgba(217, 249, 157, 0.32) 100%),
+            radial-gradient(ellipse 58% 48% at 88% 8%, rgba(251, 191, 36, 0.42), transparent 54%),
+            radial-gradient(ellipse 52% 44% at 8% 92%, rgba(163, 230, 53, 0.3), transparent 54%),
+            radial-gradient(ellipse 72% 56% at 50% 100%, rgba(251, 146, 60, 0.2), transparent 58%),
+            linear-gradient(118deg, rgba(254, 215, 170, 0.45) 0%, rgba(217, 249, 157, 0.18) 42%, transparent 58%),
+            linear-gradient(212deg, rgba(255, 250, 235, 0.4) 0%, rgba(190, 242, 100, 0.14) 48%, transparent 62%),
+            linear-gradient(175deg, rgba(255, 255, 255, 0.12) 0%, rgba(234, 179, 8, 0.06) 100%);
+    }
+    body.vp-planning-page .main-content {
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        background: transparent;
+        box-sizing: border-box;
+    }
+    .vp-plan-layout {
+        --vp-violet: #4a3f6f;
+        --vp-violet-light: #667eea;
+        --dash-glass-border: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-width: 0;
+        width: 100%;
+    }
+    .vp-planning-page .vp-plan-table-root {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    /* Шапка — те же размеры и обводка, что панель «Услуги» */
+    .vp-plan-dash {
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        margin-bottom: 0.35rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--dash-glass-border);
+        box-shadow: 0 8px 32px rgba(26, 26, 46, 0.12);
+    }
+    .vp-plan-dash::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        background: linear-gradient(
+            105deg,
+            rgba(67, 20, 7, 0.34) 0%,
+            rgba(154, 52, 18, 0.18) 42%,
+            rgba(22, 101, 52, 0.12) 100%
+        );
+        pointer-events: none;
+    }
+    .vp-plan-dash-header {
+        position: relative;
+        z-index: 1;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0 !important;
+        overflow: visible;
+    }
+    .vp-planning-page .vp-plan-dash .sw-toolbar-group {
+        overflow: visible;
+    }
+    .vp-plan-dash .sw-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .vp-plan-dash .sw-page-title__icon {
+        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
         border-radius: 14px;
-        border: 1px solid #e8eaed;
-        background: linear-gradient(180deg, #fff 0%, #f8f9fb 100%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 38%, #a3e635 72%, #65a30d 100%);
+        box-shadow:
+            0 6px 22px rgba(234, 88, 12, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .vp-plan-dash .sw-page-title__label {
+        font-size: clamp(1.32rem, 2.4vw, 1.68rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        /* Светлый, мягкий салатовый градиент без резкого тёмно-зелёного края */
+        background: linear-gradient(
+            105deg,
+            #ffffff 0%,
+            #fffefb 18%,
+            #f7fee7 32%,
+            #f0fdf4 48%,
+            #ecfccb 62%,
+            #e7f7dc 76%,
+            #dcf5d0 88%,
+            #d4f0c8 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.1));
+    }
+    @supports not (background-clip: text) {
+        .vp-plan-dash .sw-page-title__label {
+            -webkit-text-fill-color: currentColor;
+            color: #f0fdf4;
+            background: none;
+            filter: none;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+        }
+    }
+    /* Тулбар — как на панели «Социальные работники» (в т.ч. «Закреплённые лица» = outline-primary) */
+    .vp-planning-page .sw-toolbar-btn {
+        position: relative;
+        border-radius: 12px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.52rem 1.05rem 0.52rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+    }
+    /* Бейдж со счётчиком выходит за границы кнопки — иначе обрезается overflow:hidden */
+    .vp-planning-page .sw-toolbar-btn.sw-toolbar-btn--with-count,
+    .vp-planning-page .sw-toolbar-btn:has(.vp-task-count-badge) {
+        overflow: visible;
+        margin-right: 0.35rem;
+    }
+    .vp-planning-page .vp-task-count-badge {
+        position: absolute;
+        top: -0.35rem;
+        right: -0.45rem;
+        left: auto;
+        transform: none;
+        z-index: 4;
+        min-width: 1.25rem;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        line-height: 1.15;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+    .vp-planning-page .sw-toolbar-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 55%);
+    }
+    .vp-planning-page .sw-toolbar-btn:hover::before {
+        opacity: 1;
+    }
+    .vp-planning-page .sw-toolbar-btn:hover {
+        transform: translateY(-2px);
+    }
+    .vp-planning-page .sw-toolbar-btn i {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-danger {
+        color: #b91c1c;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.88) 100%);
+        border-color: rgba(220, 53, 69, 0.28);
+        border-left: 3px solid #e11d48;
+        box-shadow: 0 2px 12px rgba(225, 29, 72, 0.08);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-danger:hover {
+        color: #991b1b;
+        border-color: rgba(220, 53, 69, 0.45);
+        box-shadow: 0 8px 22px rgba(225, 29, 72, 0.18);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-success {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 253, 245, 0.9) 100%);
+        border-color: rgba(16, 185, 129, 0.28);
+        border-left: 3px solid #10b981;
+        box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-success:hover {
+        color: #0d5c56;
+        border-color: rgba(16, 185, 129, 0.42);
+        box-shadow: 0 8px 22px rgba(16, 185, 129, 0.16);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-primary {
+        color: #4338ca;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(245, 243, 255, 0.9) 100%);
+        border-color: rgba(102, 126, 234, 0.32);
+        border-left: 3px solid #667eea;
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.1);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-outline-primary:hover {
+        color: #312e81;
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-primary {
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.2rem;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .vp-planning-page .sw-toolbar-btn.btn-primary:hover {
+        color: #fff;
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        filter: brightness(1.04);
+    }
+    /* Подсказка — структура как «Услуги», тёплая оранжево–салатовая палитра */
+    .vp-planning-page .sw-filter-dash.sw-services-guide {
+        margin-top: -0.15rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: visible;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 247, 237, 0.62) 38%, rgba(236, 253, 245, 0.52) 72%, rgba(254, 243, 199, 0.45) 100%);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        box-shadow:
+            0 4px 6px -1px rgba(234, 88, 12, 0.06),
+            0 12px 28px -8px rgba(101, 163, 13, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .vp-planning-page .sw-filter-dash.sw-services-guide::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 20px 0 0 20px;
+        background: linear-gradient(180deg, #fb923c 0%, #eab308 45%, #84cc16 100%);
+        opacity: 0.95;
+    }
+    .vp-planning-page .sw-filter-dash-inner.sw-services-guide__inner {
+        padding: 0.65rem 1.1rem 0.7rem 1.3rem;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .vp-planning-page .sw-services-guide__top {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0;
+    }
+    .vp-planning-page .sw-services-guide__icon-wrap {
+        flex-shrink: 0;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #c2410c;
+        background: linear-gradient(145deg, rgba(255, 247, 237, 0.98) 0%, rgba(217, 249, 157, 0.75) 100%);
+        border: 1px solid rgba(251, 146, 60, 0.35);
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.12);
+    }
+    .vp-planning-page .sw-services-guide__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #9a3412;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .vp-planning-page .sw-services-guide__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #b45309;
+        background: rgba(251, 191, 36, 0.2);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        padding: 0.28rem 0.6rem 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-left: 0.25rem;
+        cursor: pointer;
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease,
+            transform 0.2s ease;
+    }
+    .vp-planning-page .sw-services-guide__toggle:hover {
+        background: rgba(251, 191, 36, 0.32);
+        border-color: rgba(217, 119, 6, 0.5);
+        box-shadow: 0 2px 12px rgba(234, 88, 12, 0.15);
+    }
+    .vp-planning-page .sw-services-guide__toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.45);
+    }
+    .vp-planning-page .sw-services-guide__toggle[aria-expanded="true"] {
+        background: rgba(101, 163, 13, 0.18);
+        border-color: rgba(101, 163, 13, 0.45);
+    }
+    .vp-planning-page .sw-services-guide__chev {
+        font-size: 0.72rem;
+        opacity: 0.85;
+        transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .vp-planning-page .sw-services-guide__toggle[aria-expanded="true"] .sw-services-guide__chev {
+        transform: rotate(180deg);
+    }
+    .vp-planning-page .sw-services-guide .collapsing {
+        transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .vp-planning-page .sw-services-guide__panel {
+        margin-top: 0.65rem;
+        padding: 0.85rem 1rem 0.95rem;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 199, 0.55) 45%, rgba(236, 253, 245, 0.72) 100%);
+        border: 1px solid rgba(253, 186, 116, 0.45);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 4px 20px rgba(180, 83, 9, 0.08);
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.06s,
+            transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
+    }
+    #vpGuideCollapse.collapse.show .sw-services-guide__panel {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .vp-planning-page .sw-services-guide__lead {
+        margin: 0 0 0.65rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.55;
+        color: #334155;
+        letter-spacing: -0.01em;
+        padding-left: 0.65rem;
+        border-left: 3px solid rgba(251, 146, 60, 0.85);
+    }
+    .vp-planning-page .sw-services-guide__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .vp-planning-page .sw-services-guide__list li {
+        position: relative;
+        padding: 0.4rem 0 0.4rem 1.65rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    .vp-planning-page .sw-services-guide__list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #fb923c, #84cc16);
+        box-shadow: 0 0 0 3px rgba(254, 243, 199, 0.75);
+    }
+    .vp-planning-page .sw-services-guide__list li strong {
+        font-weight: 700;
+        color: #9a3412;
+    }
+    /* Расширенная справка — секции и сетка (как «Социальные работники»), тёплая палитра панели */
+    body.vp-planning-page .vp-guide-intro {
+        margin: 0 0 1.25rem;
+        padding: 1rem 1.15rem;
+        border-radius: 16px;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 247, 237, 0.9) 42%, rgba(254, 243, 199, 0.55) 100%);
+        border: 1px solid rgba(251, 146, 60, 0.38);
+        box-shadow: 0 2px 16px rgba(234, 88, 12, 0.08);
+    }
+    body.vp-planning-page .vp-guide-intro__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9a3412;
+        background: rgba(251, 191, 36, 0.18);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
+    }
+    body.vp-planning-page .vp-guide-intro__text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.65;
+        color: #334155;
+        letter-spacing: -0.015em;
+    }
+    body.vp-planning-page .vp-guide-intro__text strong {
+        color: #7c2d12;
+        font-weight: 700;
+    }
+    body.vp-planning-page .vp-guide-section {
+        margin-top: 1.15rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(253, 186, 116, 0.55);
+    }
+    body.vp-planning-page .vp-guide-section:first-of-type {
+        margin-top: 0.35rem;
+        padding-top: 0;
+        border-top: none;
+    }
+    body.vp-planning-page .vp-guide-h {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #9a3412;
+        margin: 0 0 0.75rem;
+        line-height: 1.25;
+    }
+    body.vp-planning-page .vp-guide-h i {
+        flex-shrink: 0;
+        width: 1.85rem;
+        height: 1.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 40%, #84cc16 100%);
+        box-shadow: 0 3px 10px rgba(234, 88, 12, 0.28);
+    }
+    body.vp-planning-page .vp-guide-p {
+        margin: 0 0 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.62;
+        color: #475569;
+        letter-spacing: -0.01em;
+    }
+    body.vp-planning-page .vp-guide-p:last-child {
+        margin-bottom: 0;
+    }
+    body.vp-planning-page .vp-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 0.65rem;
+        margin: 0.5rem 0 0;
+    }
+    body.vp-planning-page .vp-guide-card {
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(253, 186, 116, 0.5);
+        box-shadow: 0 2px 10px rgba(154, 52, 18, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.vp-planning-page .vp-guide-card:hover {
+        border-color: rgba(251, 146, 60, 0.75);
+        box-shadow: 0 4px 16px rgba(234, 88, 12, 0.1);
+    }
+    body.vp-planning-page .vp-guide-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #c2410c;
+        margin: 0 0 0.35rem;
+    }
+    body.vp-planning-page .vp-guide-card__text {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+    body.vp-planning-page .vp-guide-note {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(254, 252, 232, 0.95) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(250, 204, 21, 0.35);
+        border-left: 4px solid #ca8a04;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #713f12;
+    }
+    body.vp-planning-page .vp-guide-note strong {
+        color: #854d0e;
+    }
+    body.vp-planning-page .vp-guide-tip {
+        margin: 0.85rem 0 0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        background: linear-gradient(90deg, rgba(255, 247, 237, 0.85) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border: 1px solid rgba(251, 146, 60, 0.4);
+        border-left: 4px solid #ea580c;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #7c2d12;
+    }
+    body.vp-planning-page .vp-guide-tip strong {
+        color: #431407;
+    }
+    body.vp-planning-page .vp-guide-list-rich {
+        margin: 0.35rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    body.vp-planning-page .vp-guide-list-rich > li {
+        position: relative;
+        padding: 0.45rem 0 0.45rem 1.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #475569;
+    }
+    body.vp-planning-page .vp-guide-list-rich > li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        top: 0.42rem;
+        width: 1.05rem;
+        height: 1.05rem;
+        border-radius: 6px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(145deg, #fbbf24, #65a30d);
+        box-shadow: 0 2px 6px rgba(101, 163, 13, 0.25);
+    }
+    body.vp-planning-page .vp-guide-list-rich > li strong {
+        color: #9a3412;
+        font-weight: 700;
+    }
+    body.vp-planning-page .vp-guide-ol {
+        margin: 0.4rem 0 0;
+        padding: 0 0 0 1.15rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #475569;
+    }
+    body.vp-planning-page .vp-guide-ol li {
+        margin-bottom: 0.35rem;
+        padding-left: 0.25rem;
+    }
+    body.vp-planning-page .vp-guide-ol li::marker {
+        color: #ea580c;
+        font-weight: 700;
+    }
+    body.vp-planning-page .vp-guide-kbd {
+        display: inline-block;
+        padding: 0.1rem 0.38rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-family: ui-monospace, monospace;
+        color: #9a3412;
+        background: rgba(255, 247, 237, 0.98);
+        border: 1px solid rgba(251, 146, 60, 0.55);
+        border-radius: 6px;
+        vertical-align: baseline;
+    }
+    @media (min-width: 768px) {
+        body.vp-planning-page .sw-filter-dash.sw-services-guide .sw-filter-dash-inner.sw-services-guide__inner {
+            padding: 0.85rem 1.35rem 1rem 1.45rem;
+        }
+        body.vp-planning-page .sw-filter-dash.sw-services-guide .sw-services-guide__panel {
+            padding: 1.1rem 1.2rem 1.25rem;
+        }
+    }
+    /* Блок фильтров — как «Поиск и сортировка» на панели соцработников, в палитре планирования */
+    .vp-planning-page .sw-filter-dash.vp-filter-dash {
+        --vpf-accent: #ea580c;
+        --vpf-accent-soft: rgba(251, 146, 60, 0.22);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 251, 235, 0.88) 45%, rgba(236, 253, 245, 0.75) 100%);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        border-radius: 18px;
+        box-shadow:
+            0 8px 32px rgba(154, 52, 18, 0.09),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: box-shadow 0.25s ease;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash:hover {
+        box-shadow:
+            0 12px 36px rgba(234, 88, 12, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .vp-planning-page .sw-filter-dash-inner {
+        padding: 1.15rem 1.25rem 1.2rem;
+    }
+    .vp-planning-page .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0 0 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid var(--vpf-accent-soft);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+    .vp-planning-page .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__icon {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        color: #fff;
+        /* Та же палитра, что у иконки в шапке (.vp-plan-dash .sw-page-title__icon) */
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 38%, #a3e635 72%, #65a30d 100%);
+        box-shadow:
+            0 4px 16px rgba(234, 88, 12, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .vp-planning-page .sw-filter-dash-inner > .sw-page-title.sw-filter-panel-heading .sw-page-title__label {
+        font-size: clamp(1.05rem, 1.85vw, 1.32rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: none;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #7c2d12;
+    }
+    .vp-planning-page .sw-filter-dash .sw-filter-label {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #9a3412;
+        margin-bottom: 0.4rem;
+    }
+    .vp-planning-page .sw-select-wrap {
+        position: relative;
+    }
+    .vp-planning-page .sw-select-wrap select.sw-select-native {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 2.35rem;
+        cursor: pointer;
+    }
+    .vp-planning-page .sw-select-wrap select.sw-select-native::-ms-expand {
+        display: none;
+    }
+    .vp-planning-page .sw-select-wrap .sw-select-chevron {
+        position: absolute;
+        right: 0.72rem;
+        top: 50%;
+        line-height: 1;
+        font-size: 0.95rem;
+        color: #ea580c;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.92);
+        transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .vp-planning-page .sw-select-wrap:hover .sw-select-chevron {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+        color: #c2410c;
+    }
+    .vp-planning-page .sw-select-wrap:focus-within .sw-select-chevron {
+        opacity: 1;
+        color: #c2410c;
+        transform: translateY(-50%) scale(1);
+    }
+    .vp-planning-page .sw-filter-dash .form-select.sw-status-select {
+        border-radius: 12px;
+        border: 1px solid rgba(251, 146, 60, 0.28);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #431407;
+        background: rgba(255, 255, 255, 0.94);
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(154, 52, 18, 0.06);
+    }
+    .vp-planning-page .sw-filter-dash .form-select.sw-status-select:focus {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2);
+        background: #fff;
+    }
+    /* Кнопки «Применить» / «Сбросить» — как на панели «Инвентаризация» (.sw-inv-filter-*) */
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .vp-filter-actions-col {
+        margin-top: 0;
+    }
+    @media (min-width: 992px) {
+        .vp-planning-page .sw-filter-dash.vp-filter-dash .vp-filter-actions-col {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: none;
+            margin-left: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit {
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit.vp-filter-icon-btn,
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset.vp-filter-icon-btn {
+        width: 2.85rem;
+        min-width: 2.85rem;
+        height: 2.85rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit.vp-filter-icon-btn i,
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset.vp-filter-icon-btn i {
+        font-size: 1.18rem;
+        line-height: 1;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+        box-shadow:
+            0 8px 28px rgba(118, 75, 162, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash .btn.btn-primary.vp-filter-submit:active {
+        transform: translateY(0);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        border: 1.5px solid rgba(100, 116, 139, 0.42);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%);
+        color: #475569;
+        text-decoration: none;
+        box-shadow:
+            0 4px 16px rgba(15, 23, 42, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:hover {
+        color: #334155;
+        border-color: rgba(71, 85, 105, 0.55);
+        transform: translateY(-2px);
+        box-shadow:
+            0 10px 26px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:active {
+        transform: translateY(0);
+    }
+    .vp-planning-page .sw-filter-dash.vp-filter-dash a.vp-filter-reset:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(100, 116, 139, 0.35),
+            0 4px 16px rgba(15, 23, 42, 0.1);
+    }
+    .vp-tabs-modern.vp-tabs .nav-link {
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #5f6368;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        background: rgba(255, 255, 255, 0.65);
+        padding: 0.5rem 1rem;
+    }
+    .vp-tabs-modern.vp-tabs .nav-link:hover {
+        background: rgba(255, 255, 255, 0.92);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: var(--vp-violet);
+    }
+    .vp-tabs-modern.vp-tabs .nav-link.active {
+        border: none;
+        padding: 0.55rem 1.15rem;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        color: #fff !important;
+        border-color: transparent;
+        box-shadow:
+            0 4px 18px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .vp-tabs-modern.vp-tabs .nav-link.active:hover {
+        color: #fff !important;
+        filter: brightness(1.04);
+        box-shadow:
+            0 8px 24px rgba(118, 75, 162, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .vp-tabs-wrap {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    .vp-tabs-wrap .vp-tabs-modern {
+        justify-content: center;
+    }
+    body.vp-planning-page .card {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.82);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 28px rgba(26, 26, 46, 0.08);
+    }
+    .visit-stat-card {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 247, 237, 0.75) 40%, rgba(236, 253, 245, 0.6) 100%);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
         padding: 1rem 1.25rem;
         height: 100%;
+        box-shadow: 0 6px 22px rgba(45, 38, 82, 0.07);
     }
-    .visit-stat-card .val { font-size: 1.65rem; font-weight: 700; color: var(--primary); }
-    .visit-stat-card .lbl { font-size: 0.82rem; color: #5f6368; }
-
-    .vp-tabs .nav-link {
-        border-radius: 10px;
-        font-size: 0.88rem;
-        color: #5f6368;
-        border: 1px solid transparent;
+    .visit-stat-card .val {
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(108deg, #4a3f6f 0%, #667eea 50%, #764ba2 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
     }
-    .vp-tabs .nav-link.active {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        color: #fff;
-        border-color: transparent;
+    @supports not (background-clip: text) {
+        .visit-stat-card .val { color: #4a3f6f; background: none; }
     }
+    .visit-stat-card .lbl { font-size: 0.82rem; font-weight: 600; color: #5f6368; }
 
     .weekend-col, .cal-cell.weekend, .vp-cal-weekhdr.weekend {
         background: rgba(240, 240, 245, 0.95) !important;
     }
     .cal-cell.weekend .cal-day-num { color: #888; }
 
-    .visit-plan-table { font-size: 0.84rem; }
-    .visit-plan-table thead th {
+    /* Не используем overflow:hidden на карточке: иначе ломается position:sticky у ячеек
+       внутри .vp-sheet-wrap и клики по «Действиям» могут уходить не в ту ячейку. */
+    .vp-planning-page .vp-plan-table-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        margin-bottom: 0 !important;
+        overflow: visible;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.55);
+        box-shadow: 0 6px 22px rgba(45, 38, 82, 0.07);
+    }
+    .vp-planning-page .vp-plan-table-card > .card-body {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 0 1 auto;
+        padding: 0;
+    }
+    .vp-planning-page .vp-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        max-height: min(70vh, 42rem);
+        border-radius: 0 0 14px 14px;
+        flex: 0 1 auto;
+        min-height: 0;
+        overscroll-behavior-x: contain;
+    }
+    .vp-planning-page .vp-sheet {
+        width: max-content;
+        min-width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .vp-planning-page .vp-sheet thead th {
         position: sticky;
         top: 0;
         z-index: 2;
-        background: linear-gradient(180deg, #f8f9fb 0%, #f3f5f9 100%);
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+    }
+    .vp-planning-page .vp-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #3c4043;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:hover {
+        background: #f0edff !important;
+    }
+    .vp-planning-page .vp-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 14rem;
+        white-space: normal;
+    }
+    .vp-planning-page .vp-sheet .col-narrow {
+        white-space: nowrap;
+    }
+    .vp-planning-page .vp-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-sheet a:hover {
+        color: var(--accent, #764ba2);
+        text-decoration: underline;
+    }
+    .vp-planning-page .vp-sheet .sw-actions-cell a.sw-action-btn,
+    .vp-planning-page .vp-sheet .sw-actions-cell button.sw-action-btn {
+        color: #fff;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-sheet .sw-actions-cell a.sw-action-btn:hover,
+    .vp-planning-page .vp-sheet .sw-actions-cell button.sw-action-btn:hover {
+        color: #fff;
+        text-decoration: none;
+    }
+    .vp-planning-page .sw-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        border-width: 1px;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    }
+    .vp-planning-page .sw-action-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.12);
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--destructive {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fb7185 0%, #f43f5e 40%, #dc2626 88%, #b91c1c 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(185, 28, 28, 0.22),
+            0 8px 18px rgba(239, 68, 68, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .vp-planning-page a.sw-action-btn.sw-action-btn--destructive:visited {
+        color: #fff;
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--destructive:hover:not(:disabled) {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(185, 28, 28, 0.28),
+            0 12px 26px rgba(239, 68, 68, 0.38);
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--view {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #a5b4fc 0%, #6366f1 38%, #4f46e5 82%, #4338ca 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.32),
+            0 2px 6px rgba(67, 56, 202, 0.22),
+            0 8px 18px rgba(99, 102, 241, 0.3);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .vp-planning-page a.sw-action-btn.sw-action-btn--view:visited {
+        color: #fff;
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--view:hover:not(:disabled) {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(67, 56, 202, 0.28),
+            0 12px 26px rgba(99, 102, 241, 0.38);
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--edit {
+        border: none;
+        border-radius: 50%;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: #fff;
+        text-decoration: none;
+        background:
+            radial-gradient(ellipse 85% 75% at 30% 18%, rgba(255, 255, 255, 0.42) 0%, transparent 52%),
+            linear-gradient(155deg, #fde68a 0%, #f59e0b 40%, #d97706 85%, #b45309 100%);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 2px 6px rgba(180, 83, 9, 0.22),
+            0 8px 18px rgba(245, 158, 11, 0.28);
+        font-size: 1.06rem;
+        line-height: 1;
+        transition: transform 0.18s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.22s ease, filter 0.2s ease;
+    }
+    .vp-planning-page a.sw-action-btn.sw-action-btn--edit:visited {
+        color: #fff;
+    }
+    .vp-planning-page .sw-action-btn.sw-action-btn--edit:hover:not(:disabled) {
+        color: #fff;
+        filter: brightness(1.08);
+        transform: translateY(-2px) scale(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.38),
+            0 4px 10px rgba(180, 83, 9, 0.28),
+            0 12px 26px rgba(245, 158, 11, 0.36);
+    }
+    .vp-planning-page .sw-action-btn:disabled {
+        opacity: 0.38;
+        pointer-events: none;
+        transform: none !important;
+        filter: grayscale(0.2);
+    }
+    .vp-planning-page .sw-actions-cell {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+    }
+    /* Колонка «Действия»: sticky справа; z-index выше обычных ячеек тела таблицы */
+    .vp-planning-page .vp-sheet thead th.vp-actions-th {
+        position: sticky;
+        right: 0;
+        top: 0;
+        z-index: 25;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        box-shadow: -4px 0 10px rgba(0, 0, 0, 0.07);
+    }
+    .vp-planning-page .vp-sheet tbody td.vp-actions-cell {
+        position: sticky;
+        right: 0;
+        z-index: 15;
+        vertical-align: top;
+        box-shadow: -3px 0 8px rgba(0, 0, 0, 0.06);
+        isolation: isolate;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:nth-child(odd) td.vp-actions-cell {
+        background: #fafbfc;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:nth-child(even) td.vp-actions-cell {
+        background: #fff;
+    }
+    .vp-planning-page .vp-sheet tbody tr.data-row:hover td.vp-actions-cell {
+        background: #f0edff !important;
+    }
+    .vp-planning-page .vp-sheet td.vp-actions-cell .sw-actions-cell {
+        position: relative;
+        z-index: 1;
+        padding-top: 0.2rem;
+    }
+    .vp-planning-page .vp-sheet td.vp-actions-cell .sw-actions-cell a,
+    .vp-planning-page .vp-sheet td.vp-actions-cell .sw-actions-cell form,
+    .vp-planning-page .vp-sheet td.vp-actions-cell .sw-actions-cell button:not(:disabled) {
+        position: relative;
+        z-index: 2;
+    }
+    .vp-planning-page .vp-sheet td.vp-actions-cell a.vp-remove-from-panel-btn {
+        position: relative;
+        z-index: 4;
+    }
+    .vp-planning-page .vp-sheet td.vp-actions-cell a.vp-remove-from-panel-btn i {
+        pointer-events: none;
+    }
+    .vp-planning-page .vp-planned-cell {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        max-width: 12.5rem;
+    }
+    .vp-planning-page .vp-planned-cell .vp-planned-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.35rem;
+        margin-bottom: 0.2rem;
+    }
+    .vp-planning-page .vp-planned-cell .vp-planned-line:last-child {
+        margin-bottom: 0;
+    }
+    .vp-planning-page .vp-sheet .vp-planned-cell a.vp-planned-edit {
+        color: #64748b;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    .vp-planning-page .vp-sheet .vp-planned-cell a.vp-planned-edit:hover {
+        color: #764ba2;
+        text-decoration: none;
+    }
+    .vp-planning-page .empty-state-in-card {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #6b7280;
+    }
+    .vp-planning-page .empty-state-in-card .bi {
+        font-size: 2.25rem;
+        opacity: 0.45;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .vp-planning-page .vp-empty-badge {
+        display: inline-block;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #047857;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.28);
+        padding: 0.28rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.65rem;
     }
     .visit-day-grid {
         display: grid;
@@ -95,125 +1262,1192 @@
 
     .cal-view-switch .btn { font-size: 0.8rem; }
 
-    .tl-cell {
-        min-height: 56px;
-        border-radius: 8px;
-        padding: 4px;
-        font-size: 0.72rem;
-        border: 1px solid #e8eaed;
-        vertical-align: top;
+    /* ── Календарь: общий стиль с панелью планирования ── */
+    .vp-planning-page .vp-cal-root {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
-    .tl-cell.load-0 { background: #e8f8ef; border-color: #c3e6d0; }
-    .tl-cell.load-low { background: #f5f9ff; }
-    .tl-cell.load-mid { background: #fff6e5; }
-    .tl-cell.load-high { background: #ffe8e8; border-color: #f5c2c2; }
-    .tl-cell .tl-n { font-weight: 700; font-size: 0.85rem; }
-    .tl-legend {
+    .vp-planning-page .vp-cal-toolbar {
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.95) !important;
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 250, 235, 0.72) 45%, rgba(236, 253, 245, 0.55) 100%) !important;
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 8px 28px rgba(45, 38, 82, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        overflow: hidden;
+    }
+    .vp-planning-page .vp-cal-toolbar-inner {
+        padding: 1rem 1.25rem;
+    }
+    .vp-planning-page .vp-cal-toolbar__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .vp-planning-page .vp-cal-seg {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.4rem;
+        border-radius: 14px;
+        border: 1px solid rgba(102, 126, 234, 0.18);
+        background: rgba(255, 255, 255, 0.55);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    .vp-planning-page .vp-cal-seg .vp-cal-seg-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.48rem 1rem;
+        border-radius: 10px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #5f6368;
+        text-decoration: none;
+        border: 1px solid transparent;
+        background: transparent;
+        transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.15s ease;
+        white-space: nowrap;
+    }
+    .vp-planning-page .vp-cal-seg .vp-cal-seg-btn:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--vp-violet, #4338ca);
+        border-color: rgba(102, 126, 234, 0.22);
+    }
+    .vp-planning-page .vp-cal-seg .vp-cal-seg-btn.active {
+        color: #fff !important;
+        border-color: transparent;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow:
+            0 4px 16px rgba(102, 126, 234, 0.38),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .vp-planning-page .vp-cal-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 14px;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        background: rgba(255, 255, 255, 0.65);
+    }
+    .vp-planning-page .vp-cal-nav .btn {
+        border-radius: 10px;
+        width: 2.35rem;
+        height: 2.35rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(102, 126, 234, 0.28);
+        background: rgba(255, 255, 255, 0.9);
+        color: #4338ca;
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .vp-planning-page .vp-cal-nav .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.22);
+        color: #312e81;
+    }
+    .vp-planning-page .vp-cal-nav-title {
+        min-width: 0;
+        font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(108deg, #4a3f6f 0%, #667eea 45%, #764ba2 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding: 0 0.35rem;
+        text-align: center;
+    }
+    @supports not (background-clip: text) {
+        .vp-planning-page .vp-cal-nav-title { color: #4a3f6f; background: none; }
+    }
+    .vp-planning-page .vp-cal-main {
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.92) !important;
+        background: rgba(255, 255, 255, 0.78) !important;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 28px rgba(26, 26, 46, 0.07);
+    }
+    .vp-planning-page .vp-cal-main-body {
+        padding: 1.25rem 1.35rem;
+    }
+    .vp-planning-page .vp-cal-subhead {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        padding: 0.65rem 0.85rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.06) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.12);
+    }
+    .vp-planning-page .vp-cal-subhead .vp-cal-subhead-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-left: 0.5rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        color: #4338ca;
+    }
+    .vp-planning-page .vp-cal-day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    .vp-planning-page .vp-cal-day-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 247, 237, 0.5) 100%);
+        box-shadow: 0 4px 16px rgba(45, 38, 82, 0.05);
+        transition: box-shadow 0.2s ease, transform 0.15s ease;
+    }
+    .vp-planning-page .vp-cal-day-item:hover {
+        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.1);
+    }
+    .vp-planning-page .vp-cal-day-item__side a:not(.btn) {
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    .vp-planning-page .vp-cal-empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6b7280;
+        border-radius: 14px;
+        border: 1px dashed rgba(102, 126, 234, 0.22);
+        background: rgba(255, 255, 255, 0.5);
+    }
+    .vp-planning-page .vp-cal-empty i {
+        font-size: 2rem;
+        opacity: 0.35;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    .vp-planning-page .vp-cal-week-card {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 240, 0.65) 100%);
+        box-shadow: 0 6px 20px rgba(45, 38, 82, 0.06);
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .vp-planning-page .vp-cal-week-card__head {
+        padding: 0.65rem 0.85rem;
+        font-weight: 800;
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.14) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-bottom: 1px solid rgba(102, 126, 234, 0.12);
+        color: #3730a3;
+    }
+    .vp-planning-page .vp-cal-week-card.weekend .vp-cal-week-card__head {
+        background: linear-gradient(135deg, rgba(240, 240, 245, 0.95) 0%, rgba(230, 230, 240, 0.85) 100%);
+        color: #57534e;
+    }
+    .vp-planning-page .vp-cal-week-list {
+        list-style: none;
+        padding: 0.65rem 0.85rem 0.85rem;
+        margin: 0;
+        flex: 1;
+        font-size: 0.8rem;
+    }
+    .vp-planning-page .vp-cal-week-list li {
+        padding: 0.35rem 0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    }
+    .vp-planning-page .vp-cal-week-list li:last-child {
+        border-bottom: none;
+    }
+    .vp-planning-page .vp-cal-year-tile {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        padding: 1rem 1.05rem;
+        height: 100%;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.65) 50%, rgba(236, 253, 245, 0.45) 100%);
+        box-shadow: 0 6px 18px rgba(45, 38, 82, 0.06);
+        transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+    .vp-planning-page .vp-cal-year-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 26px rgba(102, 126, 234, 0.12);
+    }
+    .vp-planning-page .vp-cal-year-tile .vp-cal-year-tile__label {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+    }
+    .vp-planning-page .vp-cal-year-tile .vp-cal-year-tile__stat {
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: linear-gradient(108deg, #4a3f6f 0%, #667eea 55%, #764ba2 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    @supports not (background-clip: text) {
+        .vp-planning-page .vp-cal-year-tile .vp-cal-year-tile__stat { color: #667eea; background: none; }
+    }
+    .vp-planning-page .vp-cal-root .cal-month-grid {
+        gap: 6px;
+    }
+    .vp-planning-page .vp-cal-root .vp-cal-weekhdr-row {
+        margin-bottom: 0.35rem;
+    }
+    .vp-planning-page .vp-cal-root .vp-cal-weekhdr {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        padding: 0.5rem 0.25rem;
+        border-radius: 8px;
+        background: rgba(248, 250, 252, 0.9);
+    }
+    .vp-planning-page .vp-cal-root .vp-cal-weekhdr.weekend {
+        color: #94a3b8;
+        background: rgba(241, 245, 249, 0.95);
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        min-height: 76px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 12px;
+        padding: 6px 8px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 255, 0.85) 100%);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.04);
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link:hover {
+        transform: translateY(-1px);
+        border-color: rgba(102, 126, 234, 0.35);
+        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.12);
+        z-index: 1;
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link.muted {
+        opacity: 0.42;
+        background: rgba(248, 250, 252, 0.9);
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link .cal-day-num {
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link.weekend .cal-day-num {
+        color: #64748b;
+    }
+    .vp-planning-page .vp-cal-root a.cal-cell-link .cal-count {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 0.2rem 0.45rem;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(102, 126, 234, 0.12);
+        color: #4338ca;
+    }
+
+    /* ── Сегодня / Завтра: в стиле панели планирования ── */
+    .vp-planning-page .vp-list-root {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    .vp-planning-page .vp-list-card {
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.95) !important;
+        background: rgba(255, 255, 255, 0.78) !important;
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow:
+            0 8px 28px rgba(26, 26, 46, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .vp-planning-page .vp-list-card__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1rem;
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 100%);
+    }
+    .vp-planning-page .vp-list-card__head.weekend {
+        background: linear-gradient(135deg, rgba(241, 245, 249, 0.95) 0%, rgba(226, 232, 240, 0.75) 100%);
+        border-bottom-color: rgba(148, 163, 184, 0.25);
+    }
+    .vp-planning-page .vp-list-card__icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        flex-shrink: 0;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 42%, #a3e635 78%, #65a30d 100%);
+        box-shadow: 0 6px 18px rgba(234, 88, 12, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .vp-planning-page .vp-list-card__head.weekend .vp-list-card__icon {
+        background: linear-gradient(145deg, #94a3b8 0%, #64748b 100%);
+        box-shadow: 0 4px 14px rgba(71, 85, 105, 0.25);
+    }
+    .vp-planning-page .vp-list-card__title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        line-height: 1.2;
+    }
+    .vp-planning-page .vp-list-card__date {
+        font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(108deg, #4a3f6f 0%, #667eea 50%, #764ba2 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1.25;
+    }
+    @supports not (background-clip: text) {
+        .vp-planning-page .vp-list-card__date { color: #4a3f6f; background: none; }
+    }
+    .vp-planning-page .vp-list-card__chip {
+        margin-left: auto;
+        padding: 0.28rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(102, 126, 234, 0.22);
+        color: #4338ca;
+    }
+    .vp-planning-page .vp-list-card__head.weekend .vp-list-card__chip {
+        color: #57534e;
+        border-color: rgba(148, 163, 184, 0.4);
+    }
+    .vp-planning-page .vp-list-card__chip--work {
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.35);
+        background: rgba(236, 253, 245, 0.9);
+    }
+    .vp-planning-page .vp-list-card__body {
+        padding: 1rem 1.15rem 1.2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+    .vp-planning-page .vp-list-item {
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 247, 237, 0.45) 100%);
+        box-shadow: 0 4px 14px rgba(45, 38, 82, 0.05);
+        transition: box-shadow 0.2s ease;
+    }
+    .vp-planning-page .vp-list-item:hover {
+        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.1);
+    }
+    .vp-planning-page .vp-list-item__top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem 0.75rem;
+    }
+    .vp-planning-page .vp-list-item__top a.fw-semibold {
+        color: #3730a3;
+        text-decoration: none;
+        font-weight: 700;
+    }
+    .vp-planning-page .vp-list-item__top a.fw-semibold:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    .vp-planning-page .vp-list-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.22rem 0.5rem;
+        border-radius: 999px;
+    }
+    .vp-planning-page .vp-list-badge--living {
+        background: rgba(100, 116, 139, 0.12);
+        color: #475569;
+        border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+    .vp-planning-page .vp-list-badge--extra {
+        background: rgba(14, 165, 233, 0.12);
+        color: #0369a1;
+        border: 1px solid rgba(14, 165, 233, 0.25);
+    }
+    .vp-planning-page .vp-list-item__meta {
+        margin-top: 0.5rem;
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.45;
+    }
+    .vp-planning-page .vp-list-item__meta a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-list-item__meta a:hover {
+        text-decoration: underline;
+        color: #764ba2;
+    }
+    .vp-planning-page .vp-list-item__actions {
+        text-align: right;
+        min-width: 5rem;
+    }
+    .vp-planning-page .vp-list-item__actions a {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #667eea;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-list-item__actions a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    .vp-planning-page .vp-list-empty {
+        text-align: center;
+        padding: 2.25rem 1rem;
+        color: #64748b;
+        border-radius: 14px;
+        border: 1px dashed rgba(102, 126, 234, 0.22);
+        background: rgba(255, 255, 255, 0.45);
+    }
+    .vp-planning-page .vp-list-empty i {
+        font-size: 2.25rem;
+        opacity: 0.35;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    .vp-planning-page .vp-list-card--tomorrow .vp-list-card__head:not(.weekend) {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.14) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    .vp-planning-page .vp-list-card--tomorrow .vp-list-card__icon {
+        background: linear-gradient(145deg, #a5b4fc 0%, #6366f1 42%, #4338ca 100%);
+        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+    .vp-planning-page .vp-list-card--tomorrow .vp-list-card__head.weekend .vp-list-card__icon {
+        background: linear-gradient(145deg, #94a3b8 0%, #64748b 100%);
+        box-shadow: 0 4px 14px rgba(71, 85, 105, 0.25);
+    }
+
+    /* ── Таймлайн: карточка и таблица как в панели «Соц. работники» (.sw-table-card / .sw-sheet) ── */
+    .vp-planning-page .vp-tl-root {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .vp-planning-page .vp-tl-intro {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6b7280;
+        margin: 0;
+        padding: 0.65rem 0.9rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.06) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.12);
+        line-height: 1.5;
+    }
+    .vp-planning-page .vp-tl-intro strong {
+        color: #4338ca;
+        font-weight: 700;
+    }
+    .vp-planning-page .vp-tl-legend {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .vp-planning-page .vp-tl-legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 2px 8px rgba(45, 38, 82, 0.05);
+        color: #475569;
+    }
+    .vp-planning-page .vp-tl-legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .vp-planning-page .vp-tl-legend-item--0 .vp-tl-legend-swatch {
+        background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+        border-color: #6ee7b7;
+    }
+    .vp-planning-page .vp-tl-legend-item--mid .vp-tl-legend-swatch {
+        background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+        border-color: #fcd34d;
+    }
+    .vp-planning-page .vp-tl-legend-item--hi .vp-tl-legend-swatch {
+        background: linear-gradient(145deg, #fecaca 0%, #fca5a5 100%);
+        border-color: #f87171;
+    }
+    .vp-planning-page .vp-tl-root .sw-table-card {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 0.25rem;
+        margin-bottom: 0 !important;
+        overflow: visible;
+    }
+    .vp-planning-page .vp-tl-root .sw-table-card > .card-body {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+    }
+    /* Прокрутка только внутри обёртки — таблица не раздвигает страницу по горизонтали */
+    .vp-planning-page .vp-tl-root .sw-sheet-wrap {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0 0 14px 14px;
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: min(70vh, 42rem);
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overscroll-behavior: contain;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet {
+        width: max-content;
+        min-width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        border: 1px solid #cdd1d6;
+        white-space: nowrap;
+        font-size: 0.75rem;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        text-align: center;
+        color: #3c4043;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet tbody tr.data-row:nth-child(odd) {
+        background: #fafbfc;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet tbody tr.data-row:nth-child(even) {
+        background: #fff;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet tbody tr.data-row:hover {
+        background: #f0edff !important;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet .col-text-left {
+        text-align: left !important;
+        max-width: 14rem;
+        white-space: normal;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet a:hover {
+        color: var(--accent, #764ba2);
+        text-decoration: underline;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet thead th:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        text-align: left !important;
+        min-width: 11rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 4px 0 8px rgba(0, 0, 0, 0.06);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        vertical-align: top;
+        text-align: left !important;
+        box-shadow: 4px 0 8px rgba(0, 0, 0, 0.05);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody tr.data-row:nth-child(odd) td:first-child {
+        background: #fafbfc;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody tr.data-row:nth-child(even) td:first-child {
+        background: #fff;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody tr.data-row:hover td:first-child {
+        background: #f0edff !important;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell {
+        min-height: 3rem;
+        padding: 0.45rem 0.4rem;
+        font-size: 0.75rem;
+        border: 1px solid #e0e3e7;
+        vertical-align: top;
+        border-radius: 0;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell.load-0 {
+        background: linear-gradient(165deg, rgba(236, 253, 245, 0.95) 0%, rgba(209, 250, 229, 0.65) 100%);
+        border-color: rgba(110, 231, 183, 0.45);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell.load-low {
+        background: linear-gradient(165deg, rgba(238, 242, 255, 0.95) 0%, rgba(224, 231, 255, 0.55) 100%);
+        border-color: rgba(129, 140, 248, 0.28);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell.load-mid {
+        background: linear-gradient(165deg, rgba(255, 251, 235, 0.98) 0%, rgba(254, 243, 199, 0.75) 100%);
+        border-color: rgba(251, 191, 36, 0.35);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell.load-high {
+        background: linear-gradient(165deg, rgba(254, 242, 242, 0.98) 0%, rgba(254, 202, 202, 0.65) 100%);
+        border-color: rgba(248, 113, 113, 0.4);
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell .tl-n {
+        font-weight: 800;
+        font-size: 0.88rem;
+        color: #1e293b;
+        margin-bottom: 0.2rem;
+    }
+    .vp-planning-page .vp-tl-root .sw-sheet.vp-tl-sheet tbody .tl-cell.weekend-col {
+        background: rgba(241, 245, 249, 0.85) !important;
+        border-color: rgba(203, 213, 225, 0.8);
+    }
+    .vp-planning-page .vp-tl-entry-line {
+        max-width: 140px;
+        line-height: 1.35;
+    }
+    .vp-planning-page .vp-tl-entry-line a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .vp-planning-page .vp-tl-entry-line a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    .vp-planning-page .vp-tl-empty {
+        text-align: center;
+        padding: 2rem 1rem !important;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    /* Модальное окно «Напоминания о задачах» — в духе карточки формы «Запланировать визит» */
+    body.vp-planning-page #taskReminderModal .modal-content.vp-task-reminder-modal-content {
+        border: 1px solid rgba(251, 146, 60, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.96);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 24px 64px rgba(154, 52, 18, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-header {
+        padding: 1.1rem 1.35rem;
+        border-bottom: 1px solid rgba(251, 146, 60, 0.22);
+        background: linear-gradient(180deg, rgba(255, 247, 237, 0.55) 0%, rgba(255, 255, 255, 0.35) 100%);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-title {
         display: flex;
         align-items: center;
-        flex-wrap: wrap;
-        gap: 0.35rem 0.75rem;
+        gap: 0.55rem;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #9a3412;
     }
-    .tl-legend span { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 4px; vertical-align: middle; }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-title__icon {
+        flex-shrink: 0;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fb923c 0%, #f59e0b 38%, #a3e635 72%, #65a30d 100%);
+        box-shadow:
+            0 5px 18px rgba(234, 88, 12, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet a {
+        color: #4c51bf;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body {
+        padding: 1.35rem 1.5rem 1.5rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-lead {
+        font-size: 0.8125rem;
+        color: #78716c;
+        line-height: 1.5;
+        margin-bottom: 1rem !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #9a3412;
+        padding: 0.5rem 0.75rem;
+        margin: 0 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #f97316;
+        background: linear-gradient(90deg, rgba(255, 247, 237, 0.95) 0%, rgba(254, 243, 199, 0.35) 72%, transparent 100%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title i {
+        color: #ea580c;
+        font-size: 1.05rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-section-title + .vp-task-reminder-section-title {
+        margin-top: 1.25rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1.25rem;
+        border: 1px solid #e0e3e7;
+        border-radius: 14px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet {
+        width: 100%;
+        font-size: 0.8125rem;
+        border-collapse: collapse;
+        margin: 0;
+        --bs-table-bg: transparent;
+        --bs-table-accent-bg: transparent;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, #e8eaed 0%, #dfe3e8 100%);
+        color: #3c4043;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.55rem 0.45rem;
+        border: 1px solid #cdd1d6;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody td {
+        border: 1px solid #e0e3e7;
+        padding: 0.45rem 0.4rem;
+        vertical-align: middle;
+        color: #3c4043;
+        background: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:nth-child(odd) td {
+        background: #fafbfc;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:nth-child(even) td {
+        background: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet tbody tr:hover td {
+        background: #f0edff !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-sheet .col-desc {
+        text-align: left;
+        max-width: 14rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-empty {
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        border: 1px dashed rgba(251, 146, 60, 0.35);
+        background: rgba(255, 247, 237, 0.5);
+        color: #78716c !important;
+        margin-bottom: 1.25rem !important;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-label {
+        color: #57534e;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-control,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-select,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body textarea.form-control {
+        border-color: rgba(251, 146, 60, 0.4);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-control:focus,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .form-select:focus,
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body textarea.form-control:focus {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.25);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-primary.vp-assign-btn-save {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #7c83ff 0%, #667eea 38%, #764ba2 100%);
+        box-shadow: 0 4px 18px rgba(102, 126, 234, 0.4);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-primary.vp-assign-btn-save:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 6px 22px rgba(118, 75, 162, 0.38);
+        color: #fff;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-primary {
+        border-color: rgba(102, 126, 234, 0.45);
+        color: #4338ca;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-primary:hover {
+        background: rgba(245, 243, 255, 0.85);
+        border-color: #667eea;
+        color: #312e81;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-body .btn-outline-danger {
+        border-radius: 10px;
+        font-weight: 600;
+        border-color: rgba(220, 53, 69, 0.35);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer {
+        padding: 0.85rem 1.35rem 1.1rem;
+        border-top: 1px solid rgba(251, 146, 60, 0.22);
+        background: rgba(255, 247, 237, 0.35);
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer .vp-assign-btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.15rem;
+        border-color: rgba(251, 146, 60, 0.45);
+        color: #57534e;
+    }
+    body.vp-planning-page #taskReminderModal .vp-task-reminder-modal-footer .vp-assign-btn-cancel:hover {
+        background: rgba(255, 247, 237, 0.95);
+        border-color: #fb923c;
+        color: #9a3412;
+    }
+    body.vp-planning-page #vp-plan-table-anchor,
+    body.vp-planning-page #vp-planning-panel-anchor,
+    body.vp-planning-page #vp-calendar-panel-anchor {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
-<div class="page-header flex-wrap">
-    <h2><i class="bi bi-calendar-week"></i> Планирование визитов</h2>
-    <div class="d-flex gap-2 flex-wrap align-items-center">
-        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#visitPlanningPdfModal">
-            <i class="bi bi-file-pdf"></i> PDF
-        </button>
-        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#visitPlanningCsvModal">
-            <i class="bi bi-filetype-csv"></i> CSV
-        </button>
-        <button type="button" class="btn btn-outline-primary position-relative" data-bs-toggle="modal" data-bs-target="#taskReminderModal">
-            <i class="bi bi-bell"></i> Напоминание о задаче
-            {% if task_reminder_count %}
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ task_reminder_count }}</span>
+<div class="vp-plan-layout">
+<section class="vp-plan-dash" aria-label="Планирование визитов">
+    <div class="page-header vp-plan-dash-header flex-wrap">
+        <h1 class="sw-page-title mb-0">
+            <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-calendar-week"></i></span>
+            <span class="sw-page-title__label">Планирование визитов</span>
+        </h1>
+        <div class="sw-toolbar-group">
+            <button type="button" class="btn btn-outline-danger btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#visitPlanningPdfModal">
+                <i class="bi bi-file-pdf"></i> PDF
+            </button>
+            <button type="button" class="btn btn-outline-success btn-sm sw-toolbar-btn" data-bs-toggle="modal" data-bs-target="#visitPlanningCsvModal">
+                <i class="bi bi-filetype-csv"></i> CSV
+            </button>
+            <button type="button" class="btn btn-outline-primary position-relative sw-toolbar-btn{% if task_reminder_count %} sw-toolbar-btn--with-count{% endif %}" data-bs-toggle="modal" data-bs-target="#taskReminderModal">
+                <i class="bi bi-bell"></i> Напоминание о задаче
+                {% if task_reminder_count %}
+                    <span class="vp-task-count-badge badge rounded-pill bg-danger">{{ task_reminder_count }}</span>
+                {% endif %}
+            </button>
+            {% if assignable_recipients %}
+            <a href="{% url 'accounts:planned_visit_assign' %}?next={{ planning_back_quoted }}" class="btn btn-primary sw-toolbar-btn">
+                <i class="bi bi-calendar-plus"></i> Запланировать визит
+            </a>
+            {% else %}
+            <span class="btn btn-primary sw-toolbar-btn disabled" title="Все закреплённые подопечные уже учтены в панели планирования" style="pointer-events: none; opacity: 0.65;">
+                <i class="bi bi-calendar-plus"></i> Запланировать визит
+            </span>
             {% endif %}
-        </button>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#plannedVisitModal">
-            <i class="bi bi-calendar-plus"></i> Запланировать визит
-        </button>
+        </div>
     </div>
-</div>
+</section>
 
-<p class="text-muted small mb-3">
-    Кратность и дни посещений проверяются при сохранении карточки подопечного.
-    Суббота и воскресенье подсвечены как <span class="badge bg-light text-dark border">выходные</span>.
-    В таймлайне светло-зелёные ячейки — «окна» без визитов в этот день у работника.
-</p>
+<div class="sw-filter-dash mb-0 sw-services-guide">
+    <div class="sw-filter-dash-inner sw-services-guide__inner">
+        <div class="sw-services-guide__top">
+            <span class="sw-services-guide__icon-wrap" aria-hidden="true"><i class="bi bi-lightbulb-fill"></i></span>
+            <div class="min-w-0 flex-grow-1 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <span class="sw-services-guide__title">Справка по разделу «Планирование визитов»</span>
+                <button type="button" id="vpGuideToggle" class="sw-services-guide__toggle"
+                        data-bs-toggle="collapse" data-bs-target="#vpGuideCollapse"
+                        aria-expanded="false" aria-controls="vpGuideCollapse">
+                    Как пользоваться
+                    <i class="bi bi-chevron-down sw-services-guide__chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="collapse" id="vpGuideCollapse">
+            <div class="sw-services-guide__panel">
+                <div class="vp-guide-intro">
+                    <div class="vp-guide-intro__badge"><i class="bi bi-stars" aria-hidden="true"></i> Раздел «SocWorker»</div>
+                    <p class="vp-guide-intro__text">
+                        <strong>Планирование визитов</strong> — операционная «ситуационная комната» для подопечных, уже включённых в учёт: недельная сетка посещений, календарь, срез «сегодня / завтра», тепловая карта загрузки соцработников и список напоминаний.
+                        Визуальный стиль — тёплый оранжево-салатовый градиент и стеклянные карточки в духе остальных панелей приложения.
+                    </p>
+                </div>
 
-<form method="get" class="card mb-3">
-    <div class="card-body py-3">
-        <input type="hidden" name="tab" value="{{ tab }}">
-        <input type="hidden" name="cal" value="{{ cal_view }}">
-        <input type="hidden" name="ref" value="{{ ref_iso }}">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label small">Соц. работник</label>
-                <select name="worker" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for w in all_workers %}
-                        <option value="{{ w.pk }}" {% if filter_worker == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small">Подопечный</label>
-                <select name="recipient" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for r in recipient_options %}
-                        <option value="{{ r.pk }}" {% if filter_recipient == r.pk|stringformat:"s" %}selected{% endif %}>{{ r.get_full_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Категория</label>
-                <select name="living" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for val, lbl in living_choices %}
-                        <option value="{{ val }}" {% if filter_living == val %}selected{% endif %}>{{ lbl }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Статус работника</label>
-                <select name="wstatus" class="form-select form-select-sm">
-                    <option value="">Все</option>
-                    {% for val, lbl in worker_status_choices %}
-                        <option value="{{ val }}" {% if filter_wstatus == val %}selected{% endif %}>{{ lbl }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-funnel"></i> Применить</button>
+                <section class="vp-guide-section" aria-labelledby="vp-guide-onboard">
+                    <h3 id="vp-guide-onboard" class="vp-guide-h"><i class="bi bi-person-check" aria-hidden="true"></i>Кто попадает в панель</h3>
+                    <p class="vp-guide-p">
+                        В основной таблице отображаются только получатели услуг с закреплённым социальным работником и отметкой учёта в панели планирования.
+                        Новый подопечный появляется здесь после страницы <strong>«Запланировать визит»</strong> (по аналогии с медосмотром: сотрудник попадает в журнал после «Назначить медосмотр»).
+                    </p>
+                    <div class="vp-guide-tip">
+                        <strong>Совет:</strong> если кнопка «Запланировать визит» неактивна, все закреплённые подопечные уже учтены в панели — проверьте фильтры или список получателей услуг.
+                    </div>
+                </section>
+
+                <section class="vp-guide-section" aria-labelledby="vp-guide-filters">
+                    <h3 id="vp-guide-filters" class="vp-guide-h"><i class="bi bi-funnel" aria-hidden="true"></i>Фильтры отображения</h3>
+                    <p class="vp-guide-p">
+                        Блок под справкой задаёт отбор строк для таблицы и связанных блоков (календарь, «Сегодня / Завтра», таймлайн учитывают те же условия).
+                    </p>
+                    <ol class="vp-guide-ol">
+                        <li><strong>Соц. работник</strong>, <strong>Подопечный</strong>, <strong>Категория</strong> проживания и <strong>Статус работника</strong> — сужают выборку.</li>
+                        <li><strong>Сортировка</strong> — № (возрастание / убывание) или фамилия А–Я; применяется после <span class="vp-guide-kbd">Применить</span>.</li>
+                        <li>Параметры сохраняются в <strong>адресе страницы</strong> (можно закладкой вернуться к тому же срезу).</li>
+                    </ol>
+                </section>
+
+                <section class="vp-guide-section" aria-labelledby="vp-guide-blocks">
+                    <h3 id="vp-guide-blocks" class="vp-guide-h"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>Основные блоки интерфейса</h3>
+                    <div class="vp-guide-grid" role="list">
+                        <div class="vp-guide-card" role="listitem">
+                            <p class="vp-guide-card__title">Таблица</p>
+                            <p class="vp-guide-card__text">Кратность визитов в неделю, дни посещений и семь колонок дней недели. Активные дни подсвечены; суббота и воскресенье — как <span class="badge bg-light text-dark border">выходные</span>. Колонка согласованности показывает, совпадает ли кратность с набором дней.</p>
+                        </div>
+                        <div class="vp-guide-card" role="listitem">
+                            <p class="vp-guide-card__title">Календарь</p>
+                            <p class="vp-guide-card__text">Режимы «День / Неделя / Месяц / Год» — визиты и внеплановые записи на выбранную дату или период. Стрелки листают интервал.</p>
+                        </div>
+                        <div class="vp-guide-card" role="listitem">
+                            <p class="vp-guide-card__title">Сегодня / Завтра</p>
+                            <p class="vp-guide-card__text">Два компактных списка ближайших визитов с учётом текущих фильтров.</p>
+                        </div>
+                        <div class="vp-guide-card" role="listitem">
+                            <p class="vp-guide-card__title">Таймлайн</p>
+                            <p class="vp-guide-card__text">Неделя с понедельника: число визитов по каждому работнику в день. Спокойные (светло-зелёные) ячейки — меньше нагрузки; теплее оттенок — выше относительно других дней колонки.</p>
+                        </div>
+                        <div class="vp-guide-card" role="listitem">
+                            <p class="vp-guide-card__title">Напоминания</p>
+                            <p class="vp-guide-card__text">Ручные задачи с датой выполнения. Дополняют календарь без замены учёта плановых визитов.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="vp-guide-section" aria-labelledby="vp-guide-actions">
+                    <h3 id="vp-guide-actions" class="vp-guide-h"><i class="bi bi-calendar-plus" aria-hidden="true"></i>Запись и правки визитов</h3>
+                    <ul class="vp-guide-list-rich">
+                        <li><strong>Запланировать визит</strong> — отдельная страница: включает подопечного в панель и задаёт первую дату.</li>
+                        <li><strong>Карандаш в строке</strong> и форма создания визита — дальнейшее редактирование расписания.</li>
+                    </ul>
+                </section>
+
+                <section class="vp-guide-section" aria-labelledby="vp-guide-export">
+                    <h3 id="vp-guide-export" class="vp-guide-h"><i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>PDF и CSV</h3>
+                    <p class="vp-guide-p">
+                        В отчёт вместе с выгрузкой передаются те же поля фильтра и сортировки, что видны на экране.
+                        Режим «весь список» включает всех подопечных панели, проходящих текущий отбор; «только отмеченные» — строки с галочкой на вкладке таблицы.
+                    </p>
+                    <div class="vp-guide-note">
+                        <strong>Важно:</strong> перед выгрузкой при необходимости откройте вкладку «Таблица» и отметьте строки — галочки других вкладок в файл не попадают.
+                    </div>
+                </section>
             </div>
         </div>
     </div>
-</form>
+</div>
 
-<ul class="nav nav-pills vp-tabs gap-2 flex-wrap mb-3">
+<div class="sw-filter-dash mb-3 vp-filter-dash">
+    <div class="sw-filter-dash-inner">
+        <h2 class="sw-page-title sw-filter-panel-heading mb-0">
+            <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-funnel"></i></span>
+            <span class="sw-page-title__label">Фильтры отображения</span>
+        </h2>
+        <form method="get" class="row g-3 align-items-end">
+            <input type="hidden" name="tab" value="{{ tab }}">
+            <input type="hidden" name="cal" value="{{ cal_view }}">
+            <input type="hidden" name="ref" value="{{ ref_iso }}">
+            <div class="col-12 col-lg-2">
+                <label for="vp-filter-worker" class="sw-filter-label d-block">Соц. работник</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-worker" name="worker">
+                        <option value="">Все</option>
+                        {% for w in all_workers %}
+                            <option value="{{ w.pk }}" {% if filter_worker == w.pk|stringformat:"s" %}selected{% endif %}>{{ w.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="vp-filter-recipient" class="sw-filter-label d-block">Подопечный</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-recipient" name="recipient">
+                        <option value="">Все</option>
+                        {% for r in recipient_options %}
+                            <option value="{{ r.pk }}" {% if filter_recipient == r.pk|stringformat:"s" %}selected{% endif %}>{{ r.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="vp-filter-living" class="sw-filter-label d-block">Категория</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-living" name="living">
+                        <option value="">Все</option>
+                        {% for val, lbl in living_choices %}
+                            <option value="{{ val }}" {% if filter_living == val %}selected{% endif %}>{{ lbl }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="vp-filter-wstatus" class="sw-filter-label d-block">Статус работника</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-wstatus" name="wstatus">
+                        <option value="">Все</option>
+                        {% for val, lbl in worker_status_choices %}
+                            <option value="{{ val }}" {% if filter_wstatus == val %}selected{% endif %}>{{ lbl }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="vp-filter-sort" class="sw-filter-label d-block">Сортировка</label>
+                <div class="sw-select-wrap">
+                    <select class="form-select sw-status-select sw-select-native" id="vp-filter-sort" name="sort" title="Сортировка применится после нажатия «Применить»">
+                        <option value="tab_asc" {% if sort_order == 'tab_asc' %}selected{% endif %}>№ (с начала: 1, 2, 3…)</option>
+                        <option value="tab_desc" {% if sort_order == 'tab_desc' %}selected{% endif %}>№ (с конца: …3, 2, 1)</option>
+                        <option value="surname" {% if sort_order == 'surname' %}selected{% endif %}>Фамилия (А–Я)</option>
+                    </select>
+                    <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+                </div>
+            </div>
+            <div class="col-12 col-lg vp-filter-actions-col">
+                <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center vp-filter-actions" id="vp-filter-actions">
+                    <button type="submit" class="btn btn-primary vp-filter-submit vp-filter-icon-btn" aria-label="Применить фильтры и сортировку">
+                        <i class="bi bi-funnel" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'accounts:visit_planning' %}" class="vp-filter-reset vp-filter-icon-btn" id="vp-filter-reset-link" aria-label="Сбросить фильтры к значениям по умолчанию" title="Сбросить соц. работника, подопечного, категорию, статус и сортировку">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="vp-tabs-wrap" id="vp-planning-panel-anchor">
+<ul class="nav nav-pills vp-tabs vp-tabs-modern gap-2 flex-wrap justify-content-center">
     <li class="nav-item">
         <a class="nav-link {% if tab == 'table' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=table&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таблица</a>
+           href="{% url 'accounts:visit_planning' %}?tab=table&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Таблица</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'calendar' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Календарь</a>
+           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Календарь</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'list' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=list&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Сегодня / завтра</a>
+           href="{% url 'accounts:visit_planning' %}?tab=list&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Сегодня / завтра</a>
     </li>
     <li class="nav-item">
         <a class="nav-link {% if tab == 'timeline' %}active{% endif %}"
-           href="{% url 'accounts:visit_planning' %}?tab=timeline&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Таймлайн</a>
+           href="{% url 'accounts:visit_planning' %}?tab=timeline&cal={{ cal_view }}&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Таймлайн</a>
     </li>
 </ul>
+</div>
 
 {% if tab == 'table' %}
+<div class="vp-plan-table-root">
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="visit-stat-card">
@@ -229,43 +2463,67 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
+<div class="card vp-plan-table-card" id="vp-plan-table-anchor">
+    <div class="card-body">
         {% if rows %}
-            <div class="table-responsive">
-            <table class="table table-hover mb-0 visit-plan-table">
+            <div class="vp-sheet-wrap">
+            <table class="vp-sheet mb-0">
                 <thead>
                     <tr>
                         {% if tab == 'table' %}
-                        <th class="text-center" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
+                        <th class="col-narrow" style="width:2.5rem;" title="Для выгрузки в PDF и CSV">
                             <input type="checkbox" class="form-check-input" id="vpSelectAll" aria-label="Отметить всех на странице">
                         </th>
                         {% endif %}
-                        <th>Подопечный</th>
-                        <th>Соц. работник</th>
+                        <th class="col-narrow">№</th>
+                        <th class="col-text-left">Подопечный</th>
+                        <th class="col-text-left">Соц. работник</th>
                         <th>Кратность</th>
-                        <th>Дни посещений</th>
-                        <th class="text-center">Виз./нед.</th>
+                        <th class="col-text-left">Дни посещений</th>
+                        <th>Виз./нед.</th>
+                        <th class="col-text-left">Запланированные визиты</th>
                         <th>Согласованность</th>
                         {% for d in weekday_labels %}
-                            <th class="text-center {% if forloop.counter >= 6 %}weekend-col{% endif %}">{{ d }}</th>
+                            <th class="{% if forloop.counter >= 6 %}weekend-col{% endif %}">{{ d }}</th>
                         {% endfor %}
+                        <th class="text-center col-narrow vp-actions-th">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in rows %}
-                        <tr>
+                        <tr class="data-row">
                             {% if tab == 'table' %}
-                            <td class="text-center align-middle">
+                            <td class="col-narrow align-middle">
                                 <input type="checkbox" class="form-check-input vp-recipient-select" name="recipient_pick" value="{{ row.recipient.pk }}"
                                        aria-label="Выбрать {{ row.recipient.get_full_name }}">
                             </td>
                             {% endif %}
-                            <td><a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a></td>
-                            <td><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
+                            <td class="col-narrow"><span class="fw-semibold">{{ row.recipient.employee_id }}</span></td>
+                            <td class="col-text-left"><a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a></td>
+                            <td class="col-text-left"><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
                             <td>{{ row.schedule_label }}</td>
-                            <td class="text-break">{{ row.visit_days_text }}</td>
-                            <td class="text-center"><span class="visits-badge">{{ row.visits_per_week }}</span></td>
+                            <td class="col-text-left">{{ row.visit_days_text }}</td>
+                            <td><span class="visits-badge">{{ row.visits_per_week }}</span></td>
+                            <td class="col-text-left align-top">
+                                <div class="vp-planned-cell text-muted">
+                                    {% if row.planned_visits_upcoming %}
+                                        {% for up_pv in row.planned_visits_upcoming %}
+                                            <div class="vp-planned-line">
+                                                <span class="text-dark">{{ up_pv.visit_date|date:"d.m.Y" }}{% if up_pv.visit_time %} <span class="text-muted">{{ up_pv.visit_time|time:"H:i" }}</span>{% endif %}</span>
+                                                <a href="{% url 'accounts:planned_visit_edit' up_pv.pk %}?next={{ planning_next_quoted }}" class="vp-planned-edit small" title="Изменить визит"><i class="bi bi-pencil-square"></i></a>
+                                            </div>
+                                        {% endfor %}
+                                    {% elif row.planned_visit_primary %}
+                                        <div class="vp-planned-line">
+                                            <span class="text-dark">{{ row.planned_visit_primary.visit_date|date:"d.m.Y" }}{% if row.planned_visit_primary.visit_time %} <span class="text-muted">{{ row.planned_visit_primary.visit_time|time:"H:i" }}</span>{% endif %}</span>
+                                            <span class="badge rounded-pill bg-light text-secondary border ms-1" title="Нет визитов с сегодняшнего дня; показана последняя запись">прошлый</span>
+                                            <a href="{% url 'accounts:planned_visit_edit' row.planned_visit_primary.pk %}?next={{ planning_next_quoted }}" class="vp-planned-edit small" title="Изменить визит"><i class="bi bi-pencil-square"></i></a>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </div>
+                            </td>
                             <td>
                                 {% if row.schedule_ok %}
                                     <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
@@ -274,91 +2532,128 @@
                                 {% endif %}
                             </td>
                             {% for on in row.day_flags %}
-                                <td class="text-center p-1 {% if forloop.counter >= 6 %}weekend-col{% endif %}">
+                                <td class="p-1 {% if forloop.counter >= 6 %}weekend-col{% endif %}">
                                     <div class="visit-day-cell{% if on %} on{% endif %}"></div>
                                 </td>
                             {% endfor %}
+                            <td class="align-top vp-actions-cell">
+                                <div class="sw-actions-cell">
+                                    <a href="{% url 'accounts:recipient_detail' row.recipient.pk %}" class="btn btn-sm sw-action-btn sw-action-btn--view" title="Карточка подопечного">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Смотреть</span>
+                                    </a>
+                                    {% if row.planned_visit_primary %}
+                                            <a href="{% url 'accounts:planned_visit_edit' row.planned_visit_primary.pk %}?next={{ planning_next_quoted }}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Изменить ближайший запланированный визит">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Редактировать</span>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'accounts:planned_visit_create' %}?recipient={{ row.recipient.pk }}&next={{ planning_next_quoted }}" class="btn btn-sm sw-action-btn sw-action-btn--edit" title="Запланировать визит (нет ближайших дат в списке)">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Запланировать визит</span>
+                                            </a>
+                                        {% endif %}
+                                    <a href="{% url 'accounts:visit_planning_remove_from_panel' row.recipient.pk %}?next={{ planning_back_quoted }}" class="btn btn-sm sw-action-btn sw-action-btn--destructive vp-remove-from-panel-btn" title="Убрать подопечного из панели планирования">
+                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Убрать подопечного из панели планирования</span>
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
             </div>
         {% else %}
-            <div class="empty-state">
-                <i class="bi bi-calendar-x"></i>
-                <p>Нет данных по выбранным фильтрам</p>
+            <div class="empty-state-in-card" role="status" aria-live="polite">
+                <i class="bi bi-inboxes" aria-hidden="true"></i>
+                <span class="vp-empty-badge">Нет подопечных в панели по заданным условиям</span>
+                <p class="mb-0">{% if has_active_filters %}Измените отбор в блоке «Фильтры отображения» и снова нажмите «Применить».{% else %}Чтобы добавить подопечного с закреплённым работником, нажмите «Запланировать визит».{% endif %}</p>
             </div>
         {% endif %}
     </div>
 </div>
+</div>
 {% endif %}
 
 {% if tab == 'calendar' %}
-<div class="card mb-3">
-    <div class="card-body py-2">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 cal-view-switch">
-            <div class="btn-group" role="group">
-                <a class="btn btn-outline-secondary {% if cal_view == 'day' %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">День</a>
-                <a class="btn btn-outline-secondary {% if cal_view == 'week' %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=week&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Неделя</a>
-                <a class="btn btn-outline-secondary {% if cal_view == 'month' %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=month&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Месяц</a>
-                <a class="btn btn-outline-secondary {% if cal_view == 'year' %}active{% endif %}"
-                   href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=year&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}">Год</a>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ prev_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}"><i class="bi bi-chevron-left"></i></a>
-                <strong class="px-2">{{ cal_title }}</strong>
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ next_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}"><i class="bi bi-chevron-right"></i></a>
+<div class="vp-cal-root" id="vp-calendar-panel-anchor">
+    <div class="card vp-cal-toolbar mb-0">
+        <div class="vp-cal-toolbar-inner">
+            <div class="vp-cal-toolbar__row">
+                <div class="vp-cal-seg" role="group" aria-label="Масштаб календаря">
+                    <a class="vp-cal-seg-btn {% if cal_view == 'day' %}active{% endif %}"
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">День</a>
+                    <a class="vp-cal-seg-btn {% if cal_view == 'week' %}active{% endif %}"
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=week&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Неделя</a>
+                    <a class="vp-cal-seg-btn {% if cal_view == 'month' %}active{% endif %}"
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=month&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Месяц</a>
+                    <a class="vp-cal-seg-btn {% if cal_view == 'year' %}active{% endif %}"
+                       href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=year&ref={{ ref_iso }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">Год</a>
+                </div>
+                <div class="vp-cal-nav">
+                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ prev_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}" title="Предыдущий период" aria-label="Назад"><i class="bi bi-chevron-left"></i></a>
+                    <span class="vp-cal-nav-title">{{ cal_title }}</span>
+                    <a class="btn btn-sm" href="{% url 'accounts:visit_planning' %}?tab=calendar&cal={{ cal_view }}&ref={{ next_ref.isoformat }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}" title="Следующий период" aria-label="Вперёд"><i class="bi bi-chevron-right"></i></a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
+    <div class="card vp-cal-main border-0">
+        <div class="vp-cal-main-body">
         {% if cal_view == 'day' %}
-            <p class="text-muted small mb-2">Визиты в выбранный день ({{ cal_title }}). Выходной: {% if ref_is_weekend %}да{% else %}нет{% endif %}</p>
-            <ul class="list-group list-group-flush">
+            <p class="vp-cal-subhead mb-3">
+                <i class="bi bi-calendar-day text-primary"></i>
+                Визиты в выбранный день
+                <span class="vp-cal-subhead-badge">{% if ref_is_weekend %}Выходной{% else %}Будний{% endif %}</span>
+            </p>
+            <div class="vp-cal-day-list">
                 {% for entry in day_entries %}
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div>
-                            <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
-                            <span class="text-muted small">— {{ entry.recipient.get_visit_frequency_display }}</span>
-                            {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                    <div class="vp-cal-day-item">
+                        <div class="vp-cal-day-item__main min-w-0">
+                            <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}" class="fw-semibold">{{ entry.recipient.get_full_name }}</a>
+                            <span class="text-muted small ms-1">— {{ entry.recipient.get_visit_frequency_display }}</span>
+                            {% if not entry.from_schedule %}<span class="badge rounded-pill bg-info text-dark ms-1" style="font-size:0.65rem;">вне графика</span>{% endif %}
                             {% if entry.planned_visit and entry.planned_visit.visit_time %}
-                                <span class="text-muted small ms-1">{{ entry.planned_visit.visit_time|time:"H:i" }}</span>
+                                <span class="badge rounded-pill ms-1" style="font-size:0.65rem;background:rgba(102,126,234,0.15);color:#4338ca;">{{ entry.planned_visit.visit_time|time:"H:i" }}</span>
                             {% endif %}
                         </div>
-                        <div class="text-end small">
+                        <div class="vp-cal-day-item__side text-end">
                             {% if entry.worker %}<a href="{% url 'accounts:social_worker_detail' entry.worker.pk %}">{{ entry.worker.get_full_name }}</a>{% endif %}
                             {% if entry.planned_visit %}
-                                <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="d-block mt-1">Изменить / удалить</a>
+                                <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="d-block mt-1 small">Изменить / удалить</a>
                             {% endif %}
                         </div>
-                    </li>
+                    </div>
                 {% empty %}
-                    <li class="list-group-item text-muted">Нет визитов на этот день</li>
+                    <div class="vp-cal-empty">
+                        <i class="bi bi-calendar-x"></i>
+                        На этот день визитов нет
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% elif cal_view == 'week' %}
-            <div class="row g-2">
+            <p class="vp-cal-subhead mb-3">
+                <i class="bi bi-calendar-week text-primary"></i>
+                Расписание по дням недели
+            </p>
+            <div class="row g-3">
                 {% for wd in week_days %}
                     <div class="col-md-6 col-lg">
-                        <div class="border rounded p-2 h-100 {% if wd.is_weekend %}weekend-col{% endif %}">
-                            <div class="fw-bold">{{ wd.wd_label }} {{ wd.date|date:"d.m" }}</div>
-                            <ul class="list-unstyled small mb-0 mt-2">
+                        <div class="vp-cal-week-card {% if wd.is_weekend %}weekend{% endif %}">
+                            <div class="vp-cal-week-card__head">{{ wd.wd_label }} · {{ wd.date|date:"d.m.Y" }}</div>
+                            <ul class="vp-cal-week-list">
                                 {% for entry in wd.entries %}
-                                    <li class="mb-1">
+                                    <li>
                                         <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
-                                        {% if not entry.from_schedule %}<span class="badge bg-info text-dark" style="font-size:0.65rem;">+</span>{% endif %}
+                                        {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1" style="font-size:0.6rem;">+</span>{% endif %}
                                         {% if entry.planned_visit %}
-                                            <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted" title="Изменить"><i class="bi bi-pencil-square"></i></a>
+                                            <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted ms-1" title="Изменить"><i class="bi bi-pencil-square"></i></a>
                                         {% endif %}
                                     </li>
                                 {% empty %}
-                                    <li class="text-muted">—</li>
+                                    <li class="text-muted py-1">Нет визитов</li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -366,94 +2661,138 @@
                 {% endfor %}
             </div>
         {% elif cal_view == 'year' %}
-            <div class="row g-2">
+            <p class="vp-cal-subhead mb-3">
+                <i class="bi bi-calendar3 text-primary"></i>
+                Сводка по месяцам (визито-дней в календаре)
+            </p>
+            <div class="row g-3">
                 {% for ym in year_months %}
                     <div class="col-6 col-md-4 col-lg-3">
-                        <div class="border rounded p-2 h-100">
-                            <div class="fw-semibold">{{ ym.label }}</div>
-                            <div class="text-primary small">Визито-дней: {{ ym.total }}</div>
+                        <div class="vp-cal-year-tile h-100">
+                            <div class="vp-cal-year-tile__label">{{ ym.label }}</div>
+                            <div class="vp-cal-year-tile__stat">Визито-дней: {{ ym.total }}</div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <div class="cal-month-grid mb-1">
+            <p class="vp-cal-subhead mb-2">
+                <i class="bi bi-grid-3x3-gap text-primary"></i>
+                {{ cal_title }} — нажмите на день, чтобы открыть его в режиме «День»
+            </p>
+            <div class="cal-month-grid vp-cal-weekhdr-row mb-1">
                 {% for d in weekday_labels %}
-                    <div class="text-center fw-semibold small py-1 vp-cal-weekhdr {% if forloop.counter >= 6 %}weekend{% endif %}">{{ d }}</div>
+                    <div class="text-center vp-cal-weekhdr {% if forloop.counter >= 6 %}weekend{% endif %}">{{ d }}</div>
                 {% endfor %}
             </div>
             {% for week in month_weeks %}
                 <div class="cal-month-grid mb-2">
                     {% for cell in week %}
-                        <div class="cal-cell {% if not cell.in_month %}muted{% endif %} {% if cell.is_weekend %}weekend{% endif %}">
+                        <a class="cal-cell cal-cell-link {% if not cell.in_month %}muted{% endif %} {% if cell.is_weekend %}weekend{% endif %}"
+                           href="{% url 'accounts:visit_planning' %}?tab=calendar&cal=day&ref={{ cell.date|date:'Y-m-d' }}&worker={{ filter_worker }}&recipient={{ filter_recipient }}&living={{ filter_living }}&wstatus={{ filter_wstatus }}&sort={{ sort_order }}">
                             <div class="cal-day-num">{{ cell.date.day }}</div>
                             {% if cell.count %}
                                 <div class="cal-count">{{ cell.count }} виз.</div>
                             {% endif %}
-                        </div>
+                        </a>
                     {% endfor %}
                 </div>
             {% endfor %}
         {% endif %}
+        </div>
     </div>
 </div>
 {% endif %}
 
 {% if tab == 'list' %}
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header fw-semibold {% if today_is_weekend %}weekend-col{% endif %}">Сегодня — {{ today_wd }}, {{ today|date:"d.m.Y" }}</div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
+<div class="vp-list-root">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card vp-list-card border-0 h-100">
+                <div class="vp-list-card__head {% if today_is_weekend %}weekend{% endif %}">
+                    <span class="vp-list-card__icon" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="vp-list-card__title">Сегодня</div>
+                        <div class="vp-list-card__date">{{ today_wd }}, {{ today|date:"d.m.Y" }}</div>
+                    </div>
+                    {% if today_is_weekend %}
+                        <span class="vp-list-card__chip">Выходной</span>
+                    {% else %}
+                        <span class="vp-list-card__chip vp-list-card__chip--work">Будний</span>
+                    {% endif %}
+                </div>
+                <div class="vp-list-card__body">
                     {% for entry in today_entries %}
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
-                                    {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                        <div class="vp-list-item">
+                            <div class="vp-list-item__top">
+                                <div class="min-w-0">
+                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}" class="fw-semibold">{{ entry.recipient.get_full_name }}</a>
+                                    {% if not entry.from_schedule %}<span class="badge vp-list-badge vp-list-badge--extra ms-1">вне графика</span>{% endif %}
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-secondary">{{ entry.recipient.get_living_status_display }}</span>
+                                <div class="vp-list-item__actions">
+                                    <span class="badge vp-list-badge vp-list-badge--living">{{ entry.recipient.get_living_status_display }}</span>
                                     {% if entry.planned_visit %}
-                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="small d-block mt-1">Изменить</a>
+                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="d-block mt-1">Изменить</a>
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="small text-muted">{% if entry.worker %}{{ entry.worker.get_full_name }}{% else %}—{% endif %} · {{ entry.recipient.get_visit_frequency_display }} · {{ entry.recipient.visit_days|default:"—" }}</div>
-                        </li>
+                            <div class="vp-list-item__meta">
+                                {% if entry.worker %}<a href="{% url 'accounts:social_worker_detail' entry.worker.pk %}">{{ entry.worker.get_full_name }}</a>{% else %}<span class="text-muted">Работник не указан</span>{% endif %}
+                                <span class="text-muted"> · </span>{{ entry.recipient.get_visit_frequency_display }}
+                                <span class="text-muted"> · </span>{{ entry.recipient.visit_days|default:"—" }}
+                            </div>
+                        </div>
                     {% empty %}
-                        <li class="list-group-item text-muted">Нет визитов на сегодня</li>
+                        <div class="vp-list-empty">
+                            <i class="bi bi-calendar-x"></i>
+                            На сегодня визитов нет
+                        </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header fw-semibold {% if tomorrow_is_weekend %}weekend-col{% endif %}">Завтра — {{ tomorrow_wd }}, {{ tomorrow|date:"d.m.Y" }}</div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
+        <div class="col-md-6">
+            <div class="card vp-list-card vp-list-card--tomorrow border-0 h-100">
+                <div class="vp-list-card__head {% if tomorrow_is_weekend %}weekend{% endif %}">
+                    <span class="vp-list-card__icon" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="vp-list-card__title">Завтра</div>
+                        <div class="vp-list-card__date">{{ tomorrow_wd }}, {{ tomorrow|date:"d.m.Y" }}</div>
+                    </div>
+                    {% if tomorrow_is_weekend %}
+                        <span class="vp-list-card__chip">Выходной</span>
+                    {% else %}
+                        <span class="vp-list-card__chip vp-list-card__chip--work">Будний</span>
+                    {% endif %}
+                </div>
+                <div class="vp-list-card__body">
                     {% for entry in tomorrow_entries %}
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}">{{ entry.recipient.get_full_name }}</a>
-                                    {% if not entry.from_schedule %}<span class="badge bg-info text-dark ms-1">вне графика</span>{% endif %}
+                        <div class="vp-list-item">
+                            <div class="vp-list-item__top">
+                                <div class="min-w-0">
+                                    <a href="{% url 'accounts:recipient_detail' entry.recipient.pk %}" class="fw-semibold">{{ entry.recipient.get_full_name }}</a>
+                                    {% if not entry.from_schedule %}<span class="badge vp-list-badge vp-list-badge--extra ms-1">вне графика</span>{% endif %}
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-secondary">{{ entry.recipient.get_living_status_display }}</span>
+                                <div class="vp-list-item__actions">
+                                    <span class="badge vp-list-badge vp-list-badge--living">{{ entry.recipient.get_living_status_display }}</span>
                                     {% if entry.planned_visit %}
-                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="small d-block mt-1">Изменить</a>
+                                        <a href="{% url 'accounts:planned_visit_edit' entry.planned_visit.pk %}?next={{ planning_next_quoted }}" class="d-block mt-1">Изменить</a>
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="small text-muted">{% if entry.worker %}{{ entry.worker.get_full_name }}{% else %}—{% endif %} · {{ entry.recipient.get_visit_frequency_display }} · {{ entry.recipient.visit_days|default:"—" }}</div>
-                        </li>
+                            <div class="vp-list-item__meta">
+                                {% if entry.worker %}<a href="{% url 'accounts:social_worker_detail' entry.worker.pk %}">{{ entry.worker.get_full_name }}</a>{% else %}<span class="text-muted">Работник не указан</span>{% endif %}
+                                <span class="text-muted"> · </span>{{ entry.recipient.get_visit_frequency_display }}
+                                <span class="text-muted"> · </span>{{ entry.recipient.visit_days|default:"—" }}
+                            </div>
+                        </div>
                     {% empty %}
-                        <li class="list-group-item text-muted">Нет визитов на завтра</li>
+                        <div class="vp-list-empty">
+                            <i class="bi bi-calendar-x"></i>
+                            На завтра визитов нет
+                        </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -461,86 +2800,106 @@
 {% endif %}
 
 {% if tab == 'timeline' %}
-<p class="small text-muted mb-2">
-    Неделя с {{ tl_week_start|date:"d.m.Y" }}.
-    Занятость по числу визитов у работника в день (относительно самого загруженного дня в колонке — тёмнее = плотнее).
-</p>
-<div class="tl-legend small mb-2 text-muted">
-    <span style="background:#e8f8ef;border:1px solid #c3e6d0;"></span> окно (0 визитов)
-    <span style="background:#fff6e5;border:1px solid #eee;"></span> средняя загрузка
-    <span style="background:#ffe8e8;border:1px solid #f5c2c2;"></span> высокая
-</div>
-<div class="card">
-    <div class="card-body p-0 table-responsive">
-        <table class="table table-sm mb-0 align-middle">
-            <thead>
-                <tr>
-                    <th>Соц. работник</th>
-                    {% for col in timeline_columns %}
-                        <th class="text-center {% if col.is_weekend %}weekend-col{% endif %}">{{ col.label }}<br><span class="fw-normal text-muted small">{{ col.date|date:"d.m" }}</span></th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in timeline %}
+<div class="vp-tl-root">
+    <p class="vp-tl-intro">
+        <i class="bi bi-bar-chart-steps text-primary me-1"></i>
+        Неделя с <strong>{{ tl_week_start|date:"d.m.Y" }}</strong>.
+        Цвет ячейки — относительная загрузка: чем насыщеннее тон, тем больше визитов по сравнению с другими днями в этой колонке.
+    </p>
+    <div class="vp-tl-legend" aria-label="Легенда загрузки">
+        <span class="vp-tl-legend-item vp-tl-legend-item--0">
+            <span class="vp-tl-legend-swatch" aria-hidden="true"></span>
+            Окно (0 визитов)
+        </span>
+        <span class="vp-tl-legend-item vp-tl-legend-item--mid">
+            <span class="vp-tl-legend-swatch" aria-hidden="true"></span>
+            Средняя загрузка
+        </span>
+        <span class="vp-tl-legend-item vp-tl-legend-item--hi">
+            <span class="vp-tl-legend-swatch" aria-hidden="true"></span>
+            Высокая загрузка
+        </span>
+    </div>
+    <div class="card sw-table-card">
+        <div class="card-body p-0">
+            <div class="sw-sheet-wrap">
+                <table class="sw-sheet vp-tl-sheet mb-0">
+                <thead>
                     <tr>
-                        <td class="small"><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
-                        {% for c in row.cells %}
-                            <td class="tl-cell {% if c.is_weekend %}weekend-col {% endif %}{% if c.count == 0 %}load-0{% elif c.load_ratio < 0.34 %}load-low{% elif c.load_ratio < 0.67 %}load-mid{% else %}load-high{% endif %}">
-                                <div class="tl-n">{{ c.count }}</div>
-                                {% for e in c.entries %}
-                                    <div class="text-truncate" style="max-width:140px;">
-                                        <a href="{% url 'accounts:recipient_detail' e.recipient.pk %}">{{ e.recipient.get_full_name }}</a>
-                                        {% if e.planned_visit %}
-                                            <a href="{% url 'accounts:planned_visit_edit' e.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted"><i class="bi bi-pencil-square"></i></a>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            </td>
+                        <th class="col-text-left" scope="col">Соц. работник</th>
+                        {% for col in timeline_columns %}
+                            <th scope="col" class="text-center {% if col.is_weekend %}weekend-col{% endif %}">{{ col.label }}<br><span class="fw-normal text-muted" style="font-size:0.72rem;">{{ col.date|date:"d.m" }}</span></th>
                         {% endfor %}
                     </tr>
-                {% empty %}
-                    <tr><td colspan="8" class="text-muted p-3">Нет данных по фильтру</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for row in timeline %}
+                        <tr class="data-row">
+                            <td class="col-text-left align-top"><a href="{% url 'accounts:social_worker_detail' row.worker.pk %}">{{ row.worker.get_full_name }}</a></td>
+                            {% for c in row.cells %}
+                                <td class="tl-cell align-top {% if c.is_weekend %}weekend-col {% endif %}{% if c.count == 0 %}load-0{% elif c.load_ratio < 0.34 %}load-low{% elif c.load_ratio < 0.67 %}load-mid{% else %}load-high{% endif %}">
+                                    <div class="tl-n">{{ c.count }}</div>
+                                    {% for e in c.entries %}
+                                        <div class="text-truncate vp-tl-entry-line">
+                                            <a href="{% url 'accounts:recipient_detail' e.recipient.pk %}">{{ e.recipient.get_full_name }}</a>
+                                            {% if e.planned_visit %}
+                                                <a href="{% url 'accounts:planned_visit_edit' e.planned_visit.pk %}?next={{ planning_next_quoted }}" class="text-muted ms-1" title="Изменить визит"><i class="bi bi-pencil-square"></i></a>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% empty %}
+                        <tr class="data-row"><td colspan="{{ timeline_columns|length|add:'1' }}" class="vp-tl-empty">Нет данных по выбранным фильтрам</td></tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}
 
+</div>{# /.vp-plan-layout #}
+
 <div class="modal fade" id="taskReminderModal" tabindex="-1" aria-labelledby="taskReminderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="taskReminderModalLabel"><i class="bi bi-bell"></i> Напоминания о задачах</h5>
+        <div class="modal-content vp-task-reminder-modal-content">
+            <div class="modal-header vp-task-reminder-modal-header">
+                <h5 class="modal-title vp-task-reminder-modal-title" id="taskReminderModalLabel">
+                    <span class="vp-task-reminder-modal-title__icon" aria-hidden="true"><i class="bi bi-bell"></i></span>
+                    <span>Напоминания о задачах</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body">
-                <p class="small text-muted mb-3">
+            <div class="modal-body vp-task-reminder-modal-body">
+                <p class="vp-task-reminder-lead">
                     Показаны записи, по которым наступило время напомнить работнику: от <strong>двух календарных дней до даты выполнения</strong> до самой этой даты включительно
                     (в том числе <strong>запланированные визиты</strong> с датой в этом окне и ваши <strong>ручные задачи</strong>).
                 </p>
                 {% if active_task_reminders %}
-                    <div class="table-responsive mb-4">
-                        <table class="table table-sm table-hover align-middle mb-0">
-                            <thead class="table-light">
+                    <div class="vp-task-reminder-section-title mt-3"><i class="bi bi-list-ul" aria-hidden="true"></i> Активные напоминания</div>
+                    <div class="vp-task-reminder-sheet-wrap">
+                        <table class="table align-middle mb-0 vp-task-reminder-sheet">
+                            <thead>
                                 <tr>
-                                    <th>Тип</th>
-                                    <th>Дата</th>
-                                    <th>Сотрудник</th>
-                                    <th>Подопечный</th>
-                                    <th>Описание</th>
-                                    <th></th>
+                                    <th scope="col">Тип</th>
+                                    <th scope="col">Дата</th>
+                                    <th scope="col">Сотрудник</th>
+                                    <th scope="col">Подопечный</th>
+                                    <th scope="col" class="col-desc">Описание</th>
+                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for row in active_task_reminders %}
                                     <tr>
-                                        <td>{% if row.kind == 'planned' %}<span class="badge bg-primary-subtle text-primary border">Визит</span>{% else %}<span class="badge bg-secondary-subtle text-secondary border">Задача</span>{% endif %}</td>
+                                        <td>{% if row.kind == 'planned' %}<span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle">Визит</span>{% else %}<span class="badge rounded-pill bg-secondary-subtle text-secondary border">Задача</span>{% endif %}</td>
                                         <td>{{ row.task_date|date:"d.m.Y" }}</td>
                                         <td class="small"><a href="{% url 'accounts:social_worker_detail' row.social_worker.pk %}">{{ row.social_worker.get_full_name }}</a></td>
                                         <td class="small">{% if row.recipient %}<a href="{% url 'accounts:recipient_detail' row.recipient.pk %}">{{ row.recipient.get_full_name }}</a>{% else %}—{% endif %}</td>
-                                        <td class="small text-break">{{ row.description }}</td>
+                                        <td class="small text-break col-desc">{{ row.description }}</td>
                                         <td class="text-nowrap">
                                             {% if row.planned_visit %}
                                                 <a href="{% url 'accounts:planned_visit_edit' row.planned_visit.pk %}?next={{ planning_next_quoted }}" class="btn btn-sm btn-outline-primary">Изменить</a>
@@ -558,15 +2917,14 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted small mb-4">Сейчас нет записей в окне напоминаний (при текущих фильтрах).</p>
+                    <p class="vp-task-reminder-empty small mb-0 mt-3">Сейчас нет записей в окне напоминаний (при текущих фильтрах).</p>
                 {% endif %}
-                <hr class="my-3">
-                <h6 class="fw-semibold mb-3">Добавить напоминание</h6>
+                <div class="vp-task-reminder-section-title mt-3"><i class="bi bi-plus-circle" aria-hidden="true"></i> Добавить напоминание</div>
                 <form method="post" action="{% url 'accounts:visit_task_reminder_create' %}">
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ planning_back_url }}">
                     {% if task_reminder_form.non_field_errors %}
-                        <div class="alert alert-danger">{{ task_reminder_form.non_field_errors }}</div>
+                        <div class="alert alert-danger rounded-3 mb-3">{{ task_reminder_form.non_field_errors }}</div>
                     {% endif %}
                     {% for field in task_reminder_form.visible_fields %}
                         <div class="mb-3">
@@ -575,55 +2933,12 @@
                             {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary">Сохранить напоминание</button>
+                    <button type="submit" class="btn btn-primary vp-assign-btn-save"><i class="bi bi-check-circle"></i> Сохранить напоминание</button>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <div class="modal-footer vp-task-reminder-modal-footer">
+                <button type="button" class="btn btn-outline-secondary vp-assign-btn-cancel" data-bs-dismiss="modal">Закрыть</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="plannedVisitModal" tabindex="-1" aria-labelledby="plannedVisitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'accounts:planned_visit_create' %}">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ planning_back_url }}">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="plannedVisitModalLabel">Запланировать визит</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-light border small py-2 mb-3 d-flex align-items-center flex-wrap gap-1">
-                        <span class="badge rounded-pill bg-light text-dark border weekend-col">Сб / Вс</span>
-                        <span class="text-muted">— выходные; в таймлайне и календаре такие колонки подсвечены.</span>
-                    </div>
-                    {% if planned_visit_form.non_field_errors %}
-                        <div class="alert alert-danger">{{ planned_visit_form.non_field_errors }}</div>
-                    {% endif %}
-                    {% for field in planned_visit_form.visible_fields %}
-                        {% if field.name == 'social_worker' %}
-                            <h6 class="small fw-semibold text-secondary mb-2 mt-1">Назначить сотрудника</h6>
-                        {% elif field.name == 'recipient' %}
-                            <h6 class="small fw-semibold text-secondary mb-2 mt-3">Подопечный</h6>
-                        {% elif field.name == 'visit_date' %}
-                            <h6 class="small fw-semibold text-secondary mb-2 mt-3">Дата и время</h6>
-                        {% endif %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
-                            {% for err in field.errors %}<div class="invalid-feedback d-block">{{ err }}</div>{% endfor %}
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -639,6 +2954,7 @@
     <input type="hidden" name="recipient" value="{{ filter_recipient }}">
     <input type="hidden" name="living" value="{{ filter_living }}">
     <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="visitPlanningPdfIdFields"></span>
 </form>
 
@@ -653,20 +2969,22 @@
     <input type="hidden" name="recipient" value="{{ filter_recipient }}">
     <input type="hidden" name="living" value="{{ filter_living }}">
     <input type="hidden" name="wstatus" value="{{ filter_wstatus }}">
+    <input type="hidden" name="sort" value="{{ sort_order }}">
     <span id="visitPlanningCsvIdFields"></span>
 </form>
 
-<div class="modal fade" id="visitPlanningPdfModal" tabindex="-1" aria-labelledby="visitPlanningPdfModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--pdf" id="visitPlanningPdfModal" tabindex="-1" aria-labelledby="visitPlanningPdfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="visitPlanningPdfModalLabel">
-                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>Вывести в PDF?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-file-earmark-pdf"></i></span>
+                    <h5 class="modal-title" id="visitPlanningPdfModalLabel">Вывести в PDF?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в отчёт (подопечные, визиты на сегодня/завтра, напоминания).</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в отчёт (подопечные, визиты на сегодня/завтра, напоминания).</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="vp_pdf_scope_choice" id="vpPdfScopeAll" value="all" checked>
@@ -680,27 +2998,28 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-danger" id="visitPlanningPdfConfirm">
-                    <i class="bi bi-download"></i> Сформировать PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="visitPlanningPdfConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать PDF
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="visitPlanningCsvModal" tabindex="-1" aria-labelledby="visitPlanningCsvModalLabel" aria-hidden="true">
+<div class="modal fade sw-report-confirm-modal sw-report-confirm-modal--csv" id="visitPlanningCsvModal" tabindex="-1" aria-labelledby="visitPlanningCsvModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title" id="visitPlanningCsvModalLabel">
-                    <i class="bi bi-filetype-csv text-success me-2"></i>Выгрузить в CSV?
-                </h5>
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <div class="sw-report-confirm-modal__title-wrap">
+                    <span class="sw-report-confirm-modal__icon" aria-hidden="true"><i class="bi bi-filetype-csv"></i></span>
+                    <h5 class="modal-title" id="visitPlanningCsvModalLabel">Выгрузить в CSV?</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Выберите, какие записи включить в файл.</p>
+            <div class="modal-body">
+                <p class="sw-report-confirm-modal__hint mb-3">Выберите, какие записи включить в файл.</p>
                 <div class="d-grid gap-2">
                     <div class="form-check p-3 border rounded">
                         <input class="form-check-input" type="radio" name="vp_csv_scope_choice" id="vpCsvScopeAll" value="all" checked>
@@ -714,10 +3033,10 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <button type="button" class="btn btn-success" id="visitPlanningCsvConfirm">
-                    <i class="bi bi-download"></i> Сформировать CSV
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary sw-report-confirm-modal__btn-cancel" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn sw-report-confirm-modal__btn-confirm" id="visitPlanningCsvConfirm">
+                    <i class="bi bi-download me-1"></i>Сформировать CSV
                 </button>
             </div>
         </div>
@@ -728,6 +3047,32 @@
 {% block extra_js %}
 <script>
 (function () {
+    var root = document.body;
+    if (root && root.classList.contains('vp-planning-page')) {
+        var KEY_HOME = 'socworkerFromHome';
+        var KEY_VP = 'socworkerFromVisitPlanning';
+        var KEY_VP_URL = 'socworkerVisitPlanningReturnUrl';
+        root.addEventListener('click', function (e) {
+            var a = e.target.closest('a');
+            if (!a) return;
+            var href = a.getAttribute('href');
+            if (!href || href.charAt(0) === '#') return;
+            if (a.target === '_blank' || a.hasAttribute('download')) return;
+            var u;
+            try {
+                u = new URL(a.href, window.location.href);
+            } catch (err) {
+                return;
+            }
+            if (u.origin !== window.location.origin) return;
+            if (!/\/accounts\/recipients(\/|$)/.test(u.pathname)) return;
+            try {
+                sessionStorage.removeItem(KEY_HOME);
+                sessionStorage.setItem(KEY_VP, '1');
+                sessionStorage.setItem(KEY_VP_URL, window.location.pathname + window.location.search);
+            } catch (err) {}
+        });
+    }
     const selectAll = document.getElementById('vpSelectAll');
     if (selectAll) {
         selectAll.addEventListener('change', function () {
@@ -790,6 +3135,81 @@
             form.submit();
         });
     }
+
+    (function () {
+        var SCROLL_KEY = 'visitPlanningScrollToResults';
+        function markScrollTable() {
+            try {
+                sessionStorage.setItem(SCROLL_KEY, 'table');
+            } catch (e) {}
+        }
+        function markScrollCalendar() {
+            try {
+                sessionStorage.setItem(SCROLL_KEY, 'calendar');
+            } catch (e) {}
+        }
+        function scrollIfFlagged() {
+            var mode;
+            try {
+                mode = sessionStorage.getItem(SCROLL_KEY);
+                sessionStorage.removeItem(SCROLL_KEY);
+            } catch (e) {
+                return;
+            }
+            if (!mode) return;
+            var el;
+            if (mode === 'calendar') {
+                el = document.getElementById('vp-calendar-panel-anchor');
+            }
+            if (!el) {
+                el = document.getElementById('vp-plan-table-anchor') || document.getElementById('vp-planning-panel-anchor');
+            }
+            if (!el) return;
+            var reduceMotion = false;
+            try {
+                reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {}
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    el.scrollIntoView({
+                        behavior: reduceMotion ? 'auto' : 'smooth',
+                        block: 'start',
+                    });
+                });
+            });
+        }
+        var vpFilterForm = document.querySelector('.vp-filter-dash form[method="get"]');
+        if (vpFilterForm) {
+            vpFilterForm.addEventListener('submit', markScrollTable);
+        }
+        var vpReset = document.getElementById('vp-filter-reset-link');
+        if (vpReset) {
+            vpReset.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollTable();
+            });
+        }
+        document.querySelectorAll('.vp-tabs a.nav-link[href]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollTable();
+            });
+        });
+        document.querySelectorAll('.vp-cal-toolbar a.vp-cal-seg-btn[href], .vp-cal-toolbar .vp-cal-nav a.btn[href]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollCalendar();
+            });
+        });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', scrollIfFlagged);
+        } else {
+            scrollIfFlagged();
+        }
+    })();
 })();
 </script>
 {% endblock %}

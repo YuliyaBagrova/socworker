@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диаграмма классов веб-приложения</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                fontSize: '18px',
+                fontFamily: 'sans-serif'
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 28px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 98vw;
+            max-width: 1600px;
+            overflow-x: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .mermaid svg {
+            width: 100% !important;
+            height: auto !important;
+            min-width: 900px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Общая диаграмма классов приложения (с Панелью Услуг)</h2>
+        <div class="mermaid">
+classDiagram
+    direction LR
+
+    class WebApplication {
+        +open()
+        +login()
+        +logout()
+    }
+
+    class AuthPage {
+        +enterCredentials()
+        +submitLogin()
+    }
+
+    class Dashboard {
+        +openSocialWorkers()
+        +openRecipients()
+        +openServices()
+        +openUserProfile()
+    }
+
+    class SocialWorkersPanel {
+        +viewWorkers()
+        +manageWorkers()
+        +returnToDashboard()
+    }
+
+    class RecipientsPanel {
+        +viewRecipients()
+        +assignRecipients()
+        +returnToDashboard()
+    }
+
+    class ServicesPanel {
+        +viewServices()
+        +manageServices()
+        +returnToDashboard()
+    }
+
+    class UserProfile {
+        +editProfile()
+        +saveSettings()
+        +returnToDashboard()
+    }
+
+    WebApplication --> AuthPage : начало работы
+    AuthPage --> Dashboard : успешный вход
+
+    Dashboard --> SocialWorkersPanel : открывает
+    Dashboard --> RecipientsPanel : открывает
+    Dashboard --> ServicesPanel : открывает
+    Dashboard --> UserProfile : открывает
+
+    SocialWorkersPanel --> Dashboard : возврат
+    RecipientsPanel --> Dashboard : возврат
+    ServicesPanel --> Dashboard : возврат
+    UserProfile --> Dashboard : возврат
+
+    SocialWorkersPanel --> RecipientsPanel : переход через меню
+    RecipientsPanel --> ServicesPanel : переход через меню
+    ServicesPanel --> SocialWorkersPanel : переход через меню
+
+    Dashboard --> AuthPage : выход
+    SocialWorkersPanel --> AuthPage : выход
+    RecipientsPanel --> AuthPage : выход
+    ServicesPanel --> AuthPage : выход
+    UserProfile --> AuthPage : выход
+        </div>
+    </div>
+</body>
+</html>

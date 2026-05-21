@@ -43,6 +43,18 @@ class UserProfile(models.Model):
         verbose_name='Фото профиля',
         help_text='Необязательно. JPG, PNG или WebP, до 2 МБ.',
     )
+    admin_panel_access = models.BooleanField(
+        default=False,
+        verbose_name='Доступ к панели администратора',
+        help_text='Разрешён вход в раздел управления учётными записями инвентаризации (код регистрации).',
+    )
+    admin_portal_password_plaintext = models.CharField(
+        max_length=256,
+        blank=True,
+        default='',
+        verbose_name='Пароль для панели администратора',
+        help_text='Обновляется при создании пользователя, смене пароля из панели или из формы «Смена пароля».',
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -61,6 +73,57 @@ class UserProfile(models.Model):
             except UserProfile.DoesNotExist:
                 pass
         super().save(*args, **kwargs)
+
+
+class AdminPortalPasswordChangeNotification(models.Model):
+    """Уведомление панели администратора: смена пароля заведующим или управляющим инвентаризацией."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='admin_portal_password_notifications',
+        verbose_name='Пользователь',
+    )
+    username = models.CharField(max_length=150)
+    role_label = models.CharField(max_length=120)
+    new_password_plaintext = models.CharField(max_length=256)
+    created_at = models.DateTimeField(auto_now_add=True)
+    dismissed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name = 'Уведомление: смена пароля'
+        verbose_name_plural = 'Уведомления: смены пароля'
+
+    def __str__(self):
+        return f'{self.username} ({self.created_at:%Y-%m-%d %H:%M})'
+
+
+class PortalAuthenticationCodes(models.Model):
+    """Строка pk=1: актуальные коды для входа и регистрации (если поле непустое)."""
+
+    inventory_code_override = models.CharField(
+        max_length=512,
+        blank=True,
+        default='',
+        verbose_name='Код раздела «Инвентаризация»',
+        help_text='Пустое значение — берётся из настроек окружения INVENTORY_AUTHENTICATION_CODE.',
+    )
+    admin_panel_code_override = models.CharField(
+        max_length=512,
+        blank=True,
+        default='',
+        verbose_name='Код панели администратора',
+        help_text='Пустое значение — берётся из настроек ADMIN_PANEL_AUTHENTICATION_CODE.',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Секретные коды порталов'
+        verbose_name_plural = 'Секретные коды порталов'
+
+    def __str__(self):
+        return 'Коды порталов'
 
 
 class SocialWorker(models.Model):
@@ -150,6 +213,17 @@ class SocialWorker(models.Model):
         null=True,
         blank=True,
         help_text='Запланированная дата прохождения осмотра.',
+    )
+    medical_notes = models.TextField(
+        verbose_name='Примечания по медосмотру',
+        blank=True,
+        null=True,
+        help_text='Сведения о здоровье и медосмотре (раздел «Прохождение медосмотра»).',
+    )
+    medical_panel_registered = models.BooleanField(
+        default=False,
+        verbose_name='Учёт в панели «Прохождение медосмотра»',
+        help_text='Сотрудник появляется в таблице после «Назначить медосмотр».',
     )
     status = models.CharField(
         max_length=20,
@@ -279,6 +353,11 @@ class ServiceRecipient(models.Model):
         ('boarding', 'Интернат'),
         ('other', 'Другое'),
     ]
+
+    HOUSING_TYPE_CHOICES = [
+        ('house', 'Дом'),
+        ('apartment', 'Квартира'),
+    ]
     
     VISIT_FREQUENCY_CHOICES = [
         ('1', '1 раз в неделю'),
@@ -400,6 +479,11 @@ class ServiceRecipient(models.Model):
         null=True,
         blank=True
     )
+    visit_planning_panel_registered = models.BooleanField(
+        default=False,
+        verbose_name='Учитывается в панели планирования визитов',
+        help_text='Подопечный отображается в таблице панели после добавления через «Запланировать визит».',
+    )
     location = models.ForeignKey(
         ServiceLocation,
         on_delete=models.SET_NULL,
@@ -407,6 +491,13 @@ class ServiceRecipient(models.Model):
         verbose_name='Населённый пункт',
         null=True,
         blank=True
+    )
+    housing_type = models.CharField(
+        max_length=20,
+        choices=HOUSING_TYPE_CHOICES,
+        default='apartment',
+        verbose_name='Тип жилья (дом / квартира)',
+        help_text='В «Расчёте нагрузки» сначала подставляется по тексту в «Адрес», иначе это поле.',
     )
     
     notes = models.TextField(

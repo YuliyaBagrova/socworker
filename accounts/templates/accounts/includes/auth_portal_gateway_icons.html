@@ -1,0 +1,16 @@
+{# Ссылки на вход в Панель администратора и Инвентаризацию (только значки). #}
+<div class="auth-portal-gateway" role="navigation" aria-label="Вход в служебные разделы">
+    <p class="auth-portal-gateway__hint">Или открыть вход в раздел:</p>
+    <div class="auth-portal-gateway__row">
+        <a href="{% url 'accounts:admin_portal_login' %}" class="auth-portal-gateway__btn auth-portal-gateway__btn--admin"
+           title="Панель администратора">
+            <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+            <span class="visually-hidden">Панель администратора</span>
+        </a>
+        <a href="{% url 'inventory:login' %}" class="auth-portal-gateway__btn auth-portal-gateway__btn--inv"
+           title="Инвентаризация">
+            <i class="bi bi-box-seam" aria-hidden="true"></i>
+            <span class="visually-hidden">Инвентаризация</span>
+        </a>
+    </div>
+</div>

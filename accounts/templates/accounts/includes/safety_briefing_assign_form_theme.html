@@ -1,0 +1,190 @@
+{# Полноэкранная форма «Новая запись об инструктаже» — структура как «Назначить медосмотр», палитра панели «Техника безопасности». #}
+    body.sw-safety-briefing-assign-page {
+        min-height: 100vh;
+        background-color: #0c1222;
+        background-image:
+            linear-gradient(180deg, rgba(8, 12, 24, 0.55) 0%, rgba(15, 23, 42, 0.72) 42%, rgba(30, 27, 75, 0.45) 78%, rgba(15, 23, 42, 0.88) 100%),
+            radial-gradient(ellipse 85% 70% at 8% 12%, rgba(251, 191, 36, 0.38), transparent 58%),
+            radial-gradient(ellipse 75% 65% at 95% 8%, rgba(167, 139, 250, 0.26), transparent 55%),
+            radial-gradient(ellipse 90% 55% at 78% 88%, rgba(249, 115, 22, 0.32), transparent 60%),
+            linear-gradient(118deg, rgba(67, 56, 202, 0.35) 0%, transparent 42%),
+            linear-gradient(232deg, rgba(217, 119, 6, 0.18) 0%, transparent 45%);
+        background-attachment: fixed;
+    }
+    body.sw-safety-briefing-assign-page .main-content {
+        background: transparent;
+        max-width: 920px;
+    }
+    body.sw-safety-briefing-assign-page .sw-entity-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-page-title {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-page-title__icon {
+        flex-shrink: 0;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #fff;
+        background: linear-gradient(145deg, #fbbf24 0%, #f59e0b 32%, #ea580c 68%, #c2410c 100%);
+        box-shadow:
+            0 6px 22px rgba(234, 88, 12, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-page-title__label {
+        font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(
+            105deg,
+            #ffffff 0%,
+            #fef3c7 22%,
+            #fde68a 42%,
+            #fcd34d 58%,
+            #e2e8f0 78%,
+            #cbd5e1 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.35));
+    }
+    @supports not (background-clip: text) {
+        body.sw-safety-briefing-assign-page .safety-briefing-assign-page-title__label {
+            color: #fef3c7;
+            background: none;
+            filter: none;
+        }
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #c2410c;
+        border: 1.5px solid rgba(251, 191, 36, 0.55);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 251, 235, 0.92) 100%);
+        box-shadow:
+            0 4px 18px rgba(234, 88, 12, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-back-btn:hover {
+        color: #9a3412;
+        border-color: rgba(245, 158, 11, 0.75);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(234, 88, 12, 0.2);
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card {
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.94);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+        box-shadow:
+            0 20px 56px rgba(15, 23, 42, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        overflow: hidden;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .card-body {
+        padding: 1.75rem 1.75rem 1.5rem;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .section-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #78350f;
+        padding-bottom: 0.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #f59e0b;
+        padding-left: 0.75rem;
+        margin-left: 0;
+        background: linear-gradient(90deg, rgba(254, 243, 199, 0.9) 0%, transparent 88%);
+        border-radius: 0 10px 10px 0;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .section-title:first-of-type {
+        margin-top: 0;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .section-title i {
+        color: #d97706;
+        font-size: 1.05rem;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-label {
+        color: #422006;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-control,
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-select,
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card textarea.form-control {
+        border-color: rgba(217, 119, 6, 0.35);
+        border-radius: 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-control:focus,
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-select:focus,
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card textarea.form-control:focus {
+        border-color: #d97706;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-control[readonly] {
+        background: rgba(255, 251, 235, 0.75);
+        color: #422006;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .border-top {
+        border-color: rgba(251, 191, 36, 0.28) !important;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-assign-form-card .form-check-input:checked {
+        background-color: #d97706;
+        border-color: #b45309;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-btn-cancel {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.15rem;
+        border-color: rgba(217, 119, 6, 0.45);
+        color: #374151;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-btn-cancel:hover {
+        background: rgba(254, 243, 199, 0.95);
+        border-color: #f59e0b;
+        color: #9a3412;
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-btn-save {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 38%, #6d28d9 72%, #5b21b6 100%);
+        box-shadow: 0 4px 18px rgba(109, 40, 217, 0.38);
+    }
+    body.sw-safety-briefing-assign-page .safety-briefing-btn-save:hover {
+        background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 42%, #7c3aed 100%);
+        box-shadow: 0 6px 22px rgba(91, 33, 182, 0.42);
+        transform: translateY(-1px);
+        color: #fff;
+    }

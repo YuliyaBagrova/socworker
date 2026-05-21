@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django import forms
 from django.contrib.auth.forms import (
     UserCreationForm,
@@ -7,6 +9,7 @@ from django.contrib.auth.forms import (
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from .models import (
     SocialWorker,
@@ -37,7 +40,7 @@ class UserProfileAvatarForm(forms.ModelForm):
         labels = {'avatar': 'Изображение'}
         widgets = {
             'avatar': forms.FileInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control sw-profile-avatar-input js-profile-avatar-input',
                 'accept': 'image/jpeg,image/png,image/webp,image/gif',
             }),
         }
@@ -186,6 +189,9 @@ class CustomAuthenticationForm(AuthenticationForm):
         if self.user_cache is None:
             raise self.get_invalid_login_error()
         self.confirm_login_allowed(self.user_cache)
+        from .admin_password_audit import remember_plaintext_password_if_missing_for_panel_tables
+        if password:
+            remember_plaintext_password_if_missing_for_panel_tables(self.user_cache, password)
         return self.cleaned_data
 
     def get_invalid_login_error(self):
@@ -233,10 +239,13 @@ class SocialWorkerForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Введите отчество (необязательно)'
             }),
-            'birth_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
+            'birth_date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',
+                },
+                format='%Y-%m-%d',
+            ),
             'phone': forms.TextInput(attrs=_PHONE_WIDGET_ATTRS.copy()),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -253,10 +262,13 @@ class SocialWorkerForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Табельный номер'
             }),
-            'hire_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
+            'hire_date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',
+                },
+                format='%Y-%m-%d',
+            ),
             'notes': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
@@ -264,8 +276,72 @@ class SocialWorkerForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # type=date ожидает ISO в value; при ru-локали виджет иначе отдаёт dd.mm.yyyy
+        for name in ('birth_date', 'hire_date'):
+            field = self.fields[name]
+            if '%Y-%m-%d' not in field.input_formats:
+                field.input_formats = ['%Y-%m-%d'] + list(field.input_formats)
+
     def clean_phone(self):
         return normalize_belarus_phone(self.cleaned_data.get('phone') or '')
+
+
+class MedicalCheckupEditForm(forms.Form):
+    """Редактирование данных медосмотра с панели «Прохождение медосмотра»."""
+
+    medical_checkup = forms.ChoiceField(
+        label='Поле в системе',
+        choices=[('passed', 'Пройден'), ('not_passed', 'Не пройден')],
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    last_medical_checkup_date = forms.DateField(
+        label='Дата последнего осмотра',
+        required=False,
+        widget=forms.DateInput(
+            attrs={'class': 'form-control', 'type': 'date'},
+            format='%Y-%m-%d',
+        ),
+    )
+    valid_until = forms.DateField(
+        label='Годен до',
+        required=False,
+        widget=forms.DateInput(
+            attrs={'class': 'form-control', 'type': 'date'},
+            format='%Y-%m-%d',
+        ),
+    )
+    mc_ok_12 = forms.ChoiceField(
+        label='Актуально 12 месяцев',
+        required=False,
+        choices=[('', '—'), ('yes', 'Да'), ('no', 'Нет')],
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    medical_checkup_planned_date = forms.DateField(
+        label='Назначен на',
+        required=False,
+        widget=forms.DateInput(
+            attrs={'class': 'form-control', 'type': 'date'},
+            format='%Y-%m-%d',
+        ),
+    )
+    medical_notes = forms.CharField(
+        label='Примечания',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Сведения о здоровье и медосмотре (необязательно)',
+        }),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('last_medical_checkup_date', 'valid_until', 'medical_checkup_planned_date'):
+            field = self.fields[name]
+            if '%Y-%m-%d' not in field.input_formats:
+                field.input_formats = ['%Y-%m-%d'] + list(field.input_formats)
 
 
 class ServiceRecipientForm(forms.ModelForm):
@@ -278,7 +354,7 @@ class ServiceRecipientForm(forms.ModelForm):
             'birth_date', 'phone', 'address', 'disability_group',
             'payment_percent', 'visit_frequency', 'living_status',
             'admission_date', 'visit_days', 'fire_detector_count',
-            'social_worker', 'location', 'notes'
+            'social_worker', 'location', 'housing_type', 'notes',
         ]
         help_texts = {
             'visit_frequency': 'Число визитов в неделю должно совпадать с количеством указанных дней ниже.',
@@ -345,6 +421,9 @@ class ServiceRecipientForm(forms.ModelForm):
             'location': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'housing_type': forms.Select(attrs={
+                'class': 'form-select',
+            }),
             'notes': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -382,7 +461,23 @@ class ServiceLocationForm(forms.ModelForm):
 
 
 class PlannedVisitForm(forms.ModelForm):
-    """Явная запись визита на дату (дополняет график по карточке подопечного)."""
+    """Явная запись визита на дату; поля кратности/дней сохраняются в карточке подопечного."""
+
+    recipient_visit_frequency = forms.ChoiceField(
+        label='Кратность',
+        choices=ServiceRecipient.VISIT_FREQUENCY_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        help_text='Число визитов в неделю должно совпадать с количеством указанных дней ниже.',
+    )
+    recipient_visit_days = forms.CharField(
+        label='Дни посещений',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Пн, Ср, Пт',
+        }),
+        help_text='Перечислите дни через запятую. Для «Ежедневно» оставьте пустым или укажите все 7 дней.',
+    )
 
     class Meta:
         model = PlannedVisit
@@ -390,35 +485,99 @@ class PlannedVisitForm(forms.ModelForm):
         widgets = {
             'social_worker': forms.Select(attrs={'class': 'form-select'}),
             'recipient': forms.Select(attrs={'class': 'form-select'}),
-            'visit_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'visit_date': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d',
+            ),
             'visit_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, *args, recipient_queryset=None, for_panel_assign=False,
+        planning_panel_short=False, **kwargs,
+    ):
         super().__init__(*args, **kwargs)
+        self.for_panel_assign = for_panel_assign
+        self.planning_panel_short = planning_panel_short
         self.fields['social_worker'].queryset = SocialWorker.objects.order_by(
             'last_name', 'first_name',
         )
         self.fields['social_worker'].label = 'Сотрудник из базы'
-        self.fields['recipient'].queryset = ServiceRecipient.objects.filter(
-            social_worker__isnull=False,
-        ).select_related('social_worker').order_by('last_name', 'first_name')
+        if recipient_queryset is not None:
+            rec_qs = recipient_queryset
+        elif self.instance.pk and self.instance.recipient_id:
+            rec_qs = ServiceRecipient.objects.filter(
+                social_worker__isnull=False,
+            ).filter(
+                Q(visit_planning_panel_registered=True)
+                | Q(pk=self.instance.recipient_id),
+            ).select_related('social_worker').order_by('last_name', 'first_name')
+        else:
+            rec_qs = ServiceRecipient.objects.filter(
+                social_worker__isnull=False,
+                visit_planning_panel_registered=True,
+            ).select_related('social_worker').order_by('last_name', 'first_name')
+        self.fields['recipient'].queryset = rec_qs
         self.fields['recipient'].label = 'Подопечный'
         self.fields['visit_date'].label = 'Дата визита'
         self.fields['visit_time'].label = 'Время (необязательно)'
-        self.fields['notes'].label = 'Примечание'
+        if 'notes' in self.fields:
+            self.fields['notes'].label = 'Примечание'
+        if for_panel_assign or planning_panel_short:
+            self.fields.pop('notes', None)
+
+        vd_field = self.fields['visit_date']
+        if '%Y-%m-%d' not in vd_field.input_formats:
+            vd_field.input_formats = ['%Y-%m-%d'] + list(vd_field.input_formats)
+
+        if self.instance.pk:
+            rec = self.instance.recipient
+            self.fields['recipient_visit_frequency'].initial = rec.visit_frequency
+            self.fields['recipient_visit_days'].initial = rec.visit_days or ''
+        else:
+            self.fields['recipient_visit_frequency'].initial = '2'
+            self.fields['recipient_visit_days'].initial = ''
+
+        order = [
+            'social_worker', 'recipient',
+            'recipient_visit_frequency', 'recipient_visit_days',
+            'visit_date', 'visit_time',
+        ]
+        if 'notes' in self.fields:
+            order.append('notes')
+        self.fields = OrderedDict((k, self.fields[k]) for k in order if k in self.fields)
 
     def clean_recipient(self):
         r = self.cleaned_data['recipient']
         if not r.social_worker_id:
             raise ValidationError('У подопечного должен быть закреплён социальный работник.')
+        editing_same = (
+            self.instance
+            and self.instance.pk
+            and self.instance.recipient_id == r.pk
+        )
+        if (
+            not self.for_panel_assign
+            and not r.visit_planning_panel_registered
+            and not editing_same
+        ):
+            raise ValidationError(
+                'Подопечный не внесён в панель планирования. '
+                'Сначала добавьте его через «Запланировать визит» на панели.',
+            )
         return r
 
     def clean(self):
         cleaned = super().clean()
         r = cleaned.get('recipient')
         d = cleaned.get('visit_date')
+        freq = cleaned.get('recipient_visit_frequency')
+        days = cleaned.get('recipient_visit_days')
+        if freq is not None:
+            err = validate_visit_frequency_and_days(freq, days)
+            if err:
+                self.add_error('recipient_visit_days', err)
         if r and d:
             qs = PlannedVisit.objects.filter(recipient=r, visit_date=d)
             if self.instance and self.instance.pk:
@@ -428,6 +587,18 @@ class PlannedVisitForm(forms.ModelForm):
                     'На эту дату для выбранного подопечного уже есть запланированный визит.',
                 )
         return cleaned
+
+    def save(self, commit=True):
+        inst = super().save(commit=commit)
+        if not commit:
+            return inst
+        freq = self.cleaned_data['recipient_visit_frequency']
+        days = (self.cleaned_data.get('recipient_visit_days') or '').strip()
+        r = inst.recipient
+        r.visit_frequency = freq
+        r.visit_days = days
+        r.save(update_fields=['visit_frequency', 'visit_days', 'updated_at'])
+        return inst
 
 
 class VisitTaskReminderForm(forms.ModelForm):
@@ -449,6 +620,7 @@ class VisitTaskReminderForm(forms.ModelForm):
         self.fields['social_worker'].label = 'Социальный работник'
         self.fields['recipient'].queryset = ServiceRecipient.objects.filter(
             social_worker__isnull=False,
+            visit_planning_panel_registered=True,
         ).select_related('social_worker').order_by('last_name', 'first_name')
         self.fields['recipient'].label = 'Подопечный'
         self.fields['recipient'].required = False
@@ -470,7 +642,11 @@ class SafetyBriefingRecordForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Например: вводный инструктаж на рабочем месте',
             }),
-            'briefing_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            # ISO-день для type="date"; иначе браузер не показывает значение при локали dd.mm.yyyy
+            'briefing_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'class': 'form-control', 'type': 'date'},
+            ),
             'passed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
@@ -483,6 +659,11 @@ class SafetyBriefingRecordForm(forms.ModelForm):
         self.fields['social_worker'].label = 'Социальный работник'
         self.fields['briefing_title'].label = 'Название инструктажа'
         self.fields['briefing_date'].label = 'Дата инструктажа (план / факт)'
+        self.fields['briefing_date'].input_formats = [
+            '%Y-%m-%d',
+            '%d.%m.%Y',
+            '%d/%m/%Y',
+        ]
         self.fields['passed'].label = 'Инструктаж уже пройден'
         self.fields['passed'].required = False
         if not self.instance.pk:
@@ -513,13 +694,32 @@ class WorkloadRecordForm(forms.ModelForm):
             'work_time_norm_minutes': 'Справочное поле (мин/мес). Коэффициент нагрузки в таблице всегда считается как отработано (часы) ÷ 168 ч.',
         }
         widgets = {
-            'social_worker': forms.Select(attrs={'class': 'form-select'}),
-            'recipient': forms.Select(attrs={'class': 'form-select'}),
-            'location': forms.Select(attrs={'class': 'form-select'}),
-            'housing_type': forms.Select(attrs={'class': 'form-select'}),
-            'period_year': forms.NumberInput(attrs={'class': 'form-control', 'min': 2000, 'max': 2100}),
-            'period_month': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 12}),
-            'visits_per_week': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': 0}),
+            'social_worker': forms.Select(
+                attrs={'class': 'form-select js-wl-social-worker', 'id': 'id_social_worker'},
+            ),
+            'recipient': forms.Select(
+                attrs={'class': 'form-select js-wl-recipient', 'id': 'id_recipient'},
+            ),
+            'location': forms.Select(
+                attrs={'class': 'form-select js-wl-location', 'id': 'id_location'},
+            ),
+            'housing_type': forms.Select(
+                attrs={'class': 'form-select js-wl-housing', 'id': 'id_housing_type'},
+            ),
+            'period_year': forms.NumberInput(
+                attrs={'class': 'form-control js-wl-period-y', 'min': 2000, 'max': 2100, 'id': 'id_period_year'},
+            ),
+            'period_month': forms.NumberInput(
+                attrs={'class': 'form-control js-wl-period-m', 'min': 1, 'max': 12, 'id': 'id_period_month'},
+            ),
+            'visits_per_week': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'step': '0.01',
+                    'min': 0,
+                    'id': 'id_visits_per_week',
+                },
+            ),
             'visits_per_month': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': 0}),
             'visit_duration_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
             'work_time_norm_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
@@ -551,13 +751,46 @@ class WorkloadRecordForm(forms.ModelForm):
         self.fields['notes'].label = 'Примечание'
 
     def clean(self):
-        cleaned_data = super().clean()
-        recipient = cleaned_data.get('recipient')
-        location = cleaned_data.get('location')
+        cleaned = super().clean()
+        if self.errors:
+            return cleaned
+        sw = cleaned.get('social_worker')
+        rec = cleaned.get('recipient')
+        loc = cleaned.get('location')
 
-        if recipient:
-            if recipient.social_worker_id:
-                cleaned_data['social_worker'] = recipient.social_worker
-            if not location and recipient.location_id:
-                cleaned_data['location'] = recipient.location
-        return cleaned_data
+        if rec and rec.social_worker_id:
+            if sw and rec.social_worker_id != sw.pk:
+                self.add_error(
+                    'recipient',
+                    'Подопечный не закреплён за выбранным сотрудником.',
+                )
+                return cleaned
+            cleaned['social_worker'] = rec.social_worker
+        if not self.errors.get('recipient') and rec and not loc and rec.location_id:
+            cleaned['location'] = rec.location
+
+        sw_final = cleaned.get('social_worker')
+        rec_final = cleaned.get('recipient')
+        year = cleaned.get('period_year')
+        month = cleaned.get('period_month')
+        if (
+            not self.errors
+            and rec_final
+            and sw_final
+            and year is not None
+            and month is not None
+        ):
+            qs = WorkloadRecord.objects.filter(
+                social_worker=sw_final,
+                recipient=rec_final,
+                period_year=year,
+                period_month=month,
+            )
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error(
+                    'recipient',
+                    'Подопечный уже есть в таблице нагрузки за выбранный месяц у этого сотрудника.',
+                )
+        return cleaned

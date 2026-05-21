@@ -1,0 +1,148 @@
+{% if ap_filter_section == 'heads' %}
+<form method="get" class="row g-3 align-items-end" action="{% url 'accounts:admin_portal_panel' %}">
+    <input type="hidden" name="q_inv" value="{{ q_inv|default:'' }}">
+    <input type="hidden" name="i_status" value="{{ i_status|default:'' }}">
+    <input type="hidden" name="i_sort" value="{{ i_sort|default:'' }}">
+    <input type="hidden" name="q_other" value="{{ q_other|default:'' }}">
+    <input type="hidden" name="o_status" value="{{ o_status|default:'' }}">
+    <input type="hidden" name="o_sort" value="{{ o_sort|default:'' }}">
+    <div class="col-12 col-lg-4">
+        <label for="adminApSearchHeads" class="sw-filter-label d-block">Поиск</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+            <input type="text" class="form-control sw-search-input" id="adminApSearchHeads" name="q_heads"
+                   value="{{ q_heads|default:'' }}" placeholder="Логин, email или ФИО…" autocomplete="off">
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApHeadsStatus" class="sw-filter-label d-block">Статус</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApHeadsStatus" name="h_status">
+                <option value="" {% if not h_status %}selected{% endif %}>Все статусы</option>
+                <option value="active" {% if h_status == 'active' %}selected{% endif %}>Только активные</option>
+                <option value="inactive" {% if h_status == 'inactive' %}selected{% endif %}>Только заблокированные</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApHeadsSort" class="sw-filter-label d-block">Сортировка</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApHeadsSort" name="h_sort" title="Сортировка применится после нажатия «Найти»">
+                <option value="" {% if not h_sort %}selected{% endif %}>По умолчанию</option>
+                <option value="active_first" {% if h_sort == 'active_first' %}selected{% endif %}>Активные сверху</option>
+                <option value="inactive_first" {% if h_sort == 'inactive_first' %}selected{% endif %}>Заблокированные сверху</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg wk-filter-actions-col">
+        <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wk-filter-actions">
+            <button type="submit" class="btn btn-primary wk-filter-submit wk-filter-icon-btn" aria-label="Применить поиск и фильтры">
+                <i class="bi bi-search" aria-hidden="true"></i>
+            </button>
+            <a href="{{ ap_filter_default_url }}" class="wk-filter-reset wk-filter-icon-btn" aria-label="Сбросить фильтры этой таблицы к значениям по умолчанию" title="Сбросить поиск, статус и сортировку для этой таблицы">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</form>
+{% elif ap_filter_section == 'inv' %}
+<form method="get" class="row g-3 align-items-end" action="{% url 'accounts:admin_portal_panel' %}">
+    <input type="hidden" name="q_heads" value="{{ q_heads|default:'' }}">
+    <input type="hidden" name="h_status" value="{{ h_status|default:'' }}">
+    <input type="hidden" name="h_sort" value="{{ h_sort|default:'' }}">
+    <input type="hidden" name="q_other" value="{{ q_other|default:'' }}">
+    <input type="hidden" name="o_status" value="{{ o_status|default:'' }}">
+    <input type="hidden" name="o_sort" value="{{ o_sort|default:'' }}">
+    <div class="col-12 col-lg-4">
+        <label for="adminApSearchInv" class="sw-filter-label d-block">Поиск</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+            <input type="text" class="form-control sw-search-input" id="adminApSearchInv" name="q_inv"
+                   value="{{ q_inv|default:'' }}" placeholder="Логин, email или ФИО…" autocomplete="off">
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApInvStatus" class="sw-filter-label d-block">Статус</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApInvStatus" name="i_status">
+                <option value="" {% if not i_status %}selected{% endif %}>Все статусы</option>
+                <option value="active" {% if i_status == 'active' %}selected{% endif %}>Только активные</option>
+                <option value="inactive" {% if i_status == 'inactive' %}selected{% endif %}>Только заблокированные</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApInvSort" class="sw-filter-label d-block">Сортировка</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApInvSort" name="i_sort" title="Сортировка применится после нажатия «Найти»">
+                <option value="" {% if not i_sort %}selected{% endif %}>По умолчанию</option>
+                <option value="active_first" {% if i_sort == 'active_first' %}selected{% endif %}>Активные сверху</option>
+                <option value="inactive_first" {% if i_sort == 'inactive_first' %}selected{% endif %}>Заблокированные сверху</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg wk-filter-actions-col">
+        <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wk-filter-actions">
+            <button type="submit" class="btn btn-primary wk-filter-submit wk-filter-icon-btn" aria-label="Применить поиск и фильтры">
+                <i class="bi bi-search" aria-hidden="true"></i>
+            </button>
+            <a href="{{ ap_filter_default_url }}" class="wk-filter-reset wk-filter-icon-btn" aria-label="Сбросить фильтры этой таблицы к значениям по умолчанию" title="Сбросить поиск, статус и сортировку для этой таблицы">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</form>
+{% elif ap_filter_section == 'other' %}
+<form method="get" class="row g-3 align-items-end" action="{% url 'accounts:admin_portal_panel' %}">
+    <input type="hidden" name="q_heads" value="{{ q_heads|default:'' }}">
+    <input type="hidden" name="h_status" value="{{ h_status|default:'' }}">
+    <input type="hidden" name="h_sort" value="{{ h_sort|default:'' }}">
+    <input type="hidden" name="q_inv" value="{{ q_inv|default:'' }}">
+    <input type="hidden" name="i_status" value="{{ i_status|default:'' }}">
+    <input type="hidden" name="i_sort" value="{{ i_sort|default:'' }}">
+    <div class="col-12 col-lg-4">
+        <label for="adminApSearchOther" class="sw-filter-label d-block">Поиск</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+            <input type="text" class="form-control sw-search-input" id="adminApSearchOther" name="q_other"
+                   value="{{ q_other|default:'' }}" placeholder="Логин, email или ФИО…" autocomplete="off">
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApOtherStatus" class="sw-filter-label d-block">Статус</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApOtherStatus" name="o_status">
+                <option value="" {% if not o_status %}selected{% endif %}>Все статусы</option>
+                <option value="active" {% if o_status == 'active' %}selected{% endif %}>Только активные</option>
+                <option value="inactive" {% if o_status == 'inactive' %}selected{% endif %}>Только заблокированные</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg-3">
+        <label for="adminApOtherSort" class="sw-filter-label d-block">Сортировка</label>
+        <div class="sw-select-wrap">
+            <select class="form-select sw-status-select sw-select-native" id="adminApOtherSort" name="o_sort" title="Сортировка применится после нажатия «Найти»">
+                <option value="" {% if not o_sort %}selected{% endif %}>По умолчанию</option>
+                <option value="active_first" {% if o_sort == 'active_first' %}selected{% endif %}>Активные сверху</option>
+                <option value="inactive_first" {% if o_sort == 'inactive_first' %}selected{% endif %}>Заблокированные сверху</option>
+            </select>
+            <span class="sw-select-chevron" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
+        </div>
+    </div>
+    <div class="col-12 col-lg wk-filter-actions-col">
+        <div class="d-flex flex-row flex-wrap gap-2 align-items-center justify-content-center wk-filter-actions">
+            <button type="submit" class="btn btn-primary wk-filter-submit wk-filter-icon-btn" aria-label="Применить поиск и фильтры">
+                <i class="bi bi-search" aria-hidden="true"></i>
+            </button>
+            <a href="{{ ap_filter_default_url }}" class="wk-filter-reset wk-filter-icon-btn" aria-label="Сбросить фильтры этой таблицы к значениям по умолчанию" title="Сбросить поиск, статус и сортировку для этой таблицы">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</form>
+{% endif %}
