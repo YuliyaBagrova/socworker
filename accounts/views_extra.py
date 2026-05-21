@@ -350,6 +350,12 @@ def _build_workload_groups(year: int, month: int, worker_pk: str | None, sort_or
 def _pdf_table_response(title: str, filename: str, headers: list[str], rows: list[list[str]]):
     font_name = _register_pdf_font()
     buf = io.BytesIO()
+    _report_pdf_meta = {
+        'title': 'report',
+        'author': 'report',
+        'subject': 'report',
+        'creator': 'report',
+    }
     doc = SimpleDocTemplate(
         buf,
         pagesize=landscape(A4),
@@ -357,6 +363,7 @@ def _pdf_table_response(title: str, filename: str, headers: list[str], rows: lis
         rightMargin=12 * mm,
         topMargin=12 * mm,
         bottomMargin=12 * mm,
+        **_report_pdf_meta,
     )
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(

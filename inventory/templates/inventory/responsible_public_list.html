@@ -1,6 +1,6 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}Ответственные за инвентарь{% endblock %}
-{% block body_attrs %} class="sw-inventory-page sw-inv-resp-public-page"{% endblock %}
+{% block body_attrs %} class="sw-inventory-page sw-inv-resp-public-page sw-form-page-enter"{% endblock %}
 {% block inline_css %}
 {% include 'inventory/includes/inventory_app_theme.html' %}
     /*
@@ -96,6 +96,39 @@
         border: 1px dashed rgba(13, 148, 136, 0.32);
         background: rgba(240, 253, 250, 0.55);
     }
+    body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-dash .sw-page-title__label {
+        background-image: none;
+        background-color: transparent;
+        -webkit-background-clip: border-box;
+        background-clip: border-box;
+        -webkit-text-fill-color: currentColor;
+        color: #ecfdf5;
+        filter: none;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .inv-resp-public-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.48rem 1.2rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        color: #0f766e;
+        border: 1.5px solid rgba(13, 148, 136, 0.48);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(240, 253, 250, 0.94) 100%);
+        box-shadow:
+            0 4px 18px rgba(13, 148, 136, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+        flex-shrink: 0;
+    }
+    body.sw-inventory-page.sw-inv-resp-public-page .inv-resp-public-back-btn:hover {
+        color: #115e59;
+        border-color: rgba(15, 118, 110, 0.62);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+    }
     body.sw-inventory-page.sw-inv-resp-public-page .sw-inv-resp-empty i {
         opacity: 0.5;
     }
@@ -103,11 +136,14 @@
 {% block content %}
 <div class="sw-inv-layout sw-inv-resp-public-inner">
     <section class="sw-inv-dash" aria-labelledby="inv-resp-pub-title">
-        <div class="page-header sw-inv-dash-header flex-wrap mb-0">
+        <div class="page-header sw-inv-dash-header flex-wrap mb-0 justify-content-between align-items-center gap-2">
             <h1 id="inv-resp-pub-title" class="sw-page-title mb-0">
                 <span class="sw-page-title__icon" aria-hidden="true"><i class="bi bi-people"></i></span>
                 <span class="sw-page-title__label">Ответственные за инвентарь</span>
             </h1>
+            <a href="{% url 'inventory:panel' %}" class="inv-resp-public-back-btn">
+                <i class="bi bi-arrow-left-circle-fill" aria-hidden="true"></i> К панели инвентаризации
+            </a>
         </div>
     </section>
 

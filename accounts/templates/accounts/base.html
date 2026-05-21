@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}СоцПомощник{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -20,11 +20,12 @@
         body.auth-body {
             margin: 0;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 1.25rem;
+            padding: max(1.25rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
             color: #e8e9f0;
             background-color: var(--auth-dark);
             background-image:
@@ -39,7 +40,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 460px;
+            max-width: min(460px, 100%);
             padding: 2.35rem 2.25rem 2rem;
             border-radius: 22px;
             background: rgba(42, 38, 72, 0.42);
@@ -188,9 +189,25 @@
             text-decoration: underline;
         }
 
+        @keyframes authAlertIn {
+            from {
+                opacity: 0;
+                transform: translateY(-0.4rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .auth-container .alert {
             border-radius: 12px;
             border: 1px solid transparent;
+            animation: authAlertIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .auth-container .alert.fade {
+            transition: opacity 0.34s ease-in-out, transform 0.34s ease-in-out;
         }
 
         .auth-container .alert-danger {
@@ -367,6 +384,22 @@
             border-color: rgba(45, 212, 191, 0.4);
             background: rgba(45, 212, 191, 0.1);
             color: #ecfdf8;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .auth-container .alert {
+                animation: none;
+            }
+            .auth-container .alert.fade {
+                transition: opacity 0.05s linear;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-container .form-control,
+            .auth-container .form-select {
+                font-size: 1rem;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}

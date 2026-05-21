@@ -1005,6 +1005,10 @@
             padding: 1.1rem 1.2rem 1.25rem;
         }
     }
+    /* Плавный scroll к таблице: учёт фиксированной шапки */
+    body.sw-workers-page #sw-panel-export-table {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -1432,11 +1436,66 @@
     const selectAll = document.getElementById('socialWorkerSelectAll');
     const modalConfirm = document.getElementById('socialWorkersPdfConfirm');
     const tableAnchor = document.getElementById('sw-panel-export-table');
+    const SCROLL_AFTER_FILTER_KEY = 'swWorkersScrollToResults';
 
     function scrollToExportTable() {
         if (tableAnchor) {
             tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+    }
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var filterForm = document.querySelector('.sw-workers-filter-dash form[method="get"]');
+    if (filterForm) {
+        filterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var resetLink = document.getElementById('wk-filter-reset-link');
+    if (resetLink) {
+        resetLink.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+    document.querySelectorAll('.pagination-wrap a.page-link[href]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
     }
 
     document.querySelectorAll('input[name="sw_pdf_scope_choice"]').forEach(function (inp) {

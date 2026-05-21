@@ -2205,6 +2205,11 @@
         border-color: #fb923c;
         color: #9a3412;
     }
+    body.vp-planning-page #vp-plan-table-anchor,
+    body.vp-planning-page #vp-planning-panel-anchor,
+    body.vp-planning-page #vp-calendar-panel-anchor {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -2420,7 +2425,7 @@
     </div>
 </div>
 
-<div class="vp-tabs-wrap">
+<div class="vp-tabs-wrap" id="vp-planning-panel-anchor">
 <ul class="nav nav-pills vp-tabs vp-tabs-modern gap-2 flex-wrap justify-content-center">
     <li class="nav-item">
         <a class="nav-link {% if tab == 'table' %}active{% endif %}"
@@ -2458,7 +2463,7 @@
     </div>
 </div>
 
-<div class="card vp-plan-table-card">
+<div class="card vp-plan-table-card" id="vp-plan-table-anchor">
     <div class="card-body">
         {% if rows %}
             <div class="vp-sheet-wrap">
@@ -2572,7 +2577,7 @@
 {% endif %}
 
 {% if tab == 'calendar' %}
-<div class="vp-cal-root">
+<div class="vp-cal-root" id="vp-calendar-panel-anchor">
     <div class="card vp-cal-toolbar mb-0">
         <div class="vp-cal-toolbar-inner">
             <div class="vp-cal-toolbar__row">
@@ -3130,6 +3135,81 @@
             form.submit();
         });
     }
+
+    (function () {
+        var SCROLL_KEY = 'visitPlanningScrollToResults';
+        function markScrollTable() {
+            try {
+                sessionStorage.setItem(SCROLL_KEY, 'table');
+            } catch (e) {}
+        }
+        function markScrollCalendar() {
+            try {
+                sessionStorage.setItem(SCROLL_KEY, 'calendar');
+            } catch (e) {}
+        }
+        function scrollIfFlagged() {
+            var mode;
+            try {
+                mode = sessionStorage.getItem(SCROLL_KEY);
+                sessionStorage.removeItem(SCROLL_KEY);
+            } catch (e) {
+                return;
+            }
+            if (!mode) return;
+            var el;
+            if (mode === 'calendar') {
+                el = document.getElementById('vp-calendar-panel-anchor');
+            }
+            if (!el) {
+                el = document.getElementById('vp-plan-table-anchor') || document.getElementById('vp-planning-panel-anchor');
+            }
+            if (!el) return;
+            var reduceMotion = false;
+            try {
+                reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {}
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    el.scrollIntoView({
+                        behavior: reduceMotion ? 'auto' : 'smooth',
+                        block: 'start',
+                    });
+                });
+            });
+        }
+        var vpFilterForm = document.querySelector('.vp-filter-dash form[method="get"]');
+        if (vpFilterForm) {
+            vpFilterForm.addEventListener('submit', markScrollTable);
+        }
+        var vpReset = document.getElementById('vp-filter-reset-link');
+        if (vpReset) {
+            vpReset.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollTable();
+            });
+        }
+        document.querySelectorAll('.vp-tabs a.nav-link[href]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollTable();
+            });
+        });
+        document.querySelectorAll('.vp-cal-toolbar a.vp-cal-seg-btn[href], .vp-cal-toolbar .vp-cal-nav a.btn[href]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                markScrollCalendar();
+            });
+        });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', scrollIfFlagged);
+        } else {
+            scrollIfFlagged();
+        }
+    })();
 })();
 </script>
 {% endblock %}

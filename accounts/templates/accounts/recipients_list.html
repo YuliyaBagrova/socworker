@@ -1044,6 +1044,9 @@
             padding: 1.1rem 1.2rem 1.25rem;
         }
     }
+    body.sw-recipients-page #recipients-panel-export-table {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -1481,11 +1484,66 @@
     const selectAll = document.getElementById('recipientSelectAll');
     const pdfConfirm = document.getElementById('recipientsPdfConfirm');
     const tableAnchor = document.getElementById('recipients-panel-export-table');
+    const SCROLL_AFTER_FILTER_KEY = 'recipientsScrollToResults';
 
     function scrollToExportTable() {
         if (tableAnchor) {
             tableAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+    }
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var recFilterForm = document.querySelector('.sw-recipients-filter-dash form[method="get"]');
+    if (recFilterForm) {
+        recFilterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var recReset = document.getElementById('rec-filter-reset-link');
+    if (recReset) {
+        recReset.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+    document.querySelectorAll('.pagination-wrap a.page-link[href]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
     }
 
     document.querySelectorAll('input[name="rec_pdf_scope_choice"]').forEach(function (inp) {

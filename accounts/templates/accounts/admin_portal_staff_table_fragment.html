@@ -1,4 +1,4 @@
-<div class="card shadow-sm mb-4">
+<div class="card shadow-sm mb-4 js-ap-staff-table-card"{% if ap_table_anchor_id %} id="{{ ap_table_anchor_id }}"{% endif %}>
     <div class="card-header fw-semibold sw-ap-card-title-row{% if section_header_align_right %} sw-ap-card-title-row--end{% endif %}">
         <i class="bi {{ section_icon }} sw-ap-card-title-icon" aria-hidden="true"></i>
         <span>{{ section_title }}</span>

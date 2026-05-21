@@ -1,6 +1,6 @@
 {% extends 'accounts/base_dashboard.html' %}
 {% block title %}{% if is_edit %}Редактирование — Инвентаризация{% else %}Новая единица учёта — Инвентаризация{% endif %}{% endblock %}
-{% block body_attrs %} class="sw-inventory-page sw-inv-unit-form-page{% if is_edit %} sw-entity-edit-page{% endif %}"{% endblock %}
+{% block body_attrs %} class="sw-inventory-page sw-inv-unit-form-page{% if is_edit %} sw-entity-edit-page{% else %} sw-form-page-enter{% endif %}"{% endblock %}
 {% block inline_css %}
 {% include 'inventory/includes/inventory_app_theme.html' %}
 {% if is_edit %}

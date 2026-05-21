@@ -25,7 +25,11 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-from .admin_password_audit import remember_plaintext_password_if_missing_for_panel_tables
+from .admin_password_audit import (
+    remember_plaintext_password_if_missing_for_panel_tables,
+    record_self_password_change_for_admin_notifications,
+    user_redirect_skip_password_change_done,
+)
 from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -50,7 +54,7 @@ from .models import (
     WorkloadRecord,
 )
 from .admin_portal_permissions import has_admin_panel_access
-from .admin_password_audit import record_self_password_change_for_admin_notifications
+from .admin_portal_staff_queries import user_is_soc_department_manager
 from .inv_report_gate import reject_inv_manager_unless_inventory_report
 from .tab_numbering import compact_service_recipient_employee_ids, compact_social_worker_employee_ids
 from .visit_schedule import (
@@ -281,11 +285,27 @@ class SocworkerPasswordChangeView(PasswordChangeView):
     form_class = StyledPasswordChangeForm
     success_url = reverse_lazy('accounts:password_change_done')
 
+    def get_success_url(self):
+        if user_redirect_skip_password_change_done(self.request.user):
+            return reverse('accounts:profile')
+        return super().get_success_url()
+
     def form_valid(self, form):
         user = self.request.user
         new_pw = form.cleaned_data['new_password1']
         response = super().form_valid(form)
         record_self_password_change_for_admin_notifications(user, new_pw)
+        if user_redirect_skip_password_change_done(user):
+            if is_inventory_manager_interface_user(user) or user_is_soc_department_manager(user):
+                messages.warning(
+                    self.request,
+                    'Пароль изменён. Администратор панели получит уведомление с новым паролем.',
+                )
+            else:
+                messages.success(
+                    self.request,
+                    'Пароль изменён. Используйте его при следующем входе.',
+                )
         return response
 
 
@@ -2100,6 +2120,12 @@ def report_pdf(request, report_type):
     font_name = _register_fonts()
 
     buf = io.BytesIO()
+    _report_pdf_meta = {
+        'title': 'report',
+        'author': 'report',
+        'subject': 'report',
+        'creator': 'report',
+    }
     doc = SimpleDocTemplate(
         buf,
         pagesize=landscape(A4),
@@ -2107,6 +2133,7 @@ def report_pdf(request, report_type):
         rightMargin=15 * mm,
         topMargin=15 * mm,
         bottomMargin=15 * mm,
+        **_report_pdf_meta,
     )
 
     styles = getSampleStyleSheet()

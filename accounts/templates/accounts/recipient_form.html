@@ -3,7 +3,7 @@
 
 {% block title %}{{ title }} - SocWorker{% endblock %}
 
-{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% else %} class="sw-entity-create-page"{% endif %}{% endblock %}
+{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% else %} class="sw-entity-create-page sw-form-page-enter"{% endif %}{% endblock %}
 
 {% block inline_css %}
 {% include 'accounts/includes/sw_edit_form_theme.html' %}

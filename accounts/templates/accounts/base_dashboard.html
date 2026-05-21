@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}SocWorker{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -17,6 +17,8 @@
             --bg: #eef1f8;
             --card-shadow: 0 2px 8px rgba(26, 26, 46, 0.06), 0 1px 2px rgba(26, 26, 46, 0.04);
             --card-shadow-hover: 0 12px 28px rgba(102, 126, 234, 0.12);
+            --content-max-width: 1440px;
+            --content-padding-x: clamp(0.75rem, 3vw, 1.75rem);
         }
 
         * { box-sizing: border-box; }
@@ -41,7 +43,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 0.55rem 0.75rem;
-            padding: 0.5rem 1rem 0.5rem 1rem;
+            padding: max(0.5rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) 0.5rem max(1rem, env(safe-area-inset-left, 0px));
             background-color: rgba(42, 34, 72, 0.38);
             background-image:
                 radial-gradient(ellipse 110% 90% at 92% -30%, rgba(118, 75, 162, 0.26), transparent 52%),
@@ -377,6 +379,49 @@
             .top-nav-main.top-nav-row-primary,
             .top-nav-main.top-nav-row-secondary {
                 justify-content: flex-start;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                gap: 0.45rem;
+                padding: 0.1rem 0 0.45rem;
+                margin: 0;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+            }
+            .top-nav-main.top-nav-row-primary::-webkit-scrollbar,
+            .top-nav-main.top-nav-row-secondary::-webkit-scrollbar {
+                height: 5px;
+            }
+            .top-nav-main.top-nav-row-primary::-webkit-scrollbar-thumb,
+            .top-nav-main.top-nav-row-secondary::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.28);
+                border-radius: 999px;
+            }
+            .top-nav-main .nav-pill {
+                flex-shrink: 0;
+                padding: 0.5rem 0.72rem;
+                min-height: 44px;
+                align-items: center;
+            }
+            .top-navbar .brand.brand-stack {
+                transform: none;
+                max-width: min(11rem, 42vw);
+            }
+            .top-navbar .brand-logo-visual {
+                width: 3.35rem;
+                height: 3.35rem;
+            }
+            .top-navbar .brand-app-caption {
+                font-size: 0.9375rem;
+                max-width: 8.5rem;
+            }
+            .top-navbar .user-area {
+                transform: none;
+            }
+            .sw-admin-shell-page-title {
+                padding-right: 0.35rem;
             }
         }
 
@@ -835,6 +880,37 @@
             overflow-y: visible;
             max-width: 100vw;
         }
+        @keyframes appBelowNavStripIn {
+            from {
+                opacity: 0;
+                transform: translateY(-0.45rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes appBelowNavStripOut {
+            to {
+                opacity: 0;
+                transform: translateY(-0.35rem);
+                max-height: 0;
+                min-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                border-bottom-width: 0;
+                border-left-width: 0;
+                margin: 0;
+            }
+        }
+        .below-nav-stack > .home-return-strip:not([hidden]):not(.is-leaving) {
+            animation: appBelowNavStripIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .below-nav-stack > .home-return-strip.is-leaving {
+            animation: appBelowNavStripOut 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            overflow: hidden;
+            pointer-events: none;
+        }
         .home-return-strip {
             position: relative;
             left: auto;
@@ -924,10 +1000,20 @@
         .main-content {
             margin-left: 0;
             margin-top: calc(var(--navbar-height) + var(--below-nav-stack-height, 0px) + 8px);
-            padding: 1.5rem 1.75rem 2.5rem;
+            padding: 1.35rem var(--content-padding-x) 2.25rem;
             min-height: calc(100vh - var(--navbar-height) - var(--below-nav-stack-height, 0px) - 8px);
-            max-width: 1440px;
+            max-width: var(--content-max-width);
+            width: 100%;
             margin-inline: auto;
+            transition:
+                margin-top 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                min-height 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @media (min-width: 1536px) {
+            :root { --content-max-width: min(1680px, 94vw); }
+        }
+        @media (min-width: 1920px) {
+            :root { --content-max-width: min(1760px, 92vw); }
         }
         @media (max-width: 992px) {
             :root {
@@ -935,6 +1021,36 @@
             }
             body:has(.top-navbar.sw-top-navbar--admin-portal) {
                 --navbar-height: calc(5.05rem + 1rem);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .below-nav-stack > .home-return-strip:not([hidden]):not(.is-leaving) {
+                animation: none;
+            }
+            .below-nav-stack > .home-return-strip.is-leaving {
+                animation: none !important;
+            }
+            .main-content {
+                transition: none;
+            }
+        }
+
+        /* iOS: не увеличивать страницу при фокусе на полях */
+        @media (max-width: 576px) {
+            .main-content .form-control,
+            .main-content .form-select,
+            .main-content textarea.form-control {
+                font-size: 1rem;
+            }
+            .page-header h2 {
+                font-size: clamp(1.15rem, 4.2vw, 1.4rem);
+            }
+            .home-return-strip {
+                padding-left: max(0.75rem, env(safe-area-inset-left));
+                padding-right: max(0.75rem, env(safe-area-inset-right));
+            }
+            .main-content {
+                padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
             }
         }
 
@@ -1437,6 +1553,89 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.28);
         }
 
+        /* Переход по sw-fs-form-link: те же длительности/кривые, что у modal.fade (backdrop) + .modal-dialog (transform), без отдельного окна */
+        @keyframes swFsFormBackdropIn {
+            from { opacity: 0; }
+            to { opacity: var(--bs-backdrop-opacity, 0.5); }
+        }
+        @keyframes swFsFormEnterMain {
+            from {
+                opacity: 0;
+                transform: translate3d(0, -50px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .top-navbar,
+        .below-nav-stack {
+            transition: opacity 0.15s linear;
+        }
+        body.sw-fs-form-nav-out {
+            pointer-events: none;
+        }
+        body.sw-fs-form-nav-out::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            background: var(--bs-backdrop-bg, #000);
+            opacity: 0;
+            pointer-events: none;
+            will-change: opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            animation: swFsFormBackdropIn 0.15s linear forwards;
+        }
+        body.sw-fs-form-nav-out .top-navbar,
+        body.sw-fs-form-nav-out .below-nav-stack {
+            opacity: 0.5;
+            will-change: opacity;
+        }
+        body.sw-fs-form-nav-in main.main-content {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            animation: swFsFormEnterMain 0.3s ease-out both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body.sw-fs-form-nav-out::before {
+                animation: none;
+                opacity: 0.5;
+            }
+            body.sw-fs-form-nav-out .top-navbar,
+            body.sw-fs-form-nav-out .below-nav-stack {
+                opacity: 1;
+                transition: none;
+                will-change: auto;
+            }
+            body.sw-fs-form-nav-in main.main-content {
+                animation: none;
+                will-change: auto;
+            }
+        }
+
+        /* Плавное появление целевых форм (как «Добавить получателя»): класс sw-form-page-enter на body */
+        @keyframes swFormPageEnterReveal {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        body.sw-form-page-enter main.main-content {
+            animation: swFormPageEnterReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body.sw-form-page-enter main.main-content {
+                animation: none;
+            }
+        }
+
         {% block inline_css %}{% endblock %}
     </style>
     {% block extra_css %}{% endblock %}
@@ -1702,6 +1901,43 @@
             var h = stack.offsetHeight || 0;
             document.documentElement.style.setProperty('--below-nav-stack-height', h + 'px');
         }
+        function prefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+        function dismissBelowNavRow(row, removeFromDom) {
+            if (!row || row.classList.contains('is-leaving')) return;
+            if (prefersReducedMotion()) {
+                if (removeFromDom) {
+                    row.remove();
+                } else {
+                    row.setAttribute('hidden', 'hidden');
+                }
+                syncBelowNavStackHeight();
+                return;
+            }
+            row.classList.add('is-leaving');
+            var done = false;
+            function finish() {
+                if (done) return;
+                done = true;
+                row.classList.remove('is-leaving');
+                if (removeFromDom) {
+                    row.remove();
+                } else {
+                    row.setAttribute('hidden', 'hidden');
+                }
+                syncBelowNavStackHeight();
+            }
+            row.addEventListener('animationend', function (e) {
+                if (e.target !== row) return;
+                finish();
+            }, { once: true });
+            setTimeout(finish, 500);
+        }
         function showHomeReturnStrip() {
             var el = document.getElementById('homeReturnStrip');
             if (!el) return;
@@ -1710,10 +1946,12 @@
         }
         function hideHomeReturnStrip() {
             var el = document.getElementById('homeReturnStrip');
-            if (!el) return;
-            el.setAttribute('hidden', 'hidden');
             try { sessionStorage.removeItem(KEY); } catch (e) {}
-            syncBelowNavStackHeight();
+            if (!el || el.hasAttribute('hidden')) {
+                syncBelowNavStackHeight();
+                return;
+            }
+            dismissBelowNavRow(el, false);
         }
         function showVisitPlanningReturnStrip() {
             var el = document.getElementById('visitPlanningReturnStrip');
@@ -1730,8 +1968,6 @@
         }
         function hideVisitPlanningReturnStrip() {
             var el = document.getElementById('visitPlanningReturnStrip');
-            if (!el) return;
-            el.setAttribute('hidden', 'hidden');
             var link = document.getElementById('visitPlanningReturnLink');
             if (link) {
                 link.setAttribute('href', '{% url "accounts:visit_planning" %}');
@@ -1740,7 +1976,11 @@
                 sessionStorage.removeItem(KEY_VP);
                 sessionStorage.removeItem(KEY_VP_URL);
             } catch (e) {}
-            syncBelowNavStackHeight();
+            if (!el || el.hasAttribute('hidden')) {
+                syncBelowNavStackHeight();
+                return;
+            }
+            dismissBelowNavRow(el, false);
         }
 
         function setupDraggableUserMenu() {
@@ -1925,8 +2165,7 @@
                     if (!btn) return;
                     var row = btn.closest('.home-return-strip--flash');
                     if (!row) return;
-                    row.remove();
-                    syncBelowNavStackHeight();
+                    dismissBelowNavRow(row, true);
                 });
             }
             var logoutModalEl = document.getElementById('swLogoutConfirmModal');
@@ -1976,6 +2215,97 @@
                     new ResizeObserver(syncBelowNavStackHeight).observe(navObs);
                 } catch (e) {}
             }
+        });
+    })();
+    </script>
+    <script>
+    (function () {
+        var STORAGE_KEY = 'swFsFormNavPending';
+        var prefetched = {};
+
+        function prefetchHref(href) {
+            try {
+                var abs = new URL(href, window.location.href);
+                if (abs.origin !== window.location.origin) return;
+                var key = abs.pathname + abs.search;
+                if (prefetched[key]) return;
+                prefetched[key] = true;
+                var link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = abs.href;
+                link.as = 'document';
+                document.head.appendChild(link);
+            } catch (err) {}
+        }
+
+        function prefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+        document.addEventListener('mouseover', function (e) {
+            var a = e.target.closest && e.target.closest('a.sw-fs-form-link');
+            if (!a || !a.href) return;
+            var href = a.href;
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(function () { prefetchHref(href); }, { timeout: 500 });
+            } else {
+                requestAnimationFrame(function () { prefetchHref(href); });
+            }
+        }, true);
+
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('a.sw-fs-form-link');
+            if (!a || !a.getAttribute('href')) return;
+            if (e.defaultPrevented) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (e.button !== 0) return;
+            var href = a.getAttribute('href');
+            if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
+            if (a.hasAttribute('download')) return;
+            if ((a.getAttribute('target') || '').toLowerCase() === '_blank') return;
+            if (a.getAttribute('role') === 'menuitem') return;
+            e.preventDefault();
+            prefetchHref(a.href);
+            if (prefersReducedMotion()) {
+                window.location.href = a.href;
+                return;
+            }
+            var targetUrl = a.href;
+            try {
+                sessionStorage.setItem(STORAGE_KEY, '1');
+            } catch (err) {}
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    document.body.classList.add('sw-fs-form-nav-out');
+                });
+            });
+            window.setTimeout(function () {
+                window.location.href = targetUrl;
+            }, 180);
+        });
+        function runEnterAnimation() {
+            if (prefersReducedMotion()) return;
+            try {
+                if (sessionStorage.getItem(STORAGE_KEY) !== '1') return;
+                sessionStorage.removeItem(STORAGE_KEY);
+            } catch (e) {
+                return;
+            }
+            document.body.classList.add('sw-fs-form-nav-in');
+            window.setTimeout(function () {
+                document.body.classList.remove('sw-fs-form-nav-in');
+            }, 340);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runEnterAnimation);
+        } else {
+            runEnterAnimation();
+        }
+        window.addEventListener('pageshow', function () {
+            document.body.classList.remove('sw-fs-form-nav-out');
         });
     })();
     </script>

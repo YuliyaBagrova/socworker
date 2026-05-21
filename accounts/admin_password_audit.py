@@ -3,6 +3,7 @@
 from inventory.inv_user_sql import user_ids_with_inv_role_assigned
 from inventory.permissions import is_inventory_manager_interface_user
 
+from .admin_portal_permissions import has_admin_panel_access
 from .admin_portal_staff_queries import user_is_soc_department_manager
 from .models import AdminPortalPasswordChangeNotification, UserProfile
 
@@ -97,6 +98,22 @@ def record_self_password_change_for_admin_notifications(user, new_plaintext: str
         role_label=role_label,
         new_password_plaintext=(new_plaintext or '')[:256],
     )
+
+
+def user_redirect_skip_password_change_done(user) -> bool:
+    """
+    Без отдельной страницы «Пароль изменён» — сразу в профиль с сообщением:
+    помеченные доступом к панели администратора, заведующие, управляющие инвентарём.
+    """
+    if not user or not getattr(user, 'is_authenticated', False):
+        return False
+    if has_admin_panel_access(user):
+        return True
+    if is_inventory_manager_interface_user(user):
+        return True
+    if user_is_soc_department_manager(user):
+        return True
+    return False
 
 
 def plaintext_password_map_for_user_ids(user_ids):

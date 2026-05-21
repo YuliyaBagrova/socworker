@@ -2,7 +2,7 @@
 
 {% block title %}{% if is_edit %}Редактирование{% else %}Новая запись{% endif %} — нагрузка{% endblock %}
 
-{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% else %} class="sw-workload-page wl-record-assign-page"{% endif %}{% endblock %}
+{% block body_attrs %}{% if is_edit %} class="sw-entity-edit-page"{% else %} class="sw-workload-page wl-record-assign-page sw-form-page-enter"{% endif %}{% endblock %}
 
 {% block inline_css %}
 {% if is_edit %}

@@ -27,7 +27,14 @@ SECRET_KEY = 'django-insecure-rtt*h$ehkzbe!wmtb!*-5=gv+_43$aa(1ctk@ykd3=ejh!vl!5
 DEBUG = True
 
 # Пустой список в DEBUG не всегда принимает нужный Host; явно задаём локальную разработку.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS',
+        'localhost,127.0.0.1,[::1],testserver',
+    ).split(',')
+    if h.strip()
+]
 
 
 # Application definition
@@ -86,11 +93,18 @@ WSGI_APPLICATION = 'socworker_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'socworker_db',  # Имя базы данных (нужно создать в MySQL)
-        'USER': 'root',
-        'PASSWORD': '12345678',
-        'HOST': '127.0.0.1',
-        'PORT': '3010',
+        # Параметры из окружения (docker-compose задаёт DB_HOST=db и т.д.)
+        'NAME': os.environ.get(
+            'MYSQL_DATABASE',
+            os.environ.get('DB_NAME', 'socworker_db'),
+        ),
+        'USER': os.environ.get('MYSQL_USER', os.environ.get('DB_USER', 'root')),
+        'PASSWORD': os.environ.get(
+            'MYSQL_PASSWORD',
+            os.environ.get('DB_PASSWORD', '12345678'),
+        ),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '3010'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         },

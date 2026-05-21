@@ -975,6 +975,9 @@
         background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
         color: #422006 !important;
     }
+    body.sw-workload-page #wl-panel-table-anchor {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -1152,7 +1155,7 @@
         </div>
     </div>
 
-    <div class="sw-wl-matrix-card">
+    <div class="sw-wl-matrix-card" id="wl-panel-table-anchor">
         <div class="sw-wl-matrix-card__head">
             <h2><i class="bi bi-table" aria-hidden="true"></i> Журнал за {{ month }}.{{ year }}</h2>
         </div>
@@ -1349,6 +1352,56 @@
 {% block extra_js %}
 <script>
 (function () {
+    const tableAnchor = document.getElementById('wl-panel-table-anchor');
+    const SCROLL_AFTER_FILTER_KEY = 'workloadScrollToResults';
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var wlFilterForm = document.querySelector('.sw-wl-period-filter form[method="get"]');
+    if (wlFilterForm) {
+        wlFilterForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var wlReset = document.getElementById('wl-filter-reset-link');
+    if (wlReset) {
+        wlReset.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
+    }
+
     const selectAll = document.getElementById('workloadSelectAll');
     if (selectAll) {
         selectAll.addEventListener('change', function () {

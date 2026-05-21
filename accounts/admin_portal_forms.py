@@ -76,13 +76,28 @@ class AdminPortalCreateStaffForm(InventoryStaffForm):
         ).order_by('name')
         del self.fields['department']
         del self.fields['phone']
+        del self.fields['position']
+        self.fields['email'] = forms.EmailField(
+            label='Email',
+            required=True,
+            widget=forms.EmailInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'email',
+            }),
+        )
+
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Учётная запись с таким email уже существует.')
+        return email
 
     def save(self):
         data = self.cleaned_data
         user = User.objects.create_user(
             username=data['username'],
             password=data['password1'],
-            email='',
+            email=data['email'],
         )
         role = data['role']
         parts = (data.get('full_name') or '').strip().split(None, 1)
@@ -96,7 +111,7 @@ class AdminPortalCreateStaffForm(InventoryStaffForm):
             user.pk,
             inv_role_id=role.pk,
             inv_department_id=None,
-            inv_position=(data.get('position') or '').strip(),
+            inv_position='',
             inv_phone='',
             last_name=ln,
             first_name=fn,

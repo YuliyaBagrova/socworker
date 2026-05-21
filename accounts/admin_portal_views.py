@@ -7,6 +7,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models.deletion import ProtectedError
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -405,12 +406,22 @@ def admin_portal_panel(request):
                 nid = int(raw_nid)
             except ValueError:
                 nid = None
+            want_json = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            updated = 0
             if nid is not None:
                 updated = AdminPortalPasswordChangeNotification.objects.filter(
                     pk=nid, dismissed=False,
                 ).update(dismissed=True)
-                if updated:
-                    messages.success(request, 'Уведомление скрыто.')
+            remaining = AdminPortalPasswordChangeNotification.objects.filter(
+                dismissed=False,
+            ).count()
+            if want_json:
+                if nid is None:
+                    return JsonResponse(
+                        {'ok': False, 'error': 'invalid', 'remaining': remaining},
+                        status=400,
+                    )
+                return JsonResponse({'ok': bool(updated), 'remaining': remaining})
             return _admin_portal_panel_redirect(request)
 
         if action == 'dismiss_all_password_notifications':
@@ -576,7 +587,7 @@ def admin_portal_panel(request):
     inv_empty_message = (
         'Нет записей по заданным условиям.'
         if inv_filtered and inventory_accountable_rows_src and not inventory_accountable_rows
-        else 'Нет пользователей с ролью ответственного за инвентарь.'
+        else 'Нет пользователей с ролью «Управляющий инвентарём».'
     )
     other_empty_message = (
         'Нет записей по заданным условиям.'

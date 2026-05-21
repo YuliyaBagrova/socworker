@@ -1155,6 +1155,9 @@
             0 4px 10px rgba(185, 28, 28, 0.28),
             0 12px 26px rgba(239, 68, 68, 0.38);
     }
+    body.sw-medical-page #medical-panel-table {
+        scroll-margin-top: calc(var(--navbar-height) + 0.75rem);
+    }
 {% endblock %}
 
 {% block content %}
@@ -1573,6 +1576,63 @@
 {% block extra_js %}
 <script>
 (function () {
+    const tableAnchor = document.getElementById('medical-panel-table');
+    const SCROLL_AFTER_FILTER_KEY = 'medicalPanelScrollToResults';
+
+    function markScrollAfterListNavigation() {
+        try {
+            sessionStorage.setItem(SCROLL_AFTER_FILTER_KEY, '1');
+        } catch (e) {}
+    }
+
+    function scrollToResultsIfFlagged() {
+        try {
+            if (sessionStorage.getItem(SCROLL_AFTER_FILTER_KEY) !== '1') return;
+            sessionStorage.removeItem(SCROLL_AFTER_FILTER_KEY);
+        } catch (e) {
+            return;
+        }
+        if (!tableAnchor) return;
+        var reduceMotion = false;
+        try {
+            reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {}
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                tableAnchor.scrollIntoView({
+                    behavior: reduceMotion ? 'auto' : 'smooth',
+                    block: 'start',
+                });
+            });
+        });
+    }
+
+    var mcForm = document.querySelector('.sw-medical-filter-dash form[method="get"]');
+    if (mcForm) {
+        mcForm.addEventListener('submit', markScrollAfterListNavigation);
+    }
+    var mcReset = document.getElementById('mc-filter-reset-link');
+    if (mcReset) {
+        mcReset.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    }
+    document.querySelectorAll('.pagination-wrap a.page-link[href]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            if (e.defaultPrevented) return;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            markScrollAfterListNavigation();
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToResultsIfFlagged);
+    } else {
+        scrollToResultsIfFlagged();
+    }
+
     const selectAll = document.getElementById('medicalSelectAll');
     if (selectAll) {
         selectAll.addEventListener('change', function () {
